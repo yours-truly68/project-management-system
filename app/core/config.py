@@ -20,28 +20,25 @@ class Settings(BaseSettings):
     )
 
     # --- App ---
-    APP_NAME: str = "Project Management System"
+    APP_NAME: str = "Kanban PMS"
     ENVIRONMENT: Environment = Environment.development
-    DEBUG: bool = False
-
-    # --- Server ---
-    HOST: str = "0.0.0.0"
-    PORT: int = 8000
-    ALLOWED_ORIGINS: list[str] = ["http://localhost:3000"]
 
     # --- Database ---
-    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/pms_db"
+    DATABASE_URL: str
 
     # --- Auth / JWT ---
-    SECRET_KEY: SecretStr
+    JWT_SECRET: SecretStr
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
-    # --- Google OAuth (optional) ---
+    # --- Google OAuth ---
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: SecretStr = SecretStr("")
-    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/auth/google/callback"
+
+    # --- GitHub OAuth ---
+    GITHUB_CLIENT_ID: str = ""
+    GITHUB_CLIENT_SECRET: SecretStr = SecretStr("")
 
     @property
     def is_production(self) -> bool:
@@ -57,5 +54,4 @@ def get_settings() -> Settings:
     return Settings()  # type: ignore[call-arg]
 
 
-# Module-level convenience export
 settings = get_settings()
