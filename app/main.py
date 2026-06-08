@@ -4,6 +4,7 @@ from collections.abc import AsyncIterator
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.auth.router import router as auth_router
 from app.core.config import settings
 
 
@@ -44,3 +45,9 @@ async def health_check() -> dict[str, str]:
         "app": settings.APP_NAME,
         "environment": settings.ENVIRONMENT.value,
     }
+
+
+# ---------------------------------------------------------------------------
+# Routers
+# ---------------------------------------------------------------------------
+app.include_router(auth_router, prefix="/api")
