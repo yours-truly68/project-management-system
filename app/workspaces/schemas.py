@@ -85,3 +85,20 @@ class WorkspaceMemberResponse(BaseModel):
     user_id: uuid.UUID
     role: WorkspaceRole
     created_at: datetime
+
+
+class WorkspaceMemberDetailResponse(BaseModel):
+    id: uuid.UUID
+    user_id: uuid.UUID
+    role: WorkspaceRole
+    email: str
+    username: str
+    full_name: str
+    avatar_url: str | None = None
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class WorkspaceMemberRoleUpdate(BaseModel):
+    role: WorkspaceRole

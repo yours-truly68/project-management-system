@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useAuthStore } from "@/stores/auth.store";
 import { useLogout } from "@/features/auth/hooks/use-logout";
-import { Sun, Moon, Monitor, Settings, LogOut, User } from "lucide-react";
+import { Sun, Moon, Monitor, Settings, LogOut } from "lucide-react";
 
 export function ProfileDropdown() {
   const { user } = useAuthStore();
@@ -16,7 +16,10 @@ export function ProfileDropdown() {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   React.useEffect(() => {

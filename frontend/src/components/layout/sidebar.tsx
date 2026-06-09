@@ -7,12 +7,12 @@ import { useSidebarStore } from "@/stores/sidebar.store";
 import { MAIN_NAV_ITEMS, OTHER_NAV_ITEMS } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
 import {
-  ChevronDown,
   Compass,
   FolderOpen,
   Plus,
   Star,
 } from "lucide-react";
+import { WorkspaceSwitcher } from "@/features/workspaces/components/workspace-switcher";
 import {
   Tooltip,
   TooltipContent,
@@ -50,29 +50,9 @@ export function Sidebar() {
           isCollapsed ? "w-16" : "w-64"
         )}
       >
-        {/* 1. Workspace Switcher (Placeholder Dropdown Button) */}
+        {/* 1. Workspace Switcher */}
         <div className="px-3 border-b border-sidebar-border flex items-center justify-between h-14 shrink-0">
-          {!isCollapsed ? (
-            <button
-              className="flex items-center gap-2.5 overflow-hidden w-full text-left rounded p-1 hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              aria-label="Workspace Switcher, current workspace: KanDo Workspace"
-            >
-              <div className="w-6 h-6 rounded bg-sidebar-accent flex items-center justify-center text-sm font-bold shrink-0">
-                K
-              </div>
-              <span className="font-bold text-[15px] truncate">KanDo Workspace</span>
-              <ChevronDown className="w-4 h-4 ml-auto text-sidebar-foreground/60 shrink-0" />
-            </button>
-          ) : (
-            <SidebarTooltip content="KanDo Workspace" disabled={!isCollapsed}>
-              <button
-                className="w-8 h-8 rounded bg-sidebar-accent flex items-center justify-center text-sm font-bold mx-auto hover:bg-sidebar-accent/80 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                aria-label="Workspace Switcher, current workspace: KanDo Workspace"
-              >
-                K
-              </button>
-            </SidebarTooltip>
-          )}
+          <WorkspaceSwitcher isCollapsed={isCollapsed} />
         </div>
 
         {/* 2. Search Area (Placeholder Button) */}

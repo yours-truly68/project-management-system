@@ -8,6 +8,7 @@ import {
   PanelLeftOpen,
   Search,
 } from "lucide-react";
+import { ProfileDropdown } from "./profile-dropdown";
 
 export function Topbar() {
   const isCollapsed = useSidebarStore((state) => state.isCollapsed);
@@ -95,12 +96,7 @@ export function Topbar() {
         </button>
 
         {/* Profile Menu Trigger (Avatar Placeholder) */}
-        <button
-          className="w-7 h-7 rounded-full bg-accent hover:ring-2 hover:ring-ring border border-border flex items-center justify-center text-xs font-bold overflow-hidden transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          aria-label="Open user profile settings menu"
-        >
-          MR
-        </button>
+        <ProfileDropdown />
       </div>
     </header>
   );

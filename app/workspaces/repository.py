@@ -11,6 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.workspaces.models import Workspace, WorkspaceMember
+from app.users.models import User
 
 
 class WorkspaceRepository:
@@ -56,3 +57,27 @@ class WorkspaceRepository:
         )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
+
+    async def update(self, workspace: Workspace) -> Workspace:
+        """Save modifications to workspace details."""
+        self.session.add(workspace)
+        await self.session.flush()
+        return workspace
+
+    async def delete(self, workspace: Workspace) -> None:
+        """Delete a workspace from the database."""
+        await self.session.delete(workspace)
+        await self.session.flush()
+
+    async def get_workspace_members_detailed(
+        self, workspace_id: uuid.UUID
+    ) -> list[tuple[WorkspaceMember, User]]:
+        """Return all members in a workspace, joined with their User records."""
+        stmt = (
+            select(WorkspaceMember, User)
+            .join(User, User.id == WorkspaceMember.user_id)
+            .where(WorkspaceMember.workspace_id == workspace_id)
+            .order_by(WorkspaceMember.created_at.asc())
+        )
+        result = await self.session.execute(stmt)
+        return list(result.all())  # type: ignore

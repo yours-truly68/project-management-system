@@ -28,7 +28,6 @@ import app.activity_logs.models  # noqa: F401
 import app.notifications.models  # noqa: F401
 
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Startup / shutdown lifecycle hook."""

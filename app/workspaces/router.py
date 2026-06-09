@@ -16,6 +16,9 @@ from app.workspaces.schemas import (
     InviteMemberRequest,
     WorkspaceCreate,
     WorkspaceResponse,
+    WorkspaceUpdate,
+    WorkspaceMemberDetailResponse,
+    WorkspaceMemberRoleUpdate,
 )
 from app.workspaces.service import WorkspaceService
 
@@ -91,4 +94,53 @@ async def remove_member(
 ) -> Response:
     service = WorkspaceService(session)
     await service.remove_member(workspace_id, user_id, user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.patch("/{workspace_id}", response_model=WorkspaceResponse)
+async def update_workspace(
+    workspace_id: uuid.UUID,
+    data: WorkspaceUpdate,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db),
+) -> WorkspaceResponse:
+    service = WorkspaceService(session)
+    return await service.update_workspace(workspace_id, data, user)
+
+
+@router.delete("/{workspace_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_workspace(
+    workspace_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db),
+) -> Response:
+    service = WorkspaceService(session)
+    await service.delete_workspace(workspace_id, user)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get(
+    "/{workspace_id}/members", response_model=list[WorkspaceMemberDetailResponse]
+)
+async def list_workspace_members(
+    workspace_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db),
+) -> list[WorkspaceMemberDetailResponse]:
+    service = WorkspaceService(session)
+    return await service.list_workspace_members(workspace_id, user)
+
+
+@router.patch(
+    "/{workspace_id}/members/{user_id}", status_code=status.HTTP_204_NO_CONTENT
+)
+async def update_member_role(
+    workspace_id: uuid.UUID,
+    user_id: uuid.UUID,
+    data: WorkspaceMemberRoleUpdate,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db),
+) -> Response:
+    service = WorkspaceService(session)
+    await service.update_member_role(workspace_id, user_id, data.role, user)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
