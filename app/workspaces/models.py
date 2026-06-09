@@ -56,6 +56,14 @@ class Workspace(UUIDMixin, TimestampMixin, Base):
         "WorkspaceMember",
         back_populates="workspace",
         cascade="all, delete-orphan",
+        passive_deletes=True,
+        lazy="raise",
+    )
+    projects: Mapped[list["Project"]] = relationship(  # type: ignore[name-defined]  # noqa: F821
+        "Project",
+        back_populates="workspace",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
         lazy="raise",
     )
 

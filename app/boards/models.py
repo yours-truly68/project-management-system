@@ -36,7 +36,15 @@ class Board(UUIDMixin, TimestampMixin, Base):
     # Relationships
     project: Mapped["Project"] = relationship(  # type: ignore[name-defined]  # noqa: F821
         "Project",
+        back_populates="boards",
         foreign_keys=[project_id],
+        lazy="raise",
+    )
+    columns: Mapped[list["Column"]] = relationship(  # type: ignore[name-defined]  # noqa: F821
+        "Column",
+        back_populates="board",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
         lazy="raise",
     )
     creator: Mapped["User"] = relationship(  # type: ignore[name-defined]  # noqa: F821

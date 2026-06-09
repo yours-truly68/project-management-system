@@ -56,7 +56,15 @@ class Project(UUIDMixin, TimestampMixin, Base):
     # Relationships
     workspace: Mapped["Workspace"] = relationship(  # type: ignore[name-defined]  # noqa: F821
         "Workspace",
+        back_populates="projects",
         foreign_keys=[workspace_id],
+        lazy="raise",
+    )
+    boards: Mapped[list["Board"]] = relationship(  # type: ignore[name-defined]  # noqa: F821
+        "Board",
+        back_populates="project",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
         lazy="raise",
     )
     creator: Mapped["User"] = relationship(  # type: ignore[name-defined]  # noqa: F821

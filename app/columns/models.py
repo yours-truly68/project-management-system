@@ -37,6 +37,7 @@ class Column(UUIDMixin, TimestampMixin, Base):
     # Relationships
     board: Mapped["Board"] = relationship(  # type: ignore[name-defined]  # noqa: F821
         "Board",
+        back_populates="columns",
         foreign_keys=[board_id],
         lazy="raise",
     )
