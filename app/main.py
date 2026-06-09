@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.auth.router import router as auth_router
 from app.core.config import settings
+from app.workspaces.router import router as workspace_router
 
 
 @asynccontextmanager
@@ -51,3 +52,4 @@ async def health_check() -> dict[str, str]:
 # Routers
 # ---------------------------------------------------------------------------
 app.include_router(auth_router, prefix="/api")
+app.include_router(workspace_router, prefix="/api")
