@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { authService } from "../services/auth.service";
+import { getErrorMessage } from "@/lib/utils";
 
 export function useRegister() {
   const router = useRouter();
@@ -21,12 +21,7 @@ export function useRegister() {
         // Success: redirect to login page with success flag
         router.push("/login?registered=success");
       } catch (err) {
-        let msg = "Registration failed.";
-        if (axios.isAxiosError(err)) {
-          msg = err.response?.data?.detail || err.message || msg;
-        } else if (err instanceof Error) {
-          msg = err.message;
-        }
+        const msg = getErrorMessage(err);
         setError(msg);
       } finally {
         setIsLoading(false);

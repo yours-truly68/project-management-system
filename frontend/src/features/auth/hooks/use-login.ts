@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 import { authService } from "../services/auth.service";
 import { tokenManager } from "@/lib/auth/token-manager";
 import { useAuthStore } from "@/stores/auth.store";
+import { getErrorMessage } from "@/lib/utils";
 
 export function useLogin() {
   const router = useRouter();
@@ -31,12 +31,7 @@ export function useLogin() {
         // 4. Redirect user to Dashboard root
         router.push("/");
       } catch (err) {
-        let msg = "Invalid credentials.";
-        if (axios.isAxiosError(err)) {
-          msg = err.response?.data?.detail || err.message || msg;
-        } else if (err instanceof Error) {
-          msg = err.message;
-        }
+        const msg = getErrorMessage(err);
         setError(msg);
         tokenManager.clear();
       } finally {

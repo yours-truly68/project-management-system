@@ -5,7 +5,7 @@ interface WorkspaceState {
   setActiveWorkspaceId: (id: string | null) => void;
 }
 
-const getCookie = (name: string): string | null => {
+export const getCookie = (name: string): string | null => {
   if (typeof document === "undefined") return null;
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
@@ -22,7 +22,7 @@ const setCookie = (name: string, value: string, days = 7) => {
 };
 
 export const useWorkspaceStore = create<WorkspaceState>((set) => ({
-  activeWorkspaceId: getCookie("kando_active_workspace"),
+  activeWorkspaceId: null, // start null to prevent SSR hydration mismatch
   setActiveWorkspaceId: (id) => {
     set({ activeWorkspaceId: id });
     if (id) {

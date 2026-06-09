@@ -8,6 +8,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { useWorkspaceMembers } from "../hooks/use-workspace-members";
 import { Workspace, WorkspaceRole, WorkspaceMemberDetailed } from "../types/workspace.types";
 import { Loader2, UserMinus, UserPlus } from "lucide-react";
+import { getErrorMessage } from "@/lib/utils";
 
 const inviteSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email address"),
@@ -69,11 +70,7 @@ export function WorkspaceMemberList({ workspace }: WorkspaceMemberListProps) {
       setInviteSuccessMsg("Member invited successfully!");
       reset();
     } catch (err: unknown) {
-      setInviteErrorMsg(
-        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
-          (err as Error)?.message ||
-          "Failed to invite member."
-      );
+      setInviteErrorMsg(getErrorMessage(err));
     }
   };
 
@@ -82,11 +79,7 @@ export function WorkspaceMemberList({ workspace }: WorkspaceMemberListProps) {
     try {
       await updateRole({ userId: member.user_id, role: newRole });
     } catch (err: unknown) {
-      setMemberErrorMsg(
-        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
-          (err as Error)?.message ||
-          "Failed to update member role."
-      );
+      setMemberErrorMsg(getErrorMessage(err));
     }
   };
 
@@ -96,11 +89,7 @@ export function WorkspaceMemberList({ workspace }: WorkspaceMemberListProps) {
     try {
       await removeMember(member.user_id);
     } catch (err: unknown) {
-      setMemberErrorMsg(
-        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
-          (err as Error)?.message ||
-          "Failed to remove member."
-      );
+      setMemberErrorMsg(getErrorMessage(err));
     }
   };
 

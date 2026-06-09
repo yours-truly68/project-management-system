@@ -10,6 +10,7 @@ import { useWorkspaceMembers } from "../hooks/use-workspace-members";
 import { Workspace } from "../types/workspace.types";
 import { Loader2, Trash2, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { getErrorMessage } from "@/lib/utils";
 
 const workspaceSettingsSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name cannot exceed 100 characters"),
@@ -85,11 +86,7 @@ export function WorkspaceSettings({ workspace }: WorkspaceSettingsProps) {
       });
       setSuccessMsg("Workspace updated successfully!");
     } catch (err: unknown) {
-      setErrorMsg(
-        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
-          (err as Error)?.message ||
-          "Failed to update workspace."
-      );
+      setErrorMsg(getErrorMessage(err));
     }
   };
 
@@ -100,11 +97,7 @@ export function WorkspaceSettings({ workspace }: WorkspaceSettingsProps) {
       await deleteWorkspace(workspace.id);
       router.push("/settings");
     } catch (err: unknown) {
-      setErrorMsg(
-        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail ||
-          (err as Error)?.message ||
-          "Failed to delete workspace."
-      );
+      setErrorMsg(getErrorMessage(err));
     }
   };
 

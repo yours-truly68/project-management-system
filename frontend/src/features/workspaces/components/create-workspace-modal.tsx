@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { X, Loader2 } from "lucide-react";
 import { useCreateWorkspace } from "../hooks/use-workspaces";
+import { getErrorMessage } from "@/lib/utils";
 
 const createWorkspaceSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name cannot exceed 100 characters"),
@@ -69,12 +70,7 @@ export function CreateWorkspaceModal({ isOpen, onClose }: CreateWorkspaceModalPr
     }
   };
 
-  const errorMessage =
-    error instanceof Error
-      ? error.message
-      : error
-        ? (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail
-        : "An error occurred";
+  const errorMessage = error ? getErrorMessage(error) : "";
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-[2px] animate-fade-in select-none">

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { workspaceService } from "../services/workspace.service";
-import { useWorkspaceStore } from "@/stores/workspace.store";
+import { useWorkspaceStore, getCookie } from "@/stores/workspace.store";
 import { useEffect } from "react";
 import { WorkspaceUpdateInput } from "../types/workspace.types";
 
@@ -14,9 +14,21 @@ export function useWorkspaces() {
 
   const workspaces = query.data;
 
+  // Load initial workspace ID from cookie on client-side mount
+  useEffect(() => {
+    const savedId = getCookie("kando_active_workspace");
+    if (savedId && !activeWorkspaceId) {
+      setActiveWorkspaceId(savedId);
+    }
+  }, [setActiveWorkspaceId, activeWorkspaceId]);
+
   // Sync activeWorkspaceId with available workspaces
   useEffect(() => {
     if (workspaces && workspaces.length > 0) {
+      const hasCookie = getCookie("kando_active_workspace");
+      if (hasCookie && !activeWorkspaceId && workspaces.some((w) => w.id === hasCookie)) {
+        return; // wait for the mount effect to restore it
+      }
       const exists = workspaces.some((w) => w.id === activeWorkspaceId);
       if (!activeWorkspaceId || !exists) {
         setActiveWorkspaceId(workspaces[0].id);

@@ -66,6 +66,7 @@ class WorkspaceService:
         )
         await self.workspace_repo.add_member(owner_member)
         await self.session.commit()
+        await self.session.refresh(workspace)
 
         return WorkspaceResponse.model_validate(workspace)
 
@@ -201,6 +202,7 @@ class WorkspaceService:
 
         await self.workspace_repo.update(workspace)
         await self.session.commit()
+        await self.session.refresh(workspace)
         return WorkspaceResponse.model_validate(workspace)
 
     async def delete_workspace(
