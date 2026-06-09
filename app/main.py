@@ -13,6 +13,7 @@ from app.columns.router import router as columns_router
 from app.tasks.router import router as tasks_router
 from app.comments.router import router as comments_router
 from app.activity_logs.router import router as activity_logs_router
+from app.notifications.router import router as notifications_router
 
 
 @asynccontextmanager
@@ -65,3 +66,4 @@ app.include_router(columns_router, prefix="/api")
 app.include_router(tasks_router, prefix="/api")
 app.include_router(comments_router, prefix="/api")
 app.include_router(activity_logs_router, prefix="/api")
+app.include_router(notifications_router, prefix="/api")
