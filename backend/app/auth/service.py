@@ -39,7 +39,7 @@ class AuthService:
         self.repo = UserRepository(session)
         self.session = session
 
-    async def register(self, data: RegisterRequest) -> AuthenticatedUserResponse:
+    async def register(self, data: RegisterRequest) -> tuple[AuthenticatedUserResponse, str]:
         """Register a new user with email + password."""
 
         # Uniqueness checks
@@ -66,7 +66,7 @@ class AuthService:
 
         return self._build_auth_response(user)
 
-    async def login(self, data: LoginRequest) -> AuthenticatedUserResponse:
+    async def login(self, data: LoginRequest) -> tuple[AuthenticatedUserResponse, str]:
         """Authenticate with email + password."""
 
         user = await self.repo.get_by_email(data.email)
@@ -90,7 +90,7 @@ class AuthService:
 
         return self._build_auth_response(user)
 
-    async def refresh(self, refresh_token: str) -> TokenResponse:
+    async def refresh(self, refresh_token: str) -> tuple[TokenResponse, str]:
         """Validate a refresh token and issue a new token pair."""
 
         user_id = verify_token(refresh_token, TOKEN_TYPE_REFRESH)
@@ -107,10 +107,10 @@ class AuthService:
                 detail="User not found or deactivated.",
             )
 
+        new_refresh = create_refresh_token(user.id)
         return TokenResponse(
             access_token=create_access_token(user.id),
-            refresh_token=create_refresh_token(user.id),
-        )
+        ), new_refresh
 
     async def get_current_user(self, token: str) -> User:
         """Decode an access token and return the user. Used by dependencies."""
@@ -136,11 +136,13 @@ class AuthService:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _build_auth_response(user: User) -> AuthenticatedUserResponse:
-        return AuthenticatedUserResponse(
+    def _build_auth_response(user: User) -> tuple[AuthenticatedUserResponse, str]:
+        access_token = create_access_token(user.id)
+        refresh_token = create_refresh_token(user.id)
+        response = AuthenticatedUserResponse(
             tokens=TokenResponse(
-                access_token=create_access_token(user.id),
-                refresh_token=create_refresh_token(user.id),
+                access_token=access_token,
             ),
             user=UserResponse.model_validate(user),
         )
+        return response, refresh_token

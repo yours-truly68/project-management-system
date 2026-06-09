@@ -27,20 +27,8 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1)
 
 
-class RefreshTokenRequest(BaseModel):
-    """Explicit request body for token refresh when not using HttpOnly cookies."""
-
-    refresh_token: str
-
-
-# ---------------------------------------------------------------------------
-# Response schemas
-# ---------------------------------------------------------------------------
-
-
 class TokenResponse(BaseModel):
     access_token: str
-    refresh_token: str
     token_type: str = "bearer"
 
 
