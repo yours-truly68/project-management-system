@@ -9,7 +9,7 @@ from app.boards.repository import BoardRepository
 from app.boards.schemas import BoardCreate, BoardResponse, BoardUpdate
 from app.projects.repository import ProjectRepository
 from app.workspaces.repository import WorkspaceRepository
-from app.workspaces.models import WorkspaceMember
+from app.shared.permissions.policies import has_permission, Permission
 
 
 class BoardService:
@@ -29,12 +29,12 @@ class BoardService:
                 detail="Project not found.",
             )
 
-        # Enforce OWNER or ADMIN role on the workspace
-        await self._require_role(
-            workspace_id=project.workspace_id,
-            user_id=current_user.id,
-            allowed_roles={WorkspaceRole.OWNER, WorkspaceRole.ADMIN},
-        )
+        role = await self._get_workspace_role(project.workspace_id, current_user.id)
+        if not has_permission(role, Permission.BOARD_CREATE):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to create boards.",
+            )
 
         # Enforce board name uniqueness within project
         existing = await self.board_repo.get_by_project_and_name(
@@ -67,12 +67,12 @@ class BoardService:
                 detail="Project not found.",
             )
 
-        # Enforce workspace membership
-        await self._require_role(
-            workspace_id=project.workspace_id,
-            user_id=current_user.id,
-            allowed_roles={WorkspaceRole.OWNER, WorkspaceRole.ADMIN, WorkspaceRole.MEMBER},
-        )
+        role = await self._get_workspace_role(project.workspace_id, current_user.id)
+        if not has_permission(role, Permission.BOARD_VIEW):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to view boards in this project.",
+            )
 
         boards = await self.board_repo.get_by_project(project_id)
         return [BoardResponse.model_validate(b) for b in boards]
@@ -94,12 +94,12 @@ class BoardService:
                 detail="Project not found.",
             )
 
-        # Enforce workspace membership
-        await self._require_role(
-            workspace_id=project.workspace_id,
-            user_id=current_user.id,
-            allowed_roles={WorkspaceRole.OWNER, WorkspaceRole.ADMIN, WorkspaceRole.MEMBER},
-        )
+        role = await self._get_workspace_role(project.workspace_id, current_user.id)
+        if not has_permission(role, Permission.BOARD_VIEW):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to view this board.",
+            )
 
         return BoardResponse.model_validate(board)
 
@@ -120,12 +120,12 @@ class BoardService:
                 detail="Project not found.",
             )
 
-        # Enforce OWNER or ADMIN role on the workspace
-        await self._require_role(
-            workspace_id=project.workspace_id,
-            user_id=current_user.id,
-            allowed_roles={WorkspaceRole.OWNER, WorkspaceRole.ADMIN},
-        )
+        role = await self._get_workspace_role(project.workspace_id, current_user.id)
+        if not has_permission(role, Permission.BOARD_RENAME):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to update this board.",
+            )
 
         update_dict = data.model_dump(exclude_unset=True)
 
@@ -159,12 +159,12 @@ class BoardService:
                 detail="Project not found.",
             )
 
-        # Enforce OWNER or ADMIN role on the workspace
-        await self._require_role(
-            workspace_id=project.workspace_id,
-            user_id=current_user.id,
-            allowed_roles={WorkspaceRole.OWNER, WorkspaceRole.ADMIN},
-        )
+        role = await self._get_workspace_role(project.workspace_id, current_user.id)
+        if not has_permission(role, Permission.BOARD_DELETE):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to delete this board.",
+            )
 
         await self.board_repo.delete(board)
         await self.session.commit()
@@ -173,16 +173,13 @@ class BoardService:
     # Private helpers
     # ------------------------------------------------------------------
 
-    async def _require_role(
-        self,
-        workspace_id: uuid.UUID,
-        user_id: uuid.UUID,
-        allowed_roles: set[WorkspaceRole],
-    ) -> WorkspaceMember:
+    async def _get_workspace_role(
+        self, workspace_id: uuid.UUID, user_id: uuid.UUID
+    ) -> WorkspaceRole:
         membership = await self.workspace_repo.get_membership(workspace_id, user_id)
-        if not membership or membership.role not in allowed_roles:
+        if not membership:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have permission to perform this action in this workspace.",
+                detail="You do not belong to this workspace.",
             )
-        return membership
+        return membership.role

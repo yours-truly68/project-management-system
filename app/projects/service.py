@@ -1,13 +1,3 @@
-"""
-Project service — business logic and authorization.
-
-Authorization rules follow PERMISSIONS_MATRIX.md:
-- Create Project: OWNER, ADMIN only.
-- View Project: OWNER, ADMIN, MEMBER.
-- Update Project (including Archive): OWNER, ADMIN only.
-- Delete Project: OWNER only.
-"""
-
 import uuid
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,7 +8,7 @@ from app.projects.models import Project
 from app.projects.repository import ProjectRepository
 from app.projects.schemas import ProjectCreate, ProjectResponse, ProjectUpdate
 from app.workspaces.repository import WorkspaceRepository
-from app.workspaces.models import WorkspaceMember
+from app.shared.permissions.policies import has_permission, Permission
 
 
 class ProjectService:
@@ -30,13 +20,13 @@ class ProjectService:
     async def create_project(
         self, data: ProjectCreate, current_user: User
     ) -> ProjectResponse:
-        """Create a project within a workspace. Requires OWNER or ADMIN role."""
-        # Validate workspace membership & role
-        await self._require_role(
-            workspace_id=data.workspace_id,
-            user_id=current_user.id,
-            allowed_roles={WorkspaceRole.OWNER, WorkspaceRole.ADMIN},
-        )
+        """Create a project within a workspace. Requires PROJECT_CREATE permission."""
+        role = await self._get_workspace_role(data.workspace_id, current_user.id)
+        if not has_permission(role, Permission.PROJECT_CREATE):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to create projects.",
+            )
 
         # Check project key uniqueness within the workspace
         existing_project = await self.project_repo.get_by_key(
@@ -63,13 +53,13 @@ class ProjectService:
     async def list_workspace_projects(
         self, workspace_id: uuid.UUID, current_user: User, include_archived: bool = False
     ) -> list[ProjectResponse]:
-        """List all projects in a workspace. Requires workspace membership."""
-        # Any membership role allows viewing projects
-        await self._require_role(
-            workspace_id=workspace_id,
-            user_id=current_user.id,
-            allowed_roles={WorkspaceRole.OWNER, WorkspaceRole.ADMIN, WorkspaceRole.MEMBER},
-        )
+        """List all projects in a workspace. Requires PROJECT_VIEW permission."""
+        role = await self._get_workspace_role(workspace_id, current_user.id)
+        if not has_permission(role, Permission.PROJECT_VIEW):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to view projects in this workspace.",
+            )
 
         projects = await self.project_repo.list_workspace_projects(
             workspace_id=workspace_id, include_archived=include_archived
@@ -79,7 +69,7 @@ class ProjectService:
     async def get_project(
         self, project_id: uuid.UUID, current_user: User
     ) -> ProjectResponse:
-        """Get project by ID. Requires workspace membership."""
+        """Get project by ID. Requires PROJECT_VIEW permission."""
         project = await self.project_repo.get_by_id(project_id)
         if not project:
             raise HTTPException(
@@ -87,18 +77,18 @@ class ProjectService:
                 detail="Project not found.",
             )
 
-        # Enforce workspace membership
-        await self._require_role(
-            workspace_id=project.workspace_id,
-            user_id=current_user.id,
-            allowed_roles={WorkspaceRole.OWNER, WorkspaceRole.ADMIN, WorkspaceRole.MEMBER},
-        )
+        role = await self._get_workspace_role(project.workspace_id, current_user.id)
+        if not has_permission(role, Permission.PROJECT_VIEW):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to view this project.",
+            )
         return ProjectResponse.model_validate(project)
 
     async def update_project(
         self, project_id: uuid.UUID, data: ProjectUpdate, current_user: User
     ) -> ProjectResponse:
-        """Update project details. Requires OWNER or ADMIN role."""
+        """Update project details. Requires PROJECT_UPDATE permission."""
         project = await self.project_repo.get_by_id(project_id)
         if not project:
             raise HTTPException(
@@ -106,12 +96,12 @@ class ProjectService:
                 detail="Project not found.",
             )
 
-        # Enforce OWNER or ADMIN role on the workspace
-        await self._require_role(
-            workspace_id=project.workspace_id,
-            user_id=current_user.id,
-            allowed_roles={WorkspaceRole.OWNER, WorkspaceRole.ADMIN},
-        )
+        role = await self._get_workspace_role(project.workspace_id, current_user.id)
+        if not has_permission(role, Permission.PROJECT_UPDATE):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to update this project.",
+            )
 
         update_dict = data.model_dump(exclude_unset=True)
 
@@ -134,7 +124,7 @@ class ProjectService:
         return ProjectResponse.model_validate(updated_project)
 
     async def delete_project(self, project_id: uuid.UUID, current_user: User) -> None:
-        """Delete a project. Requires OWNER role."""
+        """Delete a project. Requires PROJECT_DELETE permission."""
         project = await self.project_repo.get_by_id(project_id)
         if not project:
             raise HTTPException(
@@ -142,12 +132,12 @@ class ProjectService:
                 detail="Project not found.",
             )
 
-        # Only OWNER can delete projects (as per PERMISSIONS_MATRIX.md)
-        await self._require_role(
-            workspace_id=project.workspace_id,
-            user_id=current_user.id,
-            allowed_roles={WorkspaceRole.OWNER},
-        )
+        role = await self._get_workspace_role(project.workspace_id, current_user.id)
+        if not has_permission(role, Permission.PROJECT_DELETE):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to delete this project.",
+            )
 
         await self.project_repo.delete(project)
         await self.session.commit()
@@ -156,17 +146,13 @@ class ProjectService:
     # Private helpers
     # ------------------------------------------------------------------
 
-    async def _require_role(
-        self,
-        workspace_id: uuid.UUID,
-        user_id: uuid.UUID,
-        allowed_roles: set[WorkspaceRole],
-    ) -> WorkspaceMember:
-        """Assert the user has one of the allowed roles in the workspace."""
+    async def _get_workspace_role(
+        self, workspace_id: uuid.UUID, user_id: uuid.UUID
+    ) -> WorkspaceRole:
         membership = await self.workspace_repo.get_membership(workspace_id, user_id)
-        if not membership or membership.role not in allowed_roles:
+        if not membership:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have permission to perform this action in this workspace.",
+                detail="You do not belong to this workspace.",
             )
-        return membership
+        return membership.role
