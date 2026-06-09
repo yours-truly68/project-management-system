@@ -15,6 +15,19 @@ from app.comments.router import router as comments_router
 from app.activity_logs.router import router as activity_logs_router
 from app.notifications.router import router as notifications_router
 
+# Import all models to ensure registration with declarative Base mapping registry
+import app.users.models  # noqa: F401
+import app.workspaces.models  # noqa: F401
+import app.projects.models  # noqa: F401
+import app.boards.models  # noqa: F401
+import app.columns.models  # noqa: F401
+import app.tasks.models  # noqa: F401
+import app.comments.models  # noqa: F401
+import app.mentions.models  # noqa: F401
+import app.activity_logs.models  # noqa: F401
+import app.notifications.models  # noqa: F401
+
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:

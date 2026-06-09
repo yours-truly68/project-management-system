@@ -20,10 +20,10 @@ const satoshi = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Antigravity — Kanban Project Management System",
+  title: "KanDo — Project Management Platform",
   description:
     "A production-grade, high-performance workspace inspired by Linear, Raycast, and Notion.",
-  authors: [{ name: "Antigravity Team" }],
+  authors: [{ name: "KanDo Team" }],
 };
 
 export default function RootLayout({

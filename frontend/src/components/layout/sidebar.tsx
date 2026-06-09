@@ -55,21 +55,21 @@ export function Sidebar() {
           {!isCollapsed ? (
             <button
               className="flex items-center gap-2 overflow-hidden w-full text-left rounded p-0.5 hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              aria-label="Workspace Switcher, current workspace: Acme Workspace"
+              aria-label="Workspace Switcher, current workspace: KanDo Workspace"
             >
-              <div className="w-5 h-5 rounded bg-sidebar-accent flex items-center justify-center text-[10px] font-bold shrink-0">
-                A
+              <div className="w-5 h-5 rounded bg-sidebar-accent flex items-center justify-center text-xs font-bold shrink-0">
+                K
               </div>
-              <span className="font-semibold text-xs truncate">Acme Workspace</span>
+              <span className="font-semibold text-sm truncate">KanDo Workspace</span>
               <ChevronDown className="w-3.5 h-3.5 ml-auto text-sidebar-foreground/60 shrink-0" />
             </button>
           ) : (
-            <SidebarTooltip content="Acme Workspace" disabled={!isCollapsed}>
+            <SidebarTooltip content="KanDo Workspace" disabled={!isCollapsed}>
               <button
                 className="w-7 h-7 rounded bg-sidebar-accent flex items-center justify-center text-xs font-bold mx-auto hover:bg-sidebar-accent/80 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                aria-label="Workspace Switcher, current workspace: Acme Workspace"
+                aria-label="Workspace Switcher, current workspace: KanDo Workspace"
               >
-                A
+                K
               </button>
             </SidebarTooltip>
           )}
@@ -111,7 +111,7 @@ export function Sidebar() {
                   <Link
                     href={item.disabled ? "#" : item.href}
                     className={cn(
-                      "flex items-center gap-2 px-2 py-1 rounded text-xs transition-colors font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                      "flex items-center gap-2 px-2 py-1 rounded text-sm transition-colors font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                       isActive
                         ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
                         : "hover:bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground",
@@ -132,7 +132,7 @@ export function Sidebar() {
           {/* 3. Favorites List (Placeholder) */}
           <div className="space-y-0.5">
             {!isCollapsed && (
-              <div className="px-2 py-0.5 text-[9px] font-bold text-sidebar-foreground/40 uppercase tracking-wider">
+              <div className="px-2 py-0.5 text-[10px] font-bold text-sidebar-foreground/45 uppercase tracking-wider">
                 Favorites
               </div>
             )}
@@ -146,7 +146,7 @@ export function Sidebar() {
                   aria-label="Favorite workspace item: Website Redesign"
                 >
                   <Star className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" />
-                  {!isCollapsed && <span className="truncate text-[11px]">Website Redesign</span>}
+                  {!isCollapsed && <span className="truncate text-xs font-medium">Website Redesign</span>}
                 </button>
               </SidebarTooltip>
               <SidebarTooltip content="Release V1 Specs" disabled={!isCollapsed}>
@@ -158,7 +158,7 @@ export function Sidebar() {
                   aria-label="Favorite workspace item: Release V1 Specs"
                 >
                   <Star className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" />
-                  {!isCollapsed && <span className="truncate text-[11px]">Release V1 Specs</span>}
+                  {!isCollapsed && <span className="truncate text-xs font-medium">Release V1 Specs</span>}
                 </button>
               </SidebarTooltip>
             </div>
@@ -168,7 +168,7 @@ export function Sidebar() {
           <div className="space-y-0.5">
             {!isCollapsed && (
               <div className="flex items-center justify-between px-2 py-0.5">
-                <span className="text-[9px] font-bold text-sidebar-foreground/40 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-sidebar-foreground/45 uppercase tracking-wider">
                   Projects
                 </span>
                 <button
@@ -189,7 +189,7 @@ export function Sidebar() {
                   aria-label="Project: Mobile Application"
                 >
                   <FolderOpen className="w-3 h-3 text-sidebar-foreground/60 shrink-0" />
-                  {!isCollapsed && <span className="truncate text-[11px]">Mobile Application</span>}
+                  {!isCollapsed && <span className="truncate text-xs font-medium">Mobile Application</span>}
                 </button>
               </SidebarTooltip>
               <SidebarTooltip content="Internal Core API" disabled={!isCollapsed}>
@@ -201,7 +201,7 @@ export function Sidebar() {
                   aria-label="Project: Internal Core API"
                 >
                   <FolderOpen className="w-3 h-3 text-sidebar-foreground/60 shrink-0" />
-                  {!isCollapsed && <span className="truncate text-[11px]">Internal Core API</span>}
+                  {!isCollapsed && <span className="truncate text-xs font-medium">Internal Core API</span>}
                 </button>
               </SidebarTooltip>
             </div>
@@ -211,7 +211,7 @@ export function Sidebar() {
           <div className="space-y-0.5">
             {!isCollapsed && (
               <div className="flex items-center justify-between px-2 py-0.5">
-                <span className="text-[9px] font-bold text-sidebar-foreground/40 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-sidebar-foreground/45 uppercase tracking-wider">
                   Boards
                 </span>
                 <button
@@ -232,7 +232,7 @@ export function Sidebar() {
                   aria-label="Board: Sprint 1 Board"
                 >
                   <Compass className="w-3 h-3 text-sidebar-foreground/60 shrink-0" />
-                  {!isCollapsed && <span className="truncate text-[11px]">Sprint 1 Board</span>}
+                  {!isCollapsed && <span className="truncate text-xs font-medium">Sprint 1 Board</span>}
                 </button>
               </SidebarTooltip>
             </div>
@@ -248,7 +248,7 @@ export function Sidebar() {
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-2 px-2 py-1 rounded text-xs transition-colors font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                      "flex items-center gap-2 px-2 py-1 rounded text-sm transition-colors font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                       isActive
                         ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
                         : "hover:bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground",
@@ -258,7 +258,7 @@ export function Sidebar() {
                     aria-label={item.name}
                   >
                     <Icon className="w-3.5 h-3.5 shrink-0" />
-                    {!isCollapsed && <span className="truncate text-[11px]">{item.name}</span>}
+                    {!isCollapsed && <span className="truncate text-xs font-medium">{item.name}</span>}
                   </Link>
                 </SidebarTooltip>
               );

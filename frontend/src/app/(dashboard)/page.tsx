@@ -73,7 +73,7 @@ export default function Page() {
       tasks: [
         {
           id: "task-1",
-          code: "PMS-12",
+          code: "KDO-12",
           title: "Implement Auth Flow",
           priority: "HIGH",
           dueDate: "Jun 12",
@@ -82,7 +82,7 @@ export default function Page() {
         },
         {
           id: "task-2",
-          code: "PMS-14",
+          code: "KDO-14",
           title: "Design System Architecture & Multi-Tenant Partitioning Scheme",
           priority: "MEDIUM",
           dueDate: "Jun 15",
@@ -98,7 +98,7 @@ export default function Page() {
       tasks: [
         {
           id: "task-3",
-          code: "PMS-11",
+          code: "KDO-11",
           title: "API Interceptor Mapping & Token Propagation",
           priority: "CRITICAL",
           dueDate: "Jun 10",
@@ -120,7 +120,7 @@ export default function Page() {
       tasks: [
         {
           id: "task-4",
-          code: "PMS-1",
+          code: "KDO-1",
           title: "Next.js Template Bootstrap with Tailwind 4",
           priority: "LOW",
           dueDate: "May 28",
@@ -136,8 +136,8 @@ export default function Page() {
       {/* Board Header Toolbar */}
       <div className="flex items-center justify-between border-b border-border pb-2">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight text-foreground/90">Sprint 1 Board</h1>
-          <p className="text-[11px] text-muted-foreground leading-none mt-0.5">Main delivery board for foundation items</p>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground/90">Sprint 1 Board</h1>
+          <p className="text-xs text-muted-foreground leading-none mt-1">Main delivery board for foundation items</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -159,10 +159,10 @@ export default function Page() {
               <div className="flex items-center gap-1.5 min-w-0">
                 <GripVertical className="w-3.5 h-3.5 text-muted-foreground/30 cursor-grab shrink-0 hover:text-muted-foreground/60 transition-colors" />
                 <span className={`w-1.5 h-1.5 rounded-full ${column.dotColor} shrink-0`} />
-                <h3 className="text-xs font-semibold text-foreground/80 truncate">
+                <h3 className="text-sm font-semibold text-foreground/85 truncate">
                   {column.name}
                 </h3>
-                <span className="text-[10px] bg-secondary/80 border border-border px-1 py-0.2 rounded font-medium text-muted-foreground/80">
+                <span className="text-[11px] bg-secondary/80 border border-border px-1.5 py-0.2 rounded font-medium text-muted-foreground/80">
                   {column.tasks.length}
                 </span>
               </div>
@@ -204,7 +204,7 @@ export default function Page() {
                   </div>
 
                   {/* Card Body: Title */}
-                  <h4 className="text-xs font-semibold leading-normal text-foreground/90 tracking-tight">
+                  <h4 className="text-[13px] font-semibold leading-snug text-foreground/90 tracking-tight">
                     {task.title}
                   </h4>
 

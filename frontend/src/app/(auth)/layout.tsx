@@ -15,11 +15,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               <FolderKanban className="w-4 h-4" />
             </div>
             <span className="font-bold text-lg tracking-tight text-foreground/90">
-              Antigravity
+              KanDo
             </span>
           </div>
           <p className="mt-2 text-center text-xs text-muted-foreground">
-            Kanban Project Management System
+            KanDo — Project Management Platform
           </p>
         </div>
 
