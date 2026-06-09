@@ -12,7 +12,9 @@ class Mention(UUIDMixin, Base):
     __tablename__ = "mentions"
 
     __table_args__ = (
-        UniqueConstraint("comment_id", "mentioned_user_id", name="uq_mentions_comment_user"),
+        UniqueConstraint(
+            "comment_id", "mentioned_user_id", name="uq_mentions_comment_user"
+        ),
         Index("ix_mentions_mentioned_user_id", "mentioned_user_id"),
     )
 

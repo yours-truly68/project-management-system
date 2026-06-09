@@ -77,9 +77,7 @@ class BoardService:
         boards = await self.board_repo.get_by_project(project_id)
         return [BoardResponse.model_validate(b) for b in boards]
 
-    async def get_board(
-        self, board_id: uuid.UUID, current_user: User
-    ) -> BoardResponse:
+    async def get_board(self, board_id: uuid.UUID, current_user: User) -> BoardResponse:
         board = await self.board_repo.get_by_id(board_id)
         if not board:
             raise HTTPException(

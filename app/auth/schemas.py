@@ -14,6 +14,7 @@ from pydantic import BaseModel, EmailStr, Field
 # Request schemas
 # ---------------------------------------------------------------------------
 
+
 class RegisterRequest(BaseModel):
     email: EmailStr
     username: str = Field(min_length=3, max_length=50, pattern=r"^[a-zA-Z0-9_-]+$")
@@ -28,12 +29,14 @@ class LoginRequest(BaseModel):
 
 class RefreshTokenRequest(BaseModel):
     """Explicit request body for token refresh when not using HttpOnly cookies."""
+
     refresh_token: str
 
 
 # ---------------------------------------------------------------------------
 # Response schemas
 # ---------------------------------------------------------------------------
+
 
 class TokenResponse(BaseModel):
     access_token: str
@@ -43,6 +46,7 @@ class TokenResponse(BaseModel):
 
 class AuthenticatedUserResponse(BaseModel):
     """Wraps token pair + user profile in a single response."""
+
     tokens: TokenResponse
     user: "UserResponse"
 

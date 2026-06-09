@@ -10,6 +10,7 @@ from app.shared.enums import Priority
 # Input schemas
 # ---------------------------------------------------------------------------
 
+
 class TaskCreate(BaseModel):
     column_id: uuid.UUID
     title: str = Field(min_length=1, max_length=100)
@@ -53,6 +54,7 @@ class TaskAssign(BaseModel):
 # ---------------------------------------------------------------------------
 # Output schemas
 # ---------------------------------------------------------------------------
+
 
 class TaskResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

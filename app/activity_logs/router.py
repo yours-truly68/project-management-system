@@ -28,7 +28,9 @@ async def get_workspace_activity(
     )
 
 
-@router.get("/entity/{entity_type}/{entity_id}", response_model=list[ActivityLogResponse])
+@router.get(
+    "/entity/{entity_type}/{entity_id}", response_model=list[ActivityLogResponse]
+)
 async def get_entity_activity(
     entity_type: str,
     entity_id: uuid.UUID,

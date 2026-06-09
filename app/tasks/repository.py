@@ -14,14 +14,18 @@ class TaskRepository:
         await self.session.flush()
         return task
 
-    async def get_by_id(self, task_id: uuid.UUID, for_update: bool = False) -> Task | None:
+    async def get_by_id(
+        self, task_id: uuid.UUID, for_update: bool = False
+    ) -> Task | None:
         if for_update:
             stmt = select(Task).where(Task.id == task_id).with_for_update()
             result = await self.session.execute(stmt)
             return result.scalar_one_or_none()
         return await self.session.get(Task, task_id)
 
-    async def get_column_tasks(self, column_id: uuid.UUID, for_update: bool = False) -> list[Task]:
+    async def get_column_tasks(
+        self, column_id: uuid.UUID, for_update: bool = False
+    ) -> list[Task]:
         """Fetch all tasks in a column ordered by position ascending."""
         stmt = (
             select(Task)
@@ -34,12 +38,7 @@ class TaskRepository:
         return list(result.scalars().all())
 
     async def update(self, task_id: uuid.UUID, data: dict) -> Task | None:
-        stmt = (
-            update(Task)
-            .where(Task.id == task_id)
-            .values(**data)
-            .returning(Task)
-        )
+        stmt = update(Task).where(Task.id == task_id).values(**data).returning(Task)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 

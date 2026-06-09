@@ -37,11 +37,6 @@ class UserRepository:
 
     async def update(self, user_id: uuid.UUID, data: dict) -> User | None:
         """Update specific fields and return the refreshed user."""
-        stmt = (
-            update(User)
-            .where(User.id == user_id)
-            .values(**data)
-            .returning(User)
-        )
+        stmt = update(User).where(User.id == user_id).values(**data).returning(User)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()

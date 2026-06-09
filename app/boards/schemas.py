@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 # Input schemas
 # ---------------------------------------------------------------------------
 
+
 class BoardCreate(BaseModel):
     project_id: uuid.UUID
     name: str = Field(min_length=1, max_length=100)
@@ -24,6 +25,7 @@ class BoardUpdate(BaseModel):
 # ---------------------------------------------------------------------------
 # Output schemas
 # ---------------------------------------------------------------------------
+
 
 class BoardResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

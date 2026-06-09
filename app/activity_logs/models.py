@@ -16,7 +16,9 @@ class ActivityLog(UUIDMixin, Base):
     __table_args__ = (
         Index("ix_activity_logs_workspace_timeline", "workspace_id", "created_at"),
         Index("ix_activity_logs_actor_history", "actor_id", "created_at"),
-        Index("ix_activity_logs_entity_history", "entity_type", "entity_id", "created_at"),
+        Index(
+            "ix_activity_logs_entity_history", "entity_type", "entity_id", "created_at"
+        ),
     )
 
     workspace_id: Mapped[_uuid.UUID] = mapped_column(

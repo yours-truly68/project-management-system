@@ -51,7 +51,10 @@ class ProjectService:
         return ProjectResponse.model_validate(project)
 
     async def list_workspace_projects(
-        self, workspace_id: uuid.UUID, current_user: User, include_archived: bool = False
+        self,
+        workspace_id: uuid.UUID,
+        current_user: User,
+        include_archived: bool = False,
     ) -> list[ProjectResponse]:
         """List all projects in a workspace. Requires PROJECT_VIEW permission."""
         role = await self._get_workspace_role(workspace_id, current_user.id)

@@ -162,7 +162,11 @@ def has_permission(
     allowed_permissions = ROLE_PERMISSIONS.get(role, set())
 
     # If the action is specifically restricted to "own" items, check ownership context
-    if permission in {Permission.TASK_DELETE_OWN, Permission.COMMENT_EDIT_OWN, Permission.COMMENT_DELETE_OWN}:
+    if permission in {
+        Permission.TASK_DELETE_OWN,
+        Permission.COMMENT_EDIT_OWN,
+        Permission.COMMENT_DELETE_OWN,
+    }:
         return is_resource_creator and permission in allowed_permissions
 
     return permission in allowed_permissions

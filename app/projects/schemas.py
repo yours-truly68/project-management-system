@@ -17,6 +17,7 @@ _KEY_PATTERN = re.compile(r"^[A-Z0-9]+$")
 # Input schemas
 # ---------------------------------------------------------------------------
 
+
 class ProjectCreate(BaseModel):
     workspace_id: uuid.UUID
     name: str = Field(min_length=1, max_length=150)
@@ -54,6 +55,7 @@ class ProjectUpdate(BaseModel):
 # ---------------------------------------------------------------------------
 # Output schemas
 # ---------------------------------------------------------------------------
+
 
 class ProjectResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

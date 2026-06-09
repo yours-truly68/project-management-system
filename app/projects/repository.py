@@ -27,8 +27,7 @@ class ProjectRepository:
     async def get_by_key(self, workspace_id: uuid.UUID, key: str) -> Project | None:
         """Fetch a project by its unique key within a workspace."""
         stmt = select(Project).where(
-            Project.workspace_id == workspace_id,
-            Project.key == key
+            Project.workspace_id == workspace_id, Project.key == key
         )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
@@ -41,7 +40,7 @@ class ProjectRepository:
         if not include_archived:
             stmt = stmt.where(Project.is_archived == False)  # noqa: E712
         stmt = stmt.order_by(Project.created_at.desc())
-        
+
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
 

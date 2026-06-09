@@ -77,7 +77,7 @@ class NotificationService:
     async def _dispatch_realtime_events(self, notification: Notification) -> None:
         """
         Helper to publish new notifications to messaging streams and socket servers.
-        
+
         TODO: Emit domain event for decoupling/downstream handlers (e.g. outbox pattern or kafka)
         TODO: Publish event to Redis Pub/Sub channel for multi-instance horizontal scaling
         TODO: Deliver message over active WebSocket connections to the target user (realtime client push)

@@ -20,6 +20,7 @@ _SLUG_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 # Input schemas
 # ---------------------------------------------------------------------------
 
+
 class WorkspaceCreate(BaseModel):
     name: str = Field(min_length=1, max_length=100)
     slug: str = Field(min_length=1, max_length=100)
@@ -62,6 +63,7 @@ class InviteMemberRequest(BaseModel):
 # ---------------------------------------------------------------------------
 # Output schemas
 # ---------------------------------------------------------------------------
+
 
 class WorkspaceResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

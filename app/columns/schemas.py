@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 # Input schemas
 # ---------------------------------------------------------------------------
 
+
 class ColumnCreate(BaseModel):
     board_id: uuid.UUID
     name: str = Field(min_length=1, max_length=50)
@@ -32,6 +33,7 @@ class ColumnReorder(BaseModel):
 # ---------------------------------------------------------------------------
 # Output schemas
 # ---------------------------------------------------------------------------
+
 
 class ColumnResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)

@@ -87,7 +87,9 @@ class WorkspaceMember(UUIDMixin, Base):
     __tablename__ = "workspace_members"
 
     __table_args__ = (
-        UniqueConstraint("workspace_id", "user_id", name="uq_workspace_members_workspace_user"),
+        UniqueConstraint(
+            "workspace_id", "user_id", name="uq_workspace_members_workspace_user"
+        ),
         Index("ix_workspace_members_workspace_id", "workspace_id"),
         Index("ix_workspace_members_user_id", "user_id"),
     )

@@ -14,7 +14,9 @@ class NotificationRepository:
         await self.session.flush()
         return notification
 
-    async def bulk_create(self, notifications: list[Notification]) -> list[Notification]:
+    async def bulk_create(
+        self, notifications: list[Notification]
+    ) -> list[Notification]:
         self.session.add_all(notifications)
         await self.session.flush()
         return notifications

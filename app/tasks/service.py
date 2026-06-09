@@ -9,7 +9,14 @@ from app.projects.repository import ProjectRepository
 from app.workspaces.repository import WorkspaceRepository
 from app.tasks.models import Task
 from app.tasks.repository import TaskRepository
-from app.tasks.schemas import TaskCreate, TaskResponse, TaskUpdate, TaskMove, TaskReorder, TaskAssign
+from app.tasks.schemas import (
+    TaskCreate,
+    TaskResponse,
+    TaskUpdate,
+    TaskMove,
+    TaskReorder,
+    TaskAssign,
+)
 from app.users.models import User
 from app.shared.enums import WorkspaceRole, Priority
 from app.shared.permissions.policies import has_permission, Permission
@@ -24,9 +31,7 @@ class TaskService:
         self.project_repo = ProjectRepository(session)
         self.workspace_repo = WorkspaceRepository(session)
 
-    async def create_task(
-        self, data: TaskCreate, current_user: User
-    ) -> TaskResponse:
+    async def create_task(self, data: TaskCreate, current_user: User) -> TaskResponse:
         role = await self._get_column_workspace_role(data.column_id, current_user.id)
         if not has_permission(role, Permission.TASK_CREATE):
             raise HTTPException(
@@ -53,7 +58,7 @@ class TaskService:
         # Re-sequence column tasks atomically
         ordered_ids = [t.id for t in tasks]
         ordered_ids.insert(target_pos, task.id)
-        
+
         mappings = [{"id": tid, "position": idx} for idx, tid in enumerate(ordered_ids)]
         await self.task_repo.bulk_update_positions(mappings)
 
@@ -61,9 +66,7 @@ class TaskService:
         await self.session.refresh(task)
         return TaskResponse.model_validate(task)
 
-    async def get_task(
-        self, task_id: uuid.UUID, current_user: User
-    ) -> TaskResponse:
+    async def get_task(self, task_id: uuid.UUID, current_user: User) -> TaskResponse:
         task = await self.task_repo.get_by_id(task_id)
         if not task:
             raise HTTPException(
@@ -199,8 +202,12 @@ class TaskService:
         await self.task_repo.delete(task)
 
         # Close the gap in remaining tasks sequentially
-        remaining_tasks = await self.task_repo.get_column_tasks(column_id, for_update=True)
-        mappings = [{"id": t.id, "position": idx} for idx, t in enumerate(remaining_tasks)]
+        remaining_tasks = await self.task_repo.get_column_tasks(
+            column_id, for_update=True
+        )
+        mappings = [
+            {"id": t.id, "position": idx} for idx, t in enumerate(remaining_tasks)
+        ]
         await self.task_repo.bulk_update_positions(mappings)
 
         await self.session.commit()
@@ -216,8 +223,12 @@ class TaskService:
             )
 
         # Auth checks on source and target columns
-        source_role = await self._get_column_workspace_role(task.column_id, current_user.id)
-        target_role = await self._get_column_workspace_role(data.column_id, current_user.id)
+        source_role = await self._get_column_workspace_role(
+            task.column_id, current_user.id
+        )
+        target_role = await self._get_column_workspace_role(
+            data.column_id, current_user.id
+        )
 
         if not has_permission(source_role, Permission.TASK_MOVE) or not has_permission(
             target_role, Permission.TASK_MOVE
@@ -229,12 +240,16 @@ class TaskService:
 
         if task.column_id == data.column_id:
             # Same Column Move
-            tasks = await self.task_repo.get_column_tasks(task.column_id, for_update=True)
+            tasks = await self.task_repo.get_column_tasks(
+                task.column_id, for_update=True
+            )
             ordered_ids = [t.id for t in tasks if t.id != task_id]
             target_pos = max(0, min(data.position, len(ordered_ids)))
             ordered_ids.insert(target_pos, task_id)
 
-            mappings = [{"id": tid, "position": idx} for idx, tid in enumerate(ordered_ids)]
+            mappings = [
+                {"id": tid, "position": idx} for idx, tid in enumerate(ordered_ids)
+            ]
             await self.task_repo.bulk_update_positions(mappings)
         else:
             # Across Column Move
@@ -244,13 +259,19 @@ class TaskService:
             dest_tasks = []
             for col_id in col_ids:
                 if col_id == task.column_id:
-                    src_tasks = await self.task_repo.get_column_tasks(col_id, for_update=True)
+                    src_tasks = await self.task_repo.get_column_tasks(
+                        col_id, for_update=True
+                    )
                 else:
-                    dest_tasks = await self.task_repo.get_column_tasks(col_id, for_update=True)
+                    dest_tasks = await self.task_repo.get_column_tasks(
+                        col_id, for_update=True
+                    )
 
             # 1. Clean up source column
             src_ordered_ids = [t.id for t in src_tasks if t.id != task_id]
-            src_mappings = [{"id": tid, "position": idx} for idx, tid in enumerate(src_ordered_ids)]
+            src_mappings = [
+                {"id": tid, "position": idx} for idx, tid in enumerate(src_ordered_ids)
+            ]
             await self.task_repo.bulk_update_positions(src_mappings)
 
             # 2. Add to target column
@@ -262,7 +283,9 @@ class TaskService:
             await self.task_repo.move_task(task_id, data.column_id, target_pos)
 
             # 4. Sequentially reorder destination tasks
-            dest_mappings = [{"id": tid, "position": idx} for idx, tid in enumerate(dest_ordered_ids)]
+            dest_mappings = [
+                {"id": tid, "position": idx} for idx, tid in enumerate(dest_ordered_ids)
+            ]
             await self.task_repo.bulk_update_positions(dest_mappings)
 
         await self.session.commit()
@@ -289,7 +312,9 @@ class TaskService:
                 detail="One or more task IDs do not belong to this column.",
             )
 
-        mappings = [{"id": tid, "position": idx} for idx, tid in enumerate(data.ordered_ids)]
+        mappings = [
+            {"id": tid, "position": idx} for idx, tid in enumerate(data.ordered_ids)
+        ]
         await self.task_repo.bulk_update_positions(mappings)
         await self.session.commit()
 
@@ -321,7 +346,9 @@ class TaskService:
                 detail="Project not found.",
             )
 
-        membership = await self.workspace_repo.get_membership(project.workspace_id, user_id)
+        membership = await self.workspace_repo.get_membership(
+            project.workspace_id, user_id
+        )
         if not membership:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,

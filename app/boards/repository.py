@@ -31,20 +31,12 @@ class BoardRepository:
         self, project_id: uuid.UUID, name: str
     ) -> Board | None:
         """Fetch a board by name within a project (to validate uq_boards_project_name)."""
-        stmt = select(Board).where(
-            Board.project_id == project_id,
-            Board.name == name
-        )
+        stmt = select(Board).where(Board.project_id == project_id, Board.name == name)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
     async def update(self, board_id: uuid.UUID, data: dict) -> Board | None:
-        stmt = (
-            update(Board)
-            .where(Board.id == board_id)
-            .values(**data)
-            .returning(Board)
-        )
+        stmt = update(Board).where(Board.id == board_id).values(**data).returning(Board)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 

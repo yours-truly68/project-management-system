@@ -31,10 +31,7 @@ class ColumnRepository:
         self, board_id: uuid.UUID, name: str
     ) -> Column | None:
         """Fetch a column by its name within a board (uq_columns_board_name)."""
-        stmt = select(Column).where(
-            Column.board_id == board_id,
-            Column.name == name
-        )
+        stmt = select(Column).where(Column.board_id == board_id, Column.name == name)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -43,8 +40,7 @@ class ColumnRepository:
     ) -> Column | None:
         """Fetch a column by its position within a board (uq_columns_board_position)."""
         stmt = select(Column).where(
-            Column.board_id == board_id,
-            Column.position == position
+            Column.board_id == board_id, Column.position == position
         )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
@@ -52,11 +48,7 @@ class ColumnRepository:
     async def reorder_columns(self, ordered_ids: list[uuid.UUID]) -> None:
         """Update positions of columns according to their index in the ordered_ids list."""
         for index, column_id in enumerate(ordered_ids):
-            stmt = (
-                update(Column)
-                .where(Column.id == column_id)
-                .values(position=index)
-            )
+            stmt = update(Column).where(Column.id == column_id).values(position=index)
             await self.session.execute(stmt)
         await self.session.flush()
 
