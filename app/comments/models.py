@@ -40,3 +40,10 @@ class TaskComment(UUIDMixin, TimestampMixin, Base):
         foreign_keys=[author_id],
         lazy="raise",
     )
+    mentions: Mapped[list["Mention"]] = relationship(  # type: ignore[name-defined]  # noqa: F821
+        "Mention",
+        back_populates="comment",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        lazy="raise",
+    )
