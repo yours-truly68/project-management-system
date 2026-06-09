@@ -10,6 +10,7 @@ from app.workspaces.router import router as workspace_router
 from app.projects.router import router as projects_router
 from app.boards.router import router as boards_router
 from app.columns.router import router as columns_router
+from app.tasks.router import router as tasks_router
 
 
 @asynccontextmanager
@@ -59,3 +60,4 @@ app.include_router(workspace_router, prefix="/api")
 app.include_router(projects_router, prefix="/api")
 app.include_router(boards_router, prefix="/api")
 app.include_router(columns_router, prefix="/api")
+app.include_router(tasks_router, prefix="/api")

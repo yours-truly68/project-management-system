@@ -61,6 +61,24 @@ class TaskService:
         await self.session.refresh(task)
         return TaskResponse.model_validate(task)
 
+    async def get_task(
+        self, task_id: uuid.UUID, current_user: User
+    ) -> TaskResponse:
+        task = await self.task_repo.get_by_id(task_id)
+        if not task:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Task not found.",
+            )
+
+        role = await self._get_column_workspace_role(task.column_id, current_user.id)
+        if not has_permission(role, Permission.TASK_VIEW):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to view this task.",
+            )
+        return TaskResponse.model_validate(task)
+
     async def update_task(
         self, task_id: uuid.UUID, data: TaskUpdate, current_user: User
     ) -> TaskResponse:
