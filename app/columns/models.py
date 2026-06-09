@@ -41,3 +41,10 @@ class Column(UUIDMixin, TimestampMixin, Base):
         foreign_keys=[board_id],
         lazy="raise",
     )
+    tasks: Mapped[list["Task"]] = relationship(  # type: ignore[name-defined]  # noqa: F821
+        "Task",
+        back_populates="column",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        lazy="raise",
+    )
