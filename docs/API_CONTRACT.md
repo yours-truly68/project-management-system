@@ -3,9 +3,11 @@
 This document is the absolute source of truth for all V1 backend API endpoints. It defines the exact methods, routes, request models, and response payloads for frontend consumption.
 
 ## Base URL
+
 All API routes are prefixed with:
+
 ```http
-/api/v1
+/api
 ```
 
 ---
@@ -13,10 +15,12 @@ All API routes are prefixed with:
 ## 1. Authentication Module
 
 ### Register User
+
 * **Method**: `POST`
 * **Route**: `/auth/register`
 * **Authentication Requirement**: None (Public)
 * **Request Body**:
+
 ```json
 {
   "email": "user@example.com",
@@ -25,7 +29,9 @@ All API routes are prefixed with:
   "password": "strongpassword123"
 }
 ```
+
 * **Response Body (201 Created)**:
+
 ```json
 {
   "tokens": {
@@ -51,17 +57,21 @@ All API routes are prefixed with:
 ---
 
 ### Login
+
 * **Method**: `POST`
 * **Route**: `/auth/login`
 * **Authentication Requirement**: None (Public)
 * **Request Body**:
+
 ```json
 {
   "email": "user@example.com",
   "password": "strongpassword123"
 }
 ```
+
 * **Response Body (200 OK)**:
+
 ```json
 {
   "tokens": {
@@ -87,16 +97,20 @@ All API routes are prefixed with:
 ---
 
 ### Refresh Access Token
+
 * **Method**: `POST`
 * **Route**: `/auth/refresh`
 * **Authentication Requirement**: None (Public)
 * **Request Body**:
+
 ```json
 {
   "refresh_token": "eyJhbG_refresh..."
 }
 ```
+
 * **Response Body (200 OK)**:
+
 ```json
 {
   "access_token": "eyJhbG_new_access...",
@@ -108,6 +122,7 @@ All API routes are prefixed with:
 ---
 
 ### Logout
+
 * **Method**: `POST`
 * **Route**: `/auth/logout`
 * **Authentication Requirement**: None
@@ -117,11 +132,13 @@ All API routes are prefixed with:
 ---
 
 ### Current User Session Info (`/me`)
+
 * **Method**: `GET`
 * **Route**: `/auth/me`
 * **Authentication Requirement**: Bearer Token (`Authorization: Bearer <access_token>`)
 * **Request Body**: None
 * **Response Body (200 OK)**:
+
 ```json
 {
   "id": "3b2e35a1-432d-4566-a3d5-1ff2506e789a",
@@ -142,10 +159,12 @@ All API routes are prefixed with:
 ## 2. Workspaces Module
 
 ### Create Workspace
+
 * **Method**: `POST`
 * **Route**: `/workspaces`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**:
+
 ```json
 {
   "name": "Acme Workspace",
@@ -153,7 +172,9 @@ All API routes are prefixed with:
   "description": "Optional workspace overview"
 }
 ```
+
 * **Response Body (201 Created)**:
+
 ```json
 {
   "id": "4c3e35a1-432d-4566-a3d5-1ff2506e789b",
@@ -169,11 +190,13 @@ All API routes are prefixed with:
 ---
 
 ### List User Workspaces
+
 * **Method**: `GET`
 * **Route**: `/workspaces`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**: None
 * **Response Body (200 OK)**:
+
 ```json
 [
   {
@@ -191,11 +214,13 @@ All API routes are prefixed with:
 ---
 
 ### Get Single Workspace Details
+
 * **Method**: `GET`
 * **Route**: `/workspaces/{workspace_id}`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**: None
 * **Response Body (200 OK)**:
+
 ```json
 {
   "id": "4c3e35a1-432d-4566-a3d5-1ff2506e789b",
@@ -211,17 +236,21 @@ All API routes are prefixed with:
 ---
 
 ### Invite Member to Workspace
+
 * **Method**: `POST`
 * **Route**: `/workspaces/{workspace_id}/members`
 * **Authentication Requirement**: Bearer Token (ADMIN / OWNER only)
 * **Request Body**:
+
 ```json
 {
   "email": "newuser@example.com",
   "role": "MEMBER" // Accepted: "ADMIN", "MEMBER"
 }
 ```
+
 * **Response Body (201 Created)**:
+
 ```json
 {
   "detail": "Member invited successfully."
@@ -231,6 +260,7 @@ All API routes are prefixed with:
 ---
 
 ### Remove Member from Workspace
+
 * **Method**: `DELETE`
 * **Route**: `/workspaces/{workspace_id}/members/{user_id}`
 * **Authentication Requirement**: Bearer Token (OWNER / ADMIN role checking hierarchy)
@@ -242,10 +272,12 @@ All API routes are prefixed with:
 ## 3. Projects Module
 
 ### Create Project
+
 * **Method**: `POST`
 * **Route**: `/projects`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**:
+
 ```json
 {
   "workspace_id": "4c3e35a1-432d-4566-a3d5-1ff2506e789b",
@@ -254,7 +286,9 @@ All API routes are prefixed with:
   "description": "Optional project description"
 }
 ```
+
 * **Response Body (201 Created)**:
+
 ```json
 {
   "id": "5d3e35a1-432d-4566-a3d5-1ff2506e789c",
@@ -272,6 +306,7 @@ All API routes are prefixed with:
 ---
 
 ### List Projects
+
 * **Method**: `GET`
 * **Route**: `/projects`
 * **Authentication Requirement**: Bearer Token
@@ -280,6 +315,7 @@ All API routes are prefixed with:
   * `include_archived` (Boolean, Default: `false`)
 * **Request Body**: None
 * **Response Body (200 OK)**:
+
 ```json
 [
   {
@@ -299,11 +335,13 @@ All API routes are prefixed with:
 ---
 
 ### Get Project Details
+
 * **Method**: `GET`
 * **Route**: `/projects/{project_id}`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**: None
 * **Response Body (200 OK)**:
+
 ```json
 {
   "id": "5d3e35a1-432d-4566-a3d5-1ff2506e789c",
@@ -321,10 +359,12 @@ All API routes are prefixed with:
 ---
 
 ### Update Project
+
 * **Method**: `PATCH`
 * **Route**: `/projects/{project_id}`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**:
+
 ```json
 {
   "name": "New Project Title",
@@ -333,7 +373,9 @@ All API routes are prefixed with:
   "is_archived": true
 }
 ```
+
 * **Response Body (200 OK)**:
+
 ```json
 {
   "id": "5d3e35a1-432d-4566-a3d5-1ff2506e789c",
@@ -351,6 +393,7 @@ All API routes are prefixed with:
 ---
 
 ### Delete Project
+
 * **Method**: `DELETE`
 * **Route**: `/projects/{project_id}`
 * **Authentication Requirement**: Bearer Token (OWNER / ADMIN only)
@@ -362,10 +405,12 @@ All API routes are prefixed with:
 ## 4. Boards Module
 
 ### Create Board
+
 * **Method**: `POST`
 * **Route**: `/boards`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**:
+
 ```json
 {
   "project_id": "5d3e35a1-432d-4566-a3d5-1ff2506e789c",
@@ -373,7 +418,9 @@ All API routes are prefixed with:
   "description": "Main delivery board"
 }
 ```
+
 * **Response Body (201 Created)**:
+
 ```json
 {
   "id": "6e3e35a1-432d-4566-a3d5-1ff2506e789d",
@@ -389,6 +436,7 @@ All API routes are prefixed with:
 ---
 
 ### List Project Boards
+
 * **Method**: `GET`
 * **Route**: `/boards`
 * **Authentication Requirement**: Bearer Token
@@ -396,6 +444,7 @@ All API routes are prefixed with:
   * `project_id` (UUID, Required)
 * **Request Body**: None
 * **Response Body (200 OK)**:
+
 ```json
 [
   {
@@ -413,11 +462,13 @@ All API routes are prefixed with:
 ---
 
 ### Get Board Details
+
 * **Method**: `GET`
 * **Route**: `/boards/{board_id}`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**: None
 * **Response Body (200 OK)**:
+
 ```json
 {
   "id": "6e3e35a1-432d-4566-a3d5-1ff2506e789d",
@@ -433,17 +484,21 @@ All API routes are prefixed with:
 ---
 
 ### Update Board
+
 * **Method**: `PATCH`
 * **Route**: `/boards/{board_id}`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**:
+
 ```json
 {
   "name": "Updated Board Name",
   "description": "Updated board details"
 }
 ```
+
 * **Response Body (200 OK)**:
+
 ```json
 {
   "id": "6e3e35a1-432d-4566-a3d5-1ff2506e789d",
@@ -459,6 +514,7 @@ All API routes are prefixed with:
 ---
 
 ### Delete Board
+
 * **Method**: `DELETE`
 * **Route**: `/boards/{board_id}`
 * **Authentication Requirement**: Bearer Token
@@ -470,10 +526,12 @@ All API routes are prefixed with:
 ## 5. Columns Module
 
 ### Create Column
+
 * **Method**: `POST`
 * **Route**: `/columns`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**:
+
 ```json
 {
   "board_id": "6e3e35a1-432d-4566-a3d5-1ff2506e789d",
@@ -482,7 +540,9 @@ All API routes are prefixed with:
   "color": "#3b82f6" // Valid hex color matching pattern: ^#[0-9a-fA-F]{6}$
 }
 ```
+
 * **Response Body (201 Created)**:
+
 ```json
 {
   "id": "7f3e35a1-432d-4566-a3d5-1ff2506e789e",
@@ -498,6 +558,7 @@ All API routes are prefixed with:
 ---
 
 ### List Board Columns
+
 * **Method**: `GET`
 * **Route**: `/columns`
 * **Authentication Requirement**: Bearer Token
@@ -505,6 +566,7 @@ All API routes are prefixed with:
   * `board_id` (UUID, Required)
 * **Request Body**: None
 * **Response Body (200 OK)**:
+
 ```json
 [
   {
@@ -522,10 +584,12 @@ All API routes are prefixed with:
 ---
 
 ### Update Column
+
 * **Method**: `PATCH`
 * **Route**: `/columns/{column_id}`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**:
+
 ```json
 {
   "name": "Updated Column Name",
@@ -533,7 +597,9 @@ All API routes are prefixed with:
   "color": "#10b981"
 }
 ```
+
 * **Response Body (200 OK)**:
+
 ```json
 {
   "id": "7f3e35a1-432d-4566-a3d5-1ff2506e789e",
@@ -549,12 +615,14 @@ All API routes are prefixed with:
 ---
 
 ### Reorder Board Columns
+
 * **Method**: `POST`
 * **Route**: `/columns/reorder`
 * **Authentication Requirement**: Bearer Token
 * **Query Parameters**:
   * `board_id` (UUID, Required)
 * **Request Body**:
+
 ```json
 {
   "ordered_ids": [
@@ -563,11 +631,13 @@ All API routes are prefixed with:
   ]
 }
 ```
+
 * **Response (204 No Content)**: Empty Body
 
 ---
 
 ### Delete Column
+
 * **Method**: `DELETE`
 * **Route**: `/columns/{column_id}`
 * **Authentication Requirement**: Bearer Token
@@ -579,10 +649,12 @@ All API routes are prefixed with:
 ## 6. Tasks Module
 
 ### Create Task
+
 * **Method**: `POST`
 * **Route**: `/tasks`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**:
+
 ```json
 {
   "column_id": "7f3e35a1-432d-4566-a3d5-1ff2506e789e",
@@ -595,7 +667,9 @@ All API routes are prefixed with:
   "position": 0
 }
 ```
+
 * **Response Body (201 Created)**:
+
 ```json
 {
   "id": "9b3e35a1-432d-4566-a3d5-1ff2506e7890",
@@ -615,11 +689,13 @@ All API routes are prefixed with:
 ---
 
 ### Get Task Details
+
 * **Method**: `GET`
 * **Route**: `/tasks/{task_id}`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**: None
 * **Response Body (200 OK)**:
+
 ```json
 {
   "id": "9b3e35a1-432d-4566-a3d5-1ff2506e7890",
@@ -639,10 +715,12 @@ All API routes are prefixed with:
 ---
 
 ### Update Task
+
 * **Method**: `PATCH`
 * **Route**: `/tasks/{task_id}`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**:
+
 ```json
 {
   "title": "Updated Task Title",
@@ -653,7 +731,9 @@ All API routes are prefixed with:
   "due_date": "2026-06-20T12:00:00Z"
 }
 ```
+
 * **Response Body (200 OK)**:
+
 ```json
 {
   "id": "9b3e35a1-432d-4566-a3d5-1ff2506e7890",
@@ -673,17 +753,21 @@ All API routes are prefixed with:
 ---
 
 ### Move Task (Drag-and-Drop)
+
 * **Method**: `POST`
 * **Route**: `/tasks/{task_id}/move`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**:
+
 ```json
 {
   "column_id": "8a3e35a1-432d-4566-a3d5-1ff2506e789f",
   "position": 1
 }
 ```
+
 * **Response Body (200 OK)**:
+
 ```json
 {
   "id": "9b3e35a1-432d-4566-a3d5-1ff2506e7890",
@@ -703,16 +787,20 @@ All API routes are prefixed with:
 ---
 
 ### Assign Task (Direct)
+
 * **Method**: `POST`
 * **Route**: `/tasks/{task_id}/assign`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**:
+
 ```json
 {
   "assignee_id": "3b2e35a1-432d-4566-a3d5-1ff2506e789a" // Set to null to unassign
 }
 ```
+
 * **Response Body (200 OK)**:
+
 ```json
 {
   "id": "9b3e35a1-432d-4566-a3d5-1ff2506e7890",
@@ -732,12 +820,14 @@ All API routes are prefixed with:
 ---
 
 ### Reorder Tasks inside Column
+
 * **Method**: `POST`
 * **Route**: `/tasks/reorder`
 * **Authentication Requirement**: Bearer Token
 * **Query Parameters**:
   * `column_id` (UUID, Required)
 * **Request Body**:
+
 ```json
 {
   "column_id": "8a3e35a1-432d-4566-a3d5-1ff2506e789f",
@@ -747,11 +837,13 @@ All API routes are prefixed with:
   ]
 }
 ```
+
 * **Response (204 No Content)**: Empty Body
 
 ---
 
 ### Delete Task
+
 * **Method**: `DELETE`
 * **Route**: `/tasks/{task_id}`
 * **Authentication Requirement**: Bearer Token
@@ -763,17 +855,21 @@ All API routes are prefixed with:
 ## 7. Comments Module
 
 ### Create Comment
+
 * **Method**: `POST`
 * **Route**: `/comments`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**:
+
 ```json
 {
   "task_id": "9b3e35a1-432d-4566-a3d5-1ff2506e7890",
   "content": "Finished implementing the auth flow. Please review @alex."
 }
 ```
+
 * **Response Body (201 Created)**:
+
 ```json
 {
   "id": "1c3e35a1-432d-4566-a3d5-1ff2506e7892",
@@ -788,11 +884,13 @@ All API routes are prefixed with:
 ---
 
 ### List Task Comments
+
 * **Method**: `GET`
 * **Route**: `/comments/task/{task_id}`
 * **Authentication Requirement**: Bearer Token
 * **Request Body**: None
 * **Response Body (200 OK)**:
+
 ```json
 [
   {
@@ -809,16 +907,20 @@ All API routes are prefixed with:
 ---
 
 ### Edit Comment
+
 * **Method**: `PATCH`
 * **Route**: `/comments/{comment_id}`
 * **Authentication Requirement**: Bearer Token (Author only)
 * **Request Body**:
+
 ```json
 {
   "content": "Edited comment content text"
 }
 ```
+
 * **Response Body (200 OK)**:
+
 ```json
 {
   "id": "1c3e35a1-432d-4566-a3d5-1ff2506e7892",
@@ -833,6 +935,7 @@ All API routes are prefixed with:
 ---
 
 ### Delete Comment
+
 * **Method**: `DELETE`
 * **Route**: `/comments/{comment_id}`
 * **Authentication Requirement**: Bearer Token (Author or Workspace Admin/Owner only)
@@ -844,6 +947,7 @@ All API routes are prefixed with:
 ## 8. Activity Logs Module
 
 ### Get Workspace Activity timeline
+
 * **Method**: `GET`
 * **Route**: `/activity-logs/workspace/{workspace_id}`
 * **Authentication Requirement**: Bearer Token
@@ -852,6 +956,7 @@ All API routes are prefixed with:
   * `offset` (Integer, Default: `0`)
 * **Request Body**: None
 * **Response Body (200 OK)**:
+
 ```json
 [
   {
@@ -872,6 +977,7 @@ All API routes are prefixed with:
 ---
 
 ### Get Entity Activity timeline
+
 * **Method**: `GET`
 * **Route**: `/activity-logs/entity/{entity_type}/{entity_id}`
 * **Authentication Requirement**: Bearer Token
@@ -880,6 +986,7 @@ All API routes are prefixed with:
   * `offset` (Integer, Default: `0`)
 * **Request Body**: None
 * **Response Body (200 OK)**:
+
 ```json
 [
   {
@@ -902,6 +1009,7 @@ All API routes are prefixed with:
 ## 9. Notifications Module
 
 ### List Notifications
+
 * **Method**: `GET`
 * **Route**: `/notifications`
 * **Authentication Requirement**: Bearer Token
@@ -911,6 +1019,7 @@ All API routes are prefixed with:
   * `offset` (Integer, Default: `0`)
 * **Request Body**: None
 * **Response Body (200 OK)**:
+
 ```json
 [
   {
@@ -932,6 +1041,7 @@ All API routes are prefixed with:
 ---
 
 ### Mark Notification as Read
+
 * **Method**: `PATCH`
 * **Route**: `/notifications/{notification_id}/read`
 * **Authentication Requirement**: Bearer Token
@@ -941,6 +1051,7 @@ All API routes are prefixed with:
 ---
 
 ### Mark All Notifications as Read
+
 * **Method**: `PATCH`
 * **Route**: `/notifications/read-all`
 * **Authentication Requirement**: Bearer Token
@@ -952,11 +1063,13 @@ All API routes are prefixed with:
 ## 10. Health Check Module
 
 ### Check System Status
+
 * **Method**: `GET`
 * **Route**: `/health`
 * **Authentication Requirement**: None
 * **Request Body**: None
 * **Response Body (200 OK)**:
+
 ```json
 {
   "status": "healthy",

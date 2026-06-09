@@ -57,3 +57,10 @@ Direct Messaging
 11. Performance Pass
 12. Accessibility Pass
 13. Production Polish
+
+---
+
+## Documentation TODOs
+
+* **API Path Prefix Alignment**: `API_SPEC_V1.md`, `API_CONTRACT.md`, and related documents define `/api/v1` as the base API route prefix. However, the backend routers are registered under `/api` directly in FastAPI router initialization (e.g. `/api/auth/me`). A documentation pass is needed to update references to `/api/v1` to `/api`.
+* **Refresh Token Request Body vs Cookie**: The backend `/auth/refresh` route expects a JSON body (`RefreshTokenRequest`), whereas the frontend enforces cookie propagation via HTTPOnly refresh tokens. The backend must be updated to support reading refresh tokens from HTTPOnly cookies, or documentation updated to align.
