@@ -8,6 +8,7 @@ from app.auth.router import router as auth_router
 from app.core.config import settings
 from app.workspaces.router import router as workspace_router
 from app.projects.router import router as projects_router
+from app.boards.router import router as boards_router
 
 
 @asynccontextmanager
@@ -55,3 +56,4 @@ async def health_check() -> dict[str, str]:
 app.include_router(auth_router, prefix="/api")
 app.include_router(workspace_router, prefix="/api")
 app.include_router(projects_router, prefix="/api")
+app.include_router(boards_router, prefix="/api")
