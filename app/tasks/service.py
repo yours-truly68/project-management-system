@@ -35,7 +35,7 @@ class TaskService:
             )
 
         # Shift existing tasks to accommodate new position
-        tasks = await self.task_repo.get_column_tasks(data.column_id)
+        tasks = await self.task_repo.get_column_tasks(data.column_id, for_update=True)
         target_pos = max(0, min(data.position, len(tasks)))
 
         task = Task(
@@ -171,7 +171,7 @@ class TaskService:
         return TaskResponse.model_validate(updated_task)
 
     async def delete_task(self, task_id: uuid.UUID, current_user: User) -> None:
-        task = await self.task_repo.get_by_id(task_id)
+        task = await self.task_repo.get_by_id(task_id, for_update=True)
         if not task:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -199,7 +199,7 @@ class TaskService:
         await self.task_repo.delete(task)
 
         # Close the gap in remaining tasks sequentially
-        remaining_tasks = await self.task_repo.get_column_tasks(column_id)
+        remaining_tasks = await self.task_repo.get_column_tasks(column_id, for_update=True)
         mappings = [{"id": t.id, "position": idx} for idx, t in enumerate(remaining_tasks)]
         await self.task_repo.bulk_update_positions(mappings)
 
@@ -208,7 +208,7 @@ class TaskService:
     async def move_task(
         self, task_id: uuid.UUID, data: TaskMove, current_user: User
     ) -> TaskResponse:
-        task = await self.task_repo.get_by_id(task_id)
+        task = await self.task_repo.get_by_id(task_id, for_update=True)
         if not task:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -229,7 +229,7 @@ class TaskService:
 
         if task.column_id == data.column_id:
             # Same Column Move
-            tasks = await self.task_repo.get_column_tasks(task.column_id)
+            tasks = await self.task_repo.get_column_tasks(task.column_id, for_update=True)
             ordered_ids = [t.id for t in tasks if t.id != task_id]
             target_pos = max(0, min(data.position, len(ordered_ids)))
             ordered_ids.insert(target_pos, task_id)
@@ -238,14 +238,22 @@ class TaskService:
             await self.task_repo.bulk_update_positions(mappings)
         else:
             # Across Column Move
+            # Lock both columns in a consistent order to avoid deadlock
+            col_ids = sorted([task.column_id, data.column_id])
+            src_tasks = []
+            dest_tasks = []
+            for col_id in col_ids:
+                if col_id == task.column_id:
+                    src_tasks = await self.task_repo.get_column_tasks(col_id, for_update=True)
+                else:
+                    dest_tasks = await self.task_repo.get_column_tasks(col_id, for_update=True)
+
             # 1. Clean up source column
-            src_tasks = await self.task_repo.get_column_tasks(task.column_id)
             src_ordered_ids = [t.id for t in src_tasks if t.id != task_id]
             src_mappings = [{"id": tid, "position": idx} for idx, tid in enumerate(src_ordered_ids)]
             await self.task_repo.bulk_update_positions(src_mappings)
 
             # 2. Add to target column
-            dest_tasks = await self.task_repo.get_column_tasks(data.column_id)
             dest_ordered_ids = [t.id for t in dest_tasks]
             target_pos = max(0, min(data.position, len(dest_ordered_ids)))
             dest_ordered_ids.insert(target_pos, task_id)
@@ -271,7 +279,7 @@ class TaskService:
                 detail="You do not have permission to reorder tasks.",
             )
 
-        tasks = await self.task_repo.get_column_tasks(column_id)
+        tasks = await self.task_repo.get_column_tasks(column_id, for_update=True)
         existing_ids = {t.id for t in tasks}
         incoming_ids = set(data.ordered_ids)
 
