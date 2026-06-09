@@ -27,7 +27,7 @@ from app.database.base import Base
 #
 import app.users.models  # noqa: F401
 import app.workspaces.models  # noqa: F401
-# import app.projects.models     # noqa: F401
+import app.projects.models     # noqa: F401
 # import app.boards.models       # noqa: F401
 # import app.columns.models      # noqa: F401
 # import app.tasks.models        # noqa: F401
