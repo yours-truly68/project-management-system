@@ -15,11 +15,18 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.shared.enums import WorkspaceRole
+from app.shared.permissions.policies import has_permission, Permission
 from app.users.models import User
 from app.users.repository import UserRepository
 from app.workspaces.models import Workspace, WorkspaceMember
 from app.workspaces.repository import WorkspaceRepository
 from app.workspaces.schemas import WorkspaceCreate, WorkspaceResponse
+
+ROLE_HIERARCHY = {
+    WorkspaceRole.OWNER: 3,
+    WorkspaceRole.ADMIN: 2,
+    WorkspaceRole.MEMBER: 1,
+}
 
 
 class WorkspaceService:
@@ -69,11 +76,14 @@ class WorkspaceService:
         role: WorkspaceRole,
         current_user: User,
     ) -> None:
-        """Add a user to a workspace. Requires OWNER or ADMIN."""
+        """Add a user to a workspace. Requires WORKSPACE_INVITE_MEMBERS permission."""
 
-        await self._require_role(
-            workspace_id, current_user.id, {WorkspaceRole.OWNER, WorkspaceRole.ADMIN}
-        )
+        actor_role = await self._get_membership_role(workspace_id, current_user.id)
+        if not has_permission(actor_role, Permission.WORKSPACE_INVITE_MEMBERS):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to invite members.",
+            )
 
         # Cannot invite someone as OWNER — ownership is transferred, not invited
         if role == WorkspaceRole.OWNER:
@@ -110,11 +120,14 @@ class WorkspaceService:
         target_user_id: uuid.UUID,
         current_user: User,
     ) -> None:
-        """Remove a member from a workspace. Requires OWNER or ADMIN."""
+        """Remove a member from a workspace. Requires WORKSPACE_REMOVE_MEMBERS permission."""
 
-        actor_membership = await self._require_role(
-            workspace_id, current_user.id, {WorkspaceRole.OWNER, WorkspaceRole.ADMIN}
-        )
+        actor_role = await self._get_membership_role(workspace_id, current_user.id)
+        if not has_permission(actor_role, Permission.WORKSPACE_REMOVE_MEMBERS):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to remove members.",
+            )
 
         target_membership = await self.workspace_repo.get_membership(
             workspace_id, target_user_id
@@ -132,15 +145,15 @@ class WorkspaceService:
                 detail="Owner cannot remove themselves. Transfer ownership first.",
             )
 
-        # Admin cannot remove Owner or other Admins
-        if actor_membership.role == WorkspaceRole.ADMIN and target_membership.role in {
-            WorkspaceRole.OWNER,
-            WorkspaceRole.ADMIN,
-        }:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Admins cannot remove owners or other admins.",
-            )
+        # Actor cannot remove members of equal or higher hierarchy rank
+        if target_user_id != current_user.id:
+            actor_rank = ROLE_HIERARCHY.get(actor_role, 0)
+            target_rank = ROLE_HIERARCHY.get(target_membership.role, 0)
+            if actor_rank <= target_rank:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You do not have permission to remove members of equal or higher rank.",
+                )
 
         await self.session.delete(target_membership)
         await self.session.commit()
@@ -149,17 +162,14 @@ class WorkspaceService:
     # Private helpers
     # ------------------------------------------------------------------
 
-    async def _require_role(
-        self,
-        workspace_id: uuid.UUID,
-        user_id: uuid.UUID,
-        allowed_roles: set[WorkspaceRole],
-    ) -> WorkspaceMember:
-        """Assert the user has one of the allowed roles. Returns the membership."""
+    async def _get_membership_role(
+        self, workspace_id: uuid.UUID, user_id: uuid.UUID
+    ) -> WorkspaceRole:
+        """Fetch the member's role or raise an access error."""
         membership = await self.workspace_repo.get_membership(workspace_id, user_id)
-        if not membership or membership.role not in allowed_roles:
+        if not membership:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="You do not have permission to perform this action.",
+                detail="You do not belong to this workspace.",
             )
-        return membership
+        return membership.role
