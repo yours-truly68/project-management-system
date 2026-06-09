@@ -19,12 +19,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Silently attempt to refresh token via cookie
         const tokenData = await authService.refresh();
         tokenManager.setAccessToken(tokenData.access_token);
-        
+
         // Fetch profile using the fresh access token
         const user = await authService.getMe();
         setAuth(user);
       } catch (error) {
         // No valid session, clear client state
+        console.log(error)
         tokenManager.clear();
         clearAuth();
       } finally {
