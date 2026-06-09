@@ -11,7 +11,6 @@ All database access goes through UserRepository.
 No SQL here. No HTTP concerns here.
 """
 
-import uuid
 
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
