@@ -1,25 +1,12 @@
 import { create } from "zustand";
+import { getCookie, setCookie } from "@/lib/cookies";
+
+export { getCookie };
 
 interface WorkspaceState {
   activeWorkspaceId: string | null;
   setActiveWorkspaceId: (id: string | null) => void;
 }
-
-export const getCookie = (name: string): string | null => {
-  if (typeof document === "undefined") return null;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(";").shift() || null;
-  return null;
-};
-
-const setCookie = (name: string, value: string, days = 7) => {
-  if (typeof document === "undefined") return;
-  const date = new Date();
-  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-  const expires = `; expires=${date.toUTCString()}`;
-  document.cookie = `${name}=${value || ""}${expires}; path=/; SameSite=Lax`;
-};
 
 export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   activeWorkspaceId: null, // start null to prevent SSR hydration mismatch

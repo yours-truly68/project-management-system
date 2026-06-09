@@ -34,8 +34,8 @@ export function ProfileDropdown() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  const initials = user?.fullName
-    ? user.fullName
+  const initials = user?.full_name
+    ? user.full_name
         .split(" ")
         .map((n) => n[0])
         .join("")
@@ -61,7 +61,7 @@ export function ProfileDropdown() {
           {/* User Profile info header */}
           <div className="px-3 py-2 border-b border-border">
             <p className="text-xs font-semibold text-foreground truncate">
-              {user?.fullName || "User Profile"}
+              {user?.full_name || "User Profile"}
             </p>
             <p className="text-[10px] text-muted-foreground truncate mt-0.5">
               {user?.email || "user@example.com"}

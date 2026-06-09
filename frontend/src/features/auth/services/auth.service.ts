@@ -1,25 +1,20 @@
 import { apiClient } from "@/lib/api/client";
 import { User } from "@/stores/auth.store";
-
-export interface TokenResponse {
-  access_token: string;
-  token_type: string;
-}
+import { AuthenticatedUserResponse, TokenResponse } from "../types";
 
 export const authService = {
-  async register(data: Record<string, string>): Promise<TokenResponse> {
-    const response = await apiClient.post<TokenResponse>("/auth/register", data);
+  async register(data: Record<string, string>): Promise<AuthenticatedUserResponse> {
+    const response = await apiClient.post<AuthenticatedUserResponse>("/auth/register", data);
     return response.data;
   },
 
-  async login(data: Record<string, string>): Promise<TokenResponse> {
-    const response = await apiClient.post<TokenResponse>("/auth/login", data);
+  async login(data: Record<string, string>): Promise<AuthenticatedUserResponse> {
+    const response = await apiClient.post<AuthenticatedUserResponse>("/auth/login", data);
     return response.data;
   },
 
-  async refresh(): Promise<TokenResponse> {
-    // Refresh token is read and rotated on the backend via HttpOnly cookies
-    const response = await apiClient.post<TokenResponse>("/auth/refresh");
+  async refresh(refreshToken: string): Promise<TokenResponse> {
+    const response = await apiClient.post<TokenResponse>("/auth/refresh", { refresh_token: refreshToken });
     return response.data;
   },
 

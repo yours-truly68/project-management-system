@@ -4,12 +4,12 @@ export interface User {
   id: string;
   email: string;
   username: string;
-  fullName: string;
-  avatarUrl: string | null;
-  isActive: boolean;
-  isVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
+  full_name: string;
+  avatar_url: string | null;
+  is_active: boolean;
+  is_verified: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 interface AuthState {
