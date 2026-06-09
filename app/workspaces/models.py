@@ -66,6 +66,13 @@ class Workspace(UUIDMixin, TimestampMixin, Base):
         passive_deletes=True,
         lazy="raise",
     )
+    activity_logs: Mapped[list["ActivityLog"]] = relationship(  # type: ignore[name-defined]  # noqa: F821
+        "ActivityLog",
+        back_populates="workspace",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        lazy="raise",
+    )
 
 
 class WorkspaceMember(UUIDMixin, Base):

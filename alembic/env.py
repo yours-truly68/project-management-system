@@ -33,7 +33,7 @@ import app.columns.models      # noqa: F401
 import app.tasks.models        # noqa: F401
 import app.comments.models     # noqa: F401
 import app.mentions.models     # noqa: F401
-# import app.activity_logs.models  # noqa: F401
+import app.activity_logs.models  # noqa: F401
 # ──────────────────────────────────────────────────────────────────────
 
 config = context.config
