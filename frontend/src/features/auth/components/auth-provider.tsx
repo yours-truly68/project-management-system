@@ -25,7 +25,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         setAuth(user);
       } catch (error) {
         // No valid session, clear client state
-        console.log(error)
+        console.log(error);
         tokenManager.clear();
         clearAuth();
       } finally {
@@ -34,6 +34,22 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
     restoreSession();
   }, [setAuth, clearAuth, setRestoringSession]);
+
+  React.useEffect(() => {
+    const handleUnauthorized = () => {
+      tokenManager.clear();
+      clearAuth();
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("auth:unauthorized", handleUnauthorized);
+    }
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("auth:unauthorized", handleUnauthorized);
+      }
+    };
+  }, [clearAuth]);
 
   return <>{children}</>;
 }
