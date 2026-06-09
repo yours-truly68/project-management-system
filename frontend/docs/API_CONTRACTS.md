@@ -5,7 +5,7 @@ This document is the absolute source of truth for all V1 backend API endpoints. 
 ## Base URL
 All API routes are prefixed with:
 ```http
-/api/v1
+/api
 ```
 
 ---

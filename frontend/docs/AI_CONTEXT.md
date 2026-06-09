@@ -133,7 +133,7 @@ Do not mock API responses unless explicitly requested.
 
 API Base:
 
-/api/v1
+/api
 
 Authentication:
 

@@ -514,7 +514,7 @@ Always.
 Current:
 
 ```text
-/api/v1
+/api
 ```
 
 Future:

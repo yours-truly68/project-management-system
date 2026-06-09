@@ -21,13 +21,13 @@ All endpoints should follow this specification unless a documented architectural
 ## Base URL
 
 ```http
-/api/v1
+/api
 ```
 
 Example:
 
 ```http
-/api/v1/auth/login
+/api/auth/login
 ```
 
 ---
@@ -796,7 +796,7 @@ All endpoints must be versioned.
 Current:
 
 ```http
-/api/v1
+/api
 ```
 
 Future:
