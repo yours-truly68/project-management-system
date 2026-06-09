@@ -9,7 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.dependencies import get_current_user
 from app.auth.schemas import (
-    AuthenticatedUserResponse,
     LoginRequest,
     RegisterRequest,
     TokenResponse,
@@ -31,32 +30,32 @@ def _set_refresh_cookie(response: Response, refresh_token: str) -> None:
         secure=settings.is_production,
         samesite="lax",
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
-        path="/api/auth",
+        path="/",
     )
 
 
 @router.post(
     "/register",
-    response_model=AuthenticatedUserResponse,
+    response_model=TokenResponse,
     status_code=status.HTTP_201_CREATED,
 )
 async def register(
     data: RegisterRequest,
     response: Response,
     session: AsyncSession = Depends(get_db),
-) -> AuthenticatedUserResponse:
+) -> TokenResponse:
     service = AuthService(session)
     res_data, refresh_token = await service.register(data)
     _set_refresh_cookie(response, refresh_token)
     return res_data
 
 
-@router.post("/login", response_model=AuthenticatedUserResponse)
+@router.post("/login", response_model=TokenResponse)
 async def login(
     data: LoginRequest,
     response: Response,
     session: AsyncSession = Depends(get_db),
-) -> AuthenticatedUserResponse:
+) -> TokenResponse:
     service = AuthService(session)
     res_data, refresh_token = await service.login(data)
     _set_refresh_cookie(response, refresh_token)
@@ -89,7 +88,7 @@ async def logout(response: Response) -> Response:
     """
     response.delete_cookie(
         key="refresh_token",
-        path="/api/auth",
+        path="/",
         secure=settings.is_production,
         samesite="lax",
     )

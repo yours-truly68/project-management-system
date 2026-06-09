@@ -64,9 +64,21 @@ export function Topbar() {
 
       {/* Right section: Search Trigger, Notifications, Profile Menu */}
       <div className="flex items-center gap-3">
-        {/* Compact Search Trigger */}
+        {/* Sleek Command-Search Bar for larger viewports */}
         <button
-          className="flex items-center justify-center p-1.5 hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="hidden md:flex items-center gap-2 px-3 py-1 rounded bg-secondary/50 border border-border hover:bg-secondary hover:border-muted-foreground/20 transition-all text-left text-xs text-muted-foreground w-48 lg:w-64 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+          aria-label="Search Workspace"
+        >
+          <Search className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+          <span className="flex-1 truncate">Search workspace...</span>
+          <kbd className="pointer-events-none inline-flex h-4.5 select-none items-center gap-0.5 rounded border border-border bg-card px-1 font-mono text-[9px] font-medium text-muted-foreground/80 shrink-0">
+            ⌘K
+          </kbd>
+        </button>
+
+        {/* Compact Search Trigger for Mobile */}
+        <button
+          className="flex md:hidden items-center justify-center p-1.5 hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           aria-label="Search Workspace"
         >
           <Search className="w-4 h-4" />

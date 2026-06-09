@@ -22,7 +22,6 @@ from app.auth.jwt import (
     verify_token,
 )
 from app.auth.schemas import (
-    AuthenticatedUserResponse,
     LoginRequest,
     RegisterRequest,
     TokenResponse,
@@ -31,7 +30,6 @@ from app.auth.security import hash_password, verify_password
 from app.shared.enums import AuthProvider
 from app.users.models import User
 from app.users.repository import UserRepository
-from app.users.schemas import UserResponse
 
 
 class AuthService:
@@ -39,7 +37,7 @@ class AuthService:
         self.repo = UserRepository(session)
         self.session = session
 
-    async def register(self, data: RegisterRequest) -> tuple[AuthenticatedUserResponse, str]:
+    async def register(self, data: RegisterRequest) -> tuple[TokenResponse, str]:
         """Register a new user with email + password."""
 
         # Uniqueness checks
@@ -66,7 +64,7 @@ class AuthService:
 
         return self._build_auth_response(user)
 
-    async def login(self, data: LoginRequest) -> tuple[AuthenticatedUserResponse, str]:
+    async def login(self, data: LoginRequest) -> tuple[TokenResponse, str]:
         """Authenticate with email + password."""
 
         user = await self.repo.get_by_email(data.email)
@@ -136,13 +134,10 @@ class AuthService:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _build_auth_response(user: User) -> tuple[AuthenticatedUserResponse, str]:
+    def _build_auth_response(user: User) -> tuple[TokenResponse, str]:
         access_token = create_access_token(user.id)
         refresh_token = create_refresh_token(user.id)
-        response = AuthenticatedUserResponse(
-            tokens=TokenResponse(
-                access_token=access_token,
-            ),
-            user=UserResponse.model_validate(user),
+        response = TokenResponse(
+            access_token=access_token,
         )
         return response, refresh_token
