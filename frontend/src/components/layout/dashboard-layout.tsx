@@ -3,6 +3,7 @@
 import * as React from "react";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
+import { ContentArea } from "./content-area";
 import { useSidebarStore } from "@/stores/sidebar.store";
 import { X } from "lucide-react";
 
@@ -16,8 +17,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
       {/* 1. Mobile Drawer Navigation Overlay */}
+      {/* TECH DEBT: Implement focus trapping and modal accessibility for mobile drawer navigation. */}
       {isMobileOpen && (
-        <div className="fixed inset-0 z-50 flex md:hidden">
+        <div className="fixed inset-0 z-50 flex md:hidden" role="dialog" aria-modal="true" aria-label="Navigation Sidebar">
           {/* Backdrop */}
           <div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
@@ -29,7 +31,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="absolute top-3 right-3 z-10">
               <button
                 onClick={() => setMobileOpen(false)}
-                className="p-1 hover:bg-sidebar-accent rounded-md text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors"
+                className="p-1 hover:bg-sidebar-accent rounded-md text-sidebar-foreground/60 hover:text-sidebar-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                aria-label="Close sidebar menu"
                 title="Close Menu"
               >
                 <X className="w-4 h-4" />
@@ -51,11 +54,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* 3. Main Display Workspace */}
       <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         <Topbar />
-        <main className="flex-1 overflow-auto p-4 md:p-6 bg-background">
-          <div className="mx-auto max-w-7xl h-full flex flex-col">
-            {children}
-          </div>
-        </main>
+        <ContentArea>{children}</ContentArea>
       </div>
     </div>
   );

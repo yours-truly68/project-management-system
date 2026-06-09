@@ -19,8 +19,9 @@ export function Topbar() {
         {/* Mobile menu trigger */}
         <button
           onClick={toggleMobileOpen}
-          className="p-1 hover:bg-accent rounded text-muted-foreground hover:text-foreground md:hidden transition-colors"
+          className="p-1 hover:bg-accent rounded text-muted-foreground hover:text-foreground md:hidden transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           title="Open Menu"
+          aria-label="Open navigation menu"
         >
           <Menu className="w-4.5 h-4.5" />
         </button>
@@ -28,8 +29,9 @@ export function Topbar() {
         {/* Desktop/Tablet collapse trigger */}
         <button
           onClick={toggleCollapsed}
-          className="hidden md:flex p-1 hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-colors"
+          className="hidden md:flex p-1 hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+          aria-label={isCollapsed ? "Expand sidebar panel" : "Collapse sidebar panel"}
         >
           {isCollapsed ? (
             <PanelLeftOpen className="w-4.5 h-4.5" />
@@ -39,31 +41,50 @@ export function Topbar() {
         </button>
 
         {/* Breadcrumbs placeholder */}
-        <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <span className="hover:text-foreground cursor-pointer font-medium">Acme Workspace</span>
+        <nav className="flex items-center gap-1.5 text-xs text-muted-foreground" aria-label="Breadcrumb navigation">
+          <button
+            className="hover:text-foreground font-medium rounded px-1 hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            aria-label="Workspace: Acme Workspace"
+          >
+            Acme Workspace
+          </button>
           <span>/</span>
-          <span className="hover:text-foreground cursor-pointer font-medium">Website Redesign</span>
+          <button
+            className="hover:text-foreground font-medium rounded px-1 hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            aria-label="Project: Website Redesign"
+          >
+            Website Redesign
+          </button>
           <span>/</span>
-          <span className="text-foreground font-semibold">Sprint 1 Board</span>
+          <span className="text-foreground font-semibold px-1" aria-current="page">Sprint 1 Board</span>
         </nav>
       </div>
 
       {/* Right section: Search Trigger, Notifications, Profile Menu */}
       <div className="flex items-center gap-3">
         {/* Compact Search Trigger */}
-        <button className="flex items-center justify-center p-1.5 hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-colors">
+        <button
+          className="flex items-center justify-center p-1.5 hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          aria-label="Search Workspace"
+        >
           <Search className="w-4 h-4" />
         </button>
 
         {/* Notifications Bell Trigger */}
-        <button className="relative flex items-center justify-center p-1.5 hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-colors">
+        <button
+          className="relative flex items-center justify-center p-1.5 hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          aria-label="View notifications"
+        >
           <Bell className="w-4 h-4" />
           {/* Notification dot */}
           <span className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-destructive" />
         </button>
 
         {/* Profile Menu Trigger (Avatar Placeholder) */}
-        <button className="w-6.5 h-6.5 rounded-full bg-accent hover:ring-2 hover:ring-ring border border-border flex items-center justify-center text-[10px] font-bold overflow-hidden transition-all">
+        <button
+          className="w-6.5 h-6.5 rounded-full bg-accent hover:ring-2 hover:ring-ring border border-border flex items-center justify-center text-[10px] font-bold overflow-hidden transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          aria-label="Open user profile settings menu"
+        >
           MR
         </button>
       </div>

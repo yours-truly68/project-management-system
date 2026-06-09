@@ -45,7 +45,10 @@ export default function Page() {
           <p className="text-xs text-muted-foreground">Main delivery board for foundation items</p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground hover:bg-primary/95 text-xs font-semibold rounded-md shadow-sm transition-colors">
+          <button
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground hover:bg-primary/95 text-xs font-semibold rounded-md shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            aria-label="Create new task"
+          >
             <Plus className="w-3.5 h-3.5" />
             <span>Create Task</span>
           </button>
@@ -67,7 +70,10 @@ export default function Page() {
                   {column.tasks.length}
                 </span>
               </div>
-              <button className="text-muted-foreground/60 hover:text-foreground p-0.5 rounded hover:bg-accent transition-colors">
+              <button
+                className="text-muted-foreground/60 hover:text-foreground p-0.5 rounded hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                aria-label={`Column actions for ${column.name}`}
+              >
                 <MoreHorizontal className="w-4 h-4" />
               </button>
             </div>
@@ -75,9 +81,10 @@ export default function Page() {
             {/* Column Tasks List */}
             <div className="flex-1 overflow-y-auto space-y-2">
               {column.tasks.map((task) => (
-                <div
+                <button
                   key={task.id}
-                  className="bg-card hover:bg-accent/40 border border-border hover:border-accent p-3 rounded-md shadow-sm cursor-grab active:cursor-grabbing transition-all space-y-2"
+                  className="w-full text-left bg-card hover:bg-accent/40 border border-border hover:border-accent p-3 rounded-md shadow-sm cursor-grab active:cursor-grabbing transition-all space-y-2 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring block"
+                  aria-label={`Task ${task.code}: ${task.title}, priority ${task.priority}`}
                 >
                   <div className="flex items-center justify-between text-[10px]">
                     <span className="text-muted-foreground font-mono">{task.code}</span>
@@ -96,7 +103,7 @@ export default function Page() {
                     </span>
                   </div>
                   <h4 className="text-xs font-medium leading-snug">{task.title}</h4>
-                </div>
+                </button>
               ))}
 
               {column.tasks.length === 0 && (
