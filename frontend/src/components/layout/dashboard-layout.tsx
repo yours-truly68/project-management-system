@@ -19,11 +19,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [isMobile, setIsMobile] = React.useState(false);
 
   React.useEffect(() => {
+    const mql = window.matchMedia("(max-width: 767px)");
     const timer = setTimeout(() => {
       setMounted(true);
+      setIsMobile(mql.matches);
     }, 0);
-    const mql = window.matchMedia("(max-width: 767px)");
-    setIsMobile(mql.matches);
     const onChange = (e: MediaQueryListEvent) => {
       setIsMobile(e.matches);
     };
