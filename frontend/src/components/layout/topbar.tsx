@@ -10,7 +10,9 @@ import {
 } from "lucide-react";
 
 export function Topbar() {
-  const { isCollapsed, toggleCollapsed, toggleMobileOpen } = useSidebarStore();
+  const isCollapsed = useSidebarStore((state) => state.isCollapsed);
+  const toggleCollapsed = useSidebarStore((state) => state.toggleCollapsed);
+  const toggleMobileOpen = useSidebarStore((state) => state.toggleMobileOpen);
 
   return (
     <header className="flex items-center justify-between border-b border-border bg-card px-4 h-12 shrink-0 select-none">
@@ -23,7 +25,7 @@ export function Topbar() {
           title="Open Menu"
           aria-label="Open navigation menu"
         >
-          <Menu className="w-4.5 h-4.5" />
+          <Menu className="w-4 h-4" />
         </button>
 
         {/* Desktop/Tablet collapse trigger */}
@@ -34,9 +36,9 @@ export function Topbar() {
           aria-label={isCollapsed ? "Expand sidebar panel" : "Collapse sidebar panel"}
         >
           {isCollapsed ? (
-            <PanelLeftOpen className="w-4.5 h-4.5" />
+            <PanelLeftOpen className="w-4 h-4" />
           ) : (
-            <PanelLeftClose className="w-4.5 h-4.5" />
+            <PanelLeftClose className="w-4 h-4" />
           )}
         </button>
 
@@ -82,7 +84,7 @@ export function Topbar() {
 
         {/* Profile Menu Trigger (Avatar Placeholder) */}
         <button
-          className="w-6.5 h-6.5 rounded-full bg-accent hover:ring-2 hover:ring-ring border border-border flex items-center justify-center text-[10px] font-bold overflow-hidden transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          className="w-6 h-6 rounded-full bg-accent hover:ring-2 hover:ring-ring border border-border flex items-center justify-center text-[10px] font-bold overflow-hidden transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           aria-label="Open user profile settings menu"
         >
           MR
