@@ -148,8 +148,8 @@ All API routes are prefixed with:
 * **Request Body**:
 ```json
 {
-  "name": "Acme Workspace",
-  "slug": "acme-workspace",
+  "name": "KanDo Workspace",
+  "slug": "kando-workspace",
   "description": "Optional workspace overview"
 }
 ```
@@ -157,8 +157,8 @@ All API routes are prefixed with:
 ```json
 {
   "id": "4c3e35a1-432d-4566-a3d5-1ff2506e789b",
-  "name": "Acme Workspace",
-  "slug": "acme-workspace",
+  "name": "KanDo Workspace",
+  "slug": "kando-workspace",
   "description": "Optional workspace overview",
   "owner_id": "3b2e35a1-432d-4566-a3d5-1ff2506e789a",
   "created_at": "2026-06-09T04:05:00Z",
@@ -178,8 +178,8 @@ All API routes are prefixed with:
 [
   {
     "id": "4c3e35a1-432d-4566-a3d5-1ff2506e789b",
-    "name": "Acme Workspace",
-    "slug": "acme-workspace",
+    "name": "KanDo Workspace",
+    "slug": "kando-workspace",
     "description": "Optional workspace overview",
     "owner_id": "3b2e35a1-432d-4566-a3d5-1ff2506e789a",
     "created_at": "2026-06-09T04:05:00Z",
@@ -199,8 +199,8 @@ All API routes are prefixed with:
 ```json
 {
   "id": "4c3e35a1-432d-4566-a3d5-1ff2506e789b",
-  "name": "Acme Workspace",
-  "slug": "acme-workspace",
+  "name": "KanDo Workspace",
+  "slug": "kando-workspace",
   "description": "Optional workspace overview",
   "owner_id": "3b2e35a1-432d-4566-a3d5-1ff2506e789a",
   "created_at": "2026-06-09T04:05:00Z",
@@ -249,8 +249,8 @@ All API routes are prefixed with:
 ```json
 {
   "workspace_id": "4c3e35a1-432d-4566-a3d5-1ff2506e789b",
-  "name": "Acme Website redesign",
-  "key": "ACME",
+  "name": "KanDo Website redesign",
+  "key": "KDO",
   "description": "Optional project description"
 }
 ```
@@ -259,8 +259,8 @@ All API routes are prefixed with:
 {
   "id": "5d3e35a1-432d-4566-a3d5-1ff2506e789c",
   "workspace_id": "4c3e35a1-432d-4566-a3d5-1ff2506e789b",
-  "name": "Acme Website redesign",
-  "key": "ACME",
+  "name": "KanDo Website redesign",
+  "key": "KDO",
   "description": "Optional project description",
   "created_by": "3b2e35a1-432d-4566-a3d5-1ff2506e789a",
   "is_archived": false,
@@ -285,8 +285,8 @@ All API routes are prefixed with:
   {
     "id": "5d3e35a1-432d-4566-a3d5-1ff2506e789c",
     "workspace_id": "4c3e35a1-432d-4566-a3d5-1ff2506e789b",
-    "name": "Acme Website redesign",
-    "key": "ACME",
+    "name": "KanDo Website redesign",
+    "key": "KDO",
     "description": "Optional project description",
     "created_by": "3b2e35a1-432d-4566-a3d5-1ff2506e789a",
     "is_archived": false,
@@ -308,8 +308,8 @@ All API routes are prefixed with:
 {
   "id": "5d3e35a1-432d-4566-a3d5-1ff2506e789c",
   "workspace_id": "4c3e35a1-432d-4566-a3d5-1ff2506e789b",
-  "name": "Acme Website redesign",
-  "key": "ACME",
+  "name": "KanDo Website redesign",
+  "key": "KDO",
   "description": "Optional project description",
   "created_by": "3b2e35a1-432d-4566-a3d5-1ff2506e789a",
   "is_archived": false,

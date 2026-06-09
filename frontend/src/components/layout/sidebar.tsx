@@ -47,26 +47,26 @@ export function Sidebar() {
       <aside
         className={cn(
           "flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 h-full select-none",
-          isCollapsed ? "w-14" : "w-56"
+          isCollapsed ? "w-16" : "w-64"
         )}
       >
         {/* 1. Workspace Switcher (Placeholder Dropdown Button) */}
-        <div className="p-2 border-b border-sidebar-border flex items-center justify-between min-h-[44px]">
+        <div className="px-3 border-b border-sidebar-border flex items-center justify-between h-14 shrink-0">
           {!isCollapsed ? (
             <button
-              className="flex items-center gap-2 overflow-hidden w-full text-left rounded p-0.5 hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="flex items-center gap-2.5 overflow-hidden w-full text-left rounded p-1 hover:bg-sidebar-accent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               aria-label="Workspace Switcher, current workspace: KanDo Workspace"
             >
-              <div className="w-5 h-5 rounded bg-sidebar-accent flex items-center justify-center text-xs font-bold shrink-0">
+              <div className="w-6 h-6 rounded bg-sidebar-accent flex items-center justify-center text-sm font-bold shrink-0">
                 K
               </div>
-              <span className="font-semibold text-sm truncate">KanDo Workspace</span>
-              <ChevronDown className="w-3.5 h-3.5 ml-auto text-sidebar-foreground/60 shrink-0" />
+              <span className="font-bold text-[15px] truncate">KanDo Workspace</span>
+              <ChevronDown className="w-4 h-4 ml-auto text-sidebar-foreground/60 shrink-0" />
             </button>
           ) : (
             <SidebarTooltip content="KanDo Workspace" disabled={!isCollapsed}>
               <button
-                className="w-7 h-7 rounded bg-sidebar-accent flex items-center justify-center text-xs font-bold mx-auto hover:bg-sidebar-accent/80 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="w-8 h-8 rounded bg-sidebar-accent flex items-center justify-center text-sm font-bold mx-auto hover:bg-sidebar-accent/80 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 aria-label="Workspace Switcher, current workspace: KanDo Workspace"
               >
                 K
@@ -76,21 +76,21 @@ export function Sidebar() {
         </div>
 
         {/* 2. Search Area (Placeholder Button) */}
-        <div className="p-2">
+        <div className="p-2.5">
           {!isCollapsed ? (
             <button
-              className="w-full flex items-center gap-1.5 px-2 py-1 rounded bg-sidebar-accent/50 border border-sidebar-border hover:bg-sidebar-accent transition-colors text-[11px] text-sidebar-foreground/60 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              className="w-full flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-sidebar-accent/50 border border-sidebar-border hover:bg-sidebar-accent transition-colors text-xs text-sidebar-foreground/60 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               aria-label="Search Workspace"
             >
               <span className="truncate flex-1">Search workspace...</span>
-              <kbd className="pointer-events-none inline-flex h-4.5 select-none items-center gap-0.5 rounded border border-sidebar-border bg-sidebar px-1 font-mono text-[9px] font-medium opacity-80">
+              <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-0.5 rounded border border-sidebar-border bg-sidebar px-1 font-mono text-[10px] font-medium opacity-80">
                 ⌘K
               </kbd>
             </button>
           ) : (
             <SidebarTooltip content="Search Workspace (⌘K)" disabled={!isCollapsed}>
               <button
-                className="w-8 h-8 rounded hover:bg-sidebar-accent flex items-center justify-center transition-colors mx-auto text-sidebar-foreground/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="w-9 h-9 rounded hover:bg-sidebar-accent flex items-center justify-center transition-colors mx-auto text-sidebar-foreground/60 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 aria-label="Search Workspace"
               >
                 <kbd className="font-mono text-[10px] opacity-80">⌘K</kbd>
@@ -100,7 +100,7 @@ export function Sidebar() {
         </div>
 
         {/* Main Scrollable Navigation Area */}
-        <div className="flex-1 overflow-y-auto px-1.5 py-1 space-y-3">
+        <div className="flex-1 overflow-y-auto px-2 py-1.5 space-y-3.5">
           {/* Navigation Items (Main & Links) */}
           <div className="space-y-0.5">
             {MAIN_NAV_ITEMS.map((item) => {
@@ -111,7 +111,7 @@ export function Sidebar() {
                   <Link
                     href={item.disabled ? "#" : item.href}
                     className={cn(
-                      "flex items-center gap-2 px-2 py-1 rounded text-sm transition-colors font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                      "flex items-center gap-2.5 px-2.5 py-1.5 rounded text-[15px] transition-colors font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                       isActive
                         ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
                         : "hover:bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground",
@@ -121,7 +121,7 @@ export function Sidebar() {
                     title={isCollapsed ? undefined : item.name}
                     aria-label={item.name}
                   >
-                    <Icon className="w-3.5 h-3.5 shrink-0" />
+                    <Icon className="w-4 h-4 shrink-0" />
                     {!isCollapsed && <span>{item.name}</span>}
                   </Link>
                 </SidebarTooltip>
@@ -132,7 +132,7 @@ export function Sidebar() {
           {/* 3. Favorites List (Placeholder) */}
           <div className="space-y-0.5">
             {!isCollapsed && (
-              <div className="px-2 py-0.5 text-[10px] font-bold text-sidebar-foreground/45 uppercase tracking-wider">
+              <div className="px-2.5 py-1 text-[11px] font-bold text-sidebar-foreground/45 uppercase tracking-wider">
                 Favorites
               </div>
             )}
@@ -140,25 +140,25 @@ export function Sidebar() {
               <SidebarTooltip content="Website Redesign" disabled={!isCollapsed}>
                 <button
                   className={cn(
-                    "flex items-center gap-2.5 px-2 py-1 text-xs text-sidebar-foreground/70 hover:text-sidebar-foreground rounded hover:bg-sidebar-accent/40 w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                    "flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] text-sidebar-foreground/70 hover:text-sidebar-foreground rounded hover:bg-sidebar-accent/40 w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                     isCollapsed && "justify-center px-0"
                   )}
                   aria-label="Favorite workspace item: Website Redesign"
                 >
-                  <Star className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" />
-                  {!isCollapsed && <span className="truncate text-xs font-medium">Website Redesign</span>}
+                  <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" />
+                  {!isCollapsed && <span className="truncate text-[13px] font-medium">Website Redesign</span>}
                 </button>
               </SidebarTooltip>
               <SidebarTooltip content="Release V1 Specs" disabled={!isCollapsed}>
                 <button
                   className={cn(
-                    "flex items-center gap-2.5 px-2 py-1 text-xs text-sidebar-foreground/70 hover:text-sidebar-foreground rounded hover:bg-sidebar-accent/40 w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                    "flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] text-sidebar-foreground/70 hover:text-sidebar-foreground rounded hover:bg-sidebar-accent/40 w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                     isCollapsed && "justify-center px-0"
                   )}
                   aria-label="Favorite workspace item: Release V1 Specs"
                 >
-                  <Star className="w-3 h-3 text-amber-500 fill-amber-500 shrink-0" />
-                  {!isCollapsed && <span className="truncate text-xs font-medium">Release V1 Specs</span>}
+                  <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" />
+                  {!isCollapsed && <span className="truncate text-[13px] font-medium">Release V1 Specs</span>}
                 </button>
               </SidebarTooltip>
             </div>
@@ -167,15 +167,15 @@ export function Sidebar() {
           {/* 4. Projects List Section (Placeholder) */}
           <div className="space-y-0.5">
             {!isCollapsed && (
-              <div className="flex items-center justify-between px-2 py-0.5">
-                <span className="text-[10px] font-bold text-sidebar-foreground/45 uppercase tracking-wider">
+              <div className="flex items-center justify-between px-2.5 py-1">
+                <span className="text-[11px] font-bold text-sidebar-foreground/45 uppercase tracking-wider">
                   Projects
                 </span>
                 <button
                   className="text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent rounded p-0.5 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   aria-label="Create new project"
                 >
-                  <Plus className="w-3 h-3" />
+                  <Plus className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
@@ -183,25 +183,25 @@ export function Sidebar() {
               <SidebarTooltip content="Mobile Application" disabled={!isCollapsed}>
                 <button
                   className={cn(
-                    "flex items-center gap-2.5 px-2 py-1 text-xs text-sidebar-foreground/70 hover:text-sidebar-foreground rounded hover:bg-sidebar-accent/40 w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                    "flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] text-sidebar-foreground/70 hover:text-sidebar-foreground rounded hover:bg-sidebar-accent/40 w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                     isCollapsed && "justify-center px-0"
                   )}
                   aria-label="Project: Mobile Application"
                 >
-                  <FolderOpen className="w-3 h-3 text-sidebar-foreground/60 shrink-0" />
-                  {!isCollapsed && <span className="truncate text-xs font-medium">Mobile Application</span>}
+                  <FolderOpen className="w-3.5 h-3.5 text-sidebar-foreground/60 shrink-0" />
+                  {!isCollapsed && <span className="truncate text-[13px] font-medium">Mobile Application</span>}
                 </button>
               </SidebarTooltip>
               <SidebarTooltip content="Internal Core API" disabled={!isCollapsed}>
                 <button
                   className={cn(
-                    "flex items-center gap-2.5 px-2 py-1 text-xs text-sidebar-foreground/70 hover:text-sidebar-foreground rounded hover:bg-sidebar-accent/40 w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                    "flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] text-sidebar-foreground/70 hover:text-sidebar-foreground rounded hover:bg-sidebar-accent/40 w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                     isCollapsed && "justify-center px-0"
                   )}
                   aria-label="Project: Internal Core API"
                 >
-                  <FolderOpen className="w-3 h-3 text-sidebar-foreground/60 shrink-0" />
-                  {!isCollapsed && <span className="truncate text-xs font-medium">Internal Core API</span>}
+                  <FolderOpen className="w-3.5 h-3.5 text-sidebar-foreground/60 shrink-0" />
+                  {!isCollapsed && <span className="truncate text-[13px] font-medium">Internal Core API</span>}
                 </button>
               </SidebarTooltip>
             </div>
@@ -210,15 +210,15 @@ export function Sidebar() {
           {/* 5. Boards List Section (Placeholder) */}
           <div className="space-y-0.5">
             {!isCollapsed && (
-              <div className="flex items-center justify-between px-2 py-0.5">
-                <span className="text-[10px] font-bold text-sidebar-foreground/45 uppercase tracking-wider">
+              <div className="flex items-center justify-between px-2.5 py-1">
+                <span className="text-[11px] font-bold text-sidebar-foreground/45 uppercase tracking-wider">
                   Boards
                 </span>
                 <button
                   className="text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent rounded p-0.5 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   aria-label="Create new board"
                 >
-                  <Plus className="w-3 h-3" />
+                  <Plus className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
@@ -226,13 +226,13 @@ export function Sidebar() {
               <SidebarTooltip content="Sprint 1 Board" disabled={!isCollapsed}>
                 <button
                   className={cn(
-                    "flex items-center gap-2.5 px-2 py-1 text-xs text-sidebar-foreground/70 hover:text-sidebar-foreground rounded hover:bg-sidebar-accent/40 w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                    "flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] text-sidebar-foreground/70 hover:text-sidebar-foreground rounded hover:bg-sidebar-accent/40 w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                     isCollapsed && "justify-center px-0"
                   )}
                   aria-label="Board: Sprint 1 Board"
                 >
-                  <Compass className="w-3 h-3 text-sidebar-foreground/60 shrink-0" />
-                  {!isCollapsed && <span className="truncate text-xs font-medium">Sprint 1 Board</span>}
+                  <Compass className="w-3.5 h-3.5 text-sidebar-foreground/60 shrink-0" />
+                  {!isCollapsed && <span className="truncate text-[13px] font-medium">Sprint 1 Board</span>}
                 </button>
               </SidebarTooltip>
             </div>
@@ -248,7 +248,7 @@ export function Sidebar() {
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-2 px-2 py-1 rounded text-sm transition-colors font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                      "flex items-center gap-2.5 px-2.5 py-1.5 rounded text-[15px] transition-colors font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                       isActive
                         ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
                         : "hover:bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground",
@@ -257,8 +257,8 @@ export function Sidebar() {
                     title={isCollapsed ? undefined : item.name}
                     aria-label={item.name}
                   >
-                    <Icon className="w-3.5 h-3.5 shrink-0" />
-                    {!isCollapsed && <span className="truncate text-xs font-medium">{item.name}</span>}
+                    <Icon className="w-4 h-4 shrink-0" />
+                    {!isCollapsed && <span className="truncate text-[13px] font-medium">{item.name}</span>}
                   </Link>
                 </SidebarTooltip>
               );
