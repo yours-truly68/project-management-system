@@ -46,9 +46,9 @@ export function Topbar() {
         <nav className="flex items-center gap-1.5 text-xs text-muted-foreground" aria-label="Breadcrumb navigation">
           <button
             className="hover:text-foreground font-medium rounded px-1 hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            aria-label="Workspace: Acme Workspace"
+            aria-label="Workspace: KanDo Workspace"
           >
-            Acme Workspace
+            KanDo Workspace
           </button>
           <span>/</span>
           <button

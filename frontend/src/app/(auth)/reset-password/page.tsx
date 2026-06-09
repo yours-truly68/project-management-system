@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
             id="password"
             type="password"
             disabled={isLoading}
-            className="w-full text-xs px-2.5 py-1.5 rounded bg-background border border-border text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all disabled:opacity-50"
+            className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all disabled:opacity-50"
             placeholder="••••••••"
             {...register("password")}
           />
@@ -111,7 +111,7 @@ export default function ResetPasswordPage() {
             id="confirmPassword"
             type="password"
             disabled={isLoading}
-            className="w-full text-xs px-2.5 py-1.5 rounded bg-background border border-border text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all disabled:opacity-50"
+            className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all disabled:opacity-50"
             placeholder="••••••••"
             {...register("confirmPassword")}
           />
@@ -124,7 +124,7 @@ export default function ResetPasswordPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex justify-center items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground hover:bg-primary/95 text-xs font-semibold rounded shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 cursor-pointer min-h-[32px] mt-2"
+          className="w-full flex justify-center items-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground hover:bg-primary/95 text-xs font-semibold rounded-lg shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:opacity-50 cursor-pointer min-h-[32px] mt-2"
         >
           {isLoading ? (
             <>

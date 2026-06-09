@@ -11,7 +11,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="sm:mx-auto sm:w-full sm:max-w-md flex flex-col items-center">
           {/* Brand/Logo Header */}
           <div className="flex items-center gap-2 justify-center">
-            <div className="w-8 h-8 rounded bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground shadow-sm">
               <FolderKanban className="w-4 h-4" />
             </div>
             <span className="font-bold text-lg tracking-tight text-foreground/90">
@@ -25,7 +25,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 
         {/* Content Container Card */}
         <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-sm">
-          <div className="bg-card border border-border px-6 py-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] rounded-lg">
+          <div className="bg-card border border-border px-6 py-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)] rounded-xl">
             {children}
           </div>
         </div>
