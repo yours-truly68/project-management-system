@@ -72,3 +72,10 @@ class Task(UUIDMixin, TimestampMixin, Base):
         foreign_keys=[reporter_id],
         lazy="raise",
     )
+    comments: Mapped[list["TaskComment"]] = relationship(  # type: ignore[name-defined]  # noqa: F821
+        "TaskComment",
+        back_populates="task",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        lazy="raise",
+    )
