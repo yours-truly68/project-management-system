@@ -223,7 +223,7 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
           </button>
 
           {isMenuOpen && (
-            <div className="absolute right-0 mt-1 w-32 rounded-lg border border-border bg-card shadow-lg py-1 z-20 animate-fade-in focus:outline-none text-left select-none">
+            <div className="absolute right-0 mt-1 w-32 rounded-lg border border-border bg-elevated shadow-lg py-1 z-20 animate-fade-in focus:outline-none text-left select-none">
               <button
                 onClick={handleEdit}
                 className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer font-medium"

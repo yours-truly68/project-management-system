@@ -39,7 +39,7 @@ export function ColumnActionsMenu({ onEdit, onDelete, canManage }: ColumnActions
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-1 w-36 rounded-lg border border-border bg-card shadow-lg py-1 z-10 animate-fade-in focus:outline-none select-none">
+        <div className="absolute right-0 mt-1 w-36 rounded-lg border border-border bg-elevated shadow-lg py-1 z-10 animate-fade-in focus:outline-none select-none">
           <button
             onClick={() => {
               onEdit();
