@@ -91,7 +91,7 @@ export function CreateTaskModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-[1px] animate-fade-in select-none">
       <div
-        className="relative w-full max-w-lg bg-elevated border border-border rounded-xl shadow-xl p-6 m-4 animate-scale-in"
+        className="relative w-full max-w-lg bg-[#1B212B] border border-[#242B36] rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.45)] p-6 m-4 animate-scale-in"
         role="dialog"
         aria-modal="true"
       >

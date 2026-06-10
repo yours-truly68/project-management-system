@@ -75,7 +75,7 @@ export function WorkspaceSwitcher({ isCollapsed }: WorkspaceSwitcherProps) {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute left-0 mt-1.5 w-64 rounded-lg border border-border bg-elevated shadow-lg py-1.5 z-[9999] animate-fade-in focus:outline-none select-none">
+        <div className="absolute left-0 mt-1.5 w-64 rounded-lg border border-[#242B36] bg-[#1B212B] shadow-[0_20px_40px_rgba(0,0,0,0.45)] py-1.5 z-[9999] animate-fade-in focus:outline-none select-none">
           <div className="px-3.5 py-1.5 border-b border-border">
             <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider">
               Workspaces
