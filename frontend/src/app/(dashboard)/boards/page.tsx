@@ -49,46 +49,45 @@ function BoardCard({
   onSelect,
 }: BoardCardProps) {
   const { data: tasks = [] } = useTasks(board.id);
-  const createdDate = new Date(board.created_at).toLocaleDateString(undefined, {
-    year: "numeric",
+  const lastUpdated = new Date(board.updated_at).toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
   });
 
   return (
     <div
-      className={`flex flex-col justify-between p-5 rounded-xl border bg-card/50 transition-all ${
+      className={`flex flex-col justify-between p-5 rounded-2xl border bg-card shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:translate-y-[-2px] hover:shadow-md ${
         isActive
-          ? "border-primary shadow-sm shadow-primary/5 bg-card"
-          : "border-border hover:border-border-hover"
+          ? "border-primary"
+          : "border-border hover:border-[#3B82F6] hover:bg-card-hover"
       }`}
     >
       {/* Card Header */}
       <div>
-        <h3 className="font-bold text-lg md:text-xl text-foreground truncate" title={board.name}>
+        <h3 className="font-bold text-lg text-foreground truncate" title={board.name}>
           {board.name}
         </h3>
 
-        <p className="text-sm text-muted-foreground/90 mt-2.5 line-clamp-2 min-h-[40px] leading-relaxed">
+        <p className="text-sm text-secondary-text mt-2.5 line-clamp-2 min-h-[40px] leading-relaxed">
           {board.description || "No description provided."}
         </p>
 
         <div className="flex flex-wrap gap-2 mt-4">
           {projectKey && (
-            <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-secondary border border-border text-foreground flex items-center gap-1">
+            <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-accent border border-border text-foreground flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
               Project: {projectKey}
             </span>
           )}
-          <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-secondary border border-border text-foreground flex items-center gap-1">
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-accent border border-border text-foreground flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             {tasks.length} {tasks.length === 1 ? "task" : "tasks"}
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/80 mt-4 font-medium">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-4 font-medium">
           <Calendar className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
-          <span>Created {createdDate}</span>
+          <span>Updated {lastUpdated}</span>
         </div>
       </div>
 
@@ -100,7 +99,7 @@ function BoardCard({
           className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
             isActive
               ? "bg-primary/10 text-primary border border-primary/20 pointer-events-none"
-              : "bg-secondary hover:bg-secondary/80 text-foreground border border-border"
+              : "bg-accent hover:bg-card-hover text-foreground border border-border"
           }`}
         >
           {isActive ? (
@@ -117,7 +116,7 @@ function BoardCard({
           {canManage && (
             <button
               onClick={() => setActiveMenuId(activeMenuId === board.id ? null : board.id)}
-              className="board-menu-trigger p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-all cursor-pointer focus-visible:outline-none"
+              className="board-menu-trigger p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-card-hover transition-all cursor-pointer focus-visible:outline-none"
               aria-label="Board actions"
             >
               <MoreHorizontal className="w-4 h-4" />
@@ -125,13 +124,13 @@ function BoardCard({
           )}
 
           {activeMenuId === board.id && (
-            <div className="board-menu-dropdown absolute right-0 mt-1.5 w-36 rounded-lg border border-[#242B36] bg-[#1B212B] shadow-[0_20px_40px_rgba(0,0,0,0.45)] py-1 z-[9999] animate-fade-in text-left select-none">
+            <div className="board-menu-dropdown absolute right-0 mt-1.5 w-36 rounded-lg border border-border bg-elevated shadow-2xl py-1 z-[9999] animate-fade-in text-left select-none">
               <button
                 onClick={() => {
                   onEdit(board);
                   setActiveMenuId(null);
                 }}
-                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer font-medium"
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-background/80 transition-colors text-left cursor-pointer font-medium"
               >
                 <Edit3 className="w-3.5 h-3.5 text-muted-foreground" />
                 <span>Edit Board</span>
@@ -293,9 +292,9 @@ export default function BoardsPage() {
       )}
 
       {boardToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-[1px] animate-fade-in select-none">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-[2px] animate-fade-in select-none">
           <div
-            className="relative w-full max-w-md bg-[#1B212B] border border-[#242B36] rounded-lg shadow-[0_20px_40px_rgba(0,0,0,0.45)] p-5 m-4 animate-scale-in"
+            className="relative w-full max-w-md bg-elevated border border-border rounded-[20px] shadow-2xl p-5 m-4 animate-scale-in"
             role="dialog"
             aria-modal="true"
           >

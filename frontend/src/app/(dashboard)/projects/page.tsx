@@ -63,6 +63,7 @@ interface ProjectCardProps {
   onEdit: (project: Project) => void;
   onDelete: (project: Project) => void;
   onSelect: (id: string) => void;
+  memberCount: number;
 }
 
 function ProjectCard({
@@ -73,11 +74,11 @@ function ProjectCard({
   onEdit,
   onDelete,
   onSelect,
+  memberCount,
 }: ProjectCardProps) {
   const { mutateAsync: updateProject } = useUpdateProject(project.id);
   const color = getProjectColor(project.key);
-  const createdDate = new Date(project.created_at).toLocaleDateString(undefined, {
-    year: "numeric",
+  const lastUpdated = new Date(project.updated_at).toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
   });
@@ -89,21 +90,27 @@ function ProjectCard({
   });
 
   // Fetch tasks for each board to sum active tasks
-  const tasksQueries = useQueries({
-    queries: boards.map((b) => ({
-      queryKey: ["tasks", b.id],
-      queryFn: () => taskService.listTasks(b.id),
-      enabled: !!b.id,
-    })),
+  const { data: tasks = [] } = useQuery({
+    queryKey: ["tasks-summary", project.id],
+    queryFn: async () => {
+      let sum = 0;
+      for (const b of boards) {
+        try {
+          const bt = await taskService.listTasks(b.id);
+          if (Array.isArray(bt)) sum += bt.length;
+        } catch {
+          // Ignore
+        }
+      }
+      return sum;
+    },
+    enabled: boards.length > 0,
   });
 
-  const totalTasks = tasksQueries.reduce((sum, q) => {
-    const taskCount = Array.isArray(q.data) ? q.data.length : 0;
-    return sum + taskCount;
-  }, 0);
+  const totalTasks = tasks || 0;
 
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const menuRef = React. useRef<HTMLDivElement>(null);
+  const menuRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -127,10 +134,10 @@ function ProjectCard({
 
   return (
     <div
-      className={`flex flex-col justify-between p-5 rounded-xl border bg-card/50 transition-all ${
+      className={`flex flex-col justify-between p-5 rounded-2xl border bg-card shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:translate-y-[-2px] hover:shadow-md ${
         isActive
-          ? "border-primary shadow-sm shadow-primary/5 bg-card"
-          : "border-border hover:border-border-hover"
+          ? "border-primary"
+          : "border-border hover:border-[#3B82F6] hover:bg-card-hover"
       }`}
     >
       {/* Card Header */}
@@ -141,33 +148,37 @@ function ProjectCard({
               className="w-3.5 h-3.5 rounded-full shrink-0"
               style={{ backgroundColor: color }}
             />
-            <h3 className="font-bold text-lg md:text-xl text-foreground truncate" title={project.name}>
+            <h3 className="font-bold text-lg text-foreground truncate" title={project.name}>
               {project.name}
             </h3>
           </div>
-          <span className="text-[10px] px-2.5 py-0.5 rounded font-bold uppercase tracking-wider bg-secondary border border-border text-muted-foreground shrink-0">
+          <span className="text-[10px] px-2.5 py-0.5 rounded font-bold uppercase tracking-wider bg-accent border border-border text-muted-foreground shrink-0">
             {project.key}
           </span>
         </div>
 
-        <p className="text-sm text-muted-foreground/90 mt-2.5 line-clamp-2 min-h-[40px] leading-relaxed">
+        <p className="text-sm text-secondary-text mt-2.5 line-clamp-2 min-h-[40px] leading-relaxed">
           {project.description || "No description provided."}
         </p>
 
         <div className="flex flex-wrap gap-2 mt-4">
-          <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-secondary border border-border text-foreground flex items-center gap-1">
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-accent border border-border text-foreground flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
             {boards.length} {boards.length === 1 ? "board" : "boards"}
           </span>
-          <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-secondary border border-border text-foreground flex items-center gap-1">
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-accent border border-border text-foreground flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
             {totalTasks} {totalTasks === 1 ? "task" : "tasks"}
           </span>
+          <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-accent border border-border text-foreground flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+            {memberCount} {memberCount === 1 ? "member" : "members"}
+          </span>
         </div>
 
-        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/80 mt-4 font-medium">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-4 font-medium">
           <Calendar className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
-          <span>Created {createdDate}</span>
+          <span>Updated {lastUpdated}</span>
           {project.archived_at && (
             <span className="ml-auto text-[9px] px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded font-semibold uppercase tracking-wider">
               Archived
@@ -189,7 +200,7 @@ function ProjectCard({
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
               isActive
                 ? "bg-primary/10 text-primary border border-primary/20 pointer-events-none"
-                : "bg-secondary hover:bg-secondary/80 text-foreground border border-border"
+                : "bg-accent hover:bg-card-hover text-foreground border border-border"
             }`}
           >
             {isActive ? (
@@ -207,7 +218,7 @@ function ProjectCard({
           {(canCreateOrEdit || canDelete) && (
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-all cursor-pointer focus-visible:outline-none"
+              className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-card-hover transition-all cursor-pointer focus-visible:outline-none"
               aria-label="Project actions"
             >
               <MoreHorizontal className="w-4 h-4" />
@@ -215,14 +226,14 @@ function ProjectCard({
           )}
 
           {isMenuOpen && (
-            <div className="absolute right-0 mt-1.5 w-36 rounded-lg border border-[#242B36] bg-[#1B212B] shadow-[0_20px_40px_rgba(0,0,0,0.45)] py-1 z-[9999] animate-fade-in text-left select-none">
+            <div className="absolute right-0 mt-1.5 w-36 rounded-lg border border-border bg-elevated shadow-2xl py-1 z-[9999] animate-fade-in text-left select-none">
               {canCreateOrEdit && !project.archived_at && (
                 <button
                   onClick={() => {
                     onEdit(project);
                     setIsMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer font-medium"
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-background/80 transition-colors text-left cursor-pointer font-medium"
                 >
                   <Edit3 className="w-3.5 h-3.5 text-muted-foreground" />
                   <span>Edit Project</span>
@@ -234,7 +245,7 @@ function ProjectCard({
                     handleArchive();
                     setIsMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer font-medium"
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-background/80 transition-colors text-left cursor-pointer font-medium"
                 >
                   <Archive className="w-3.5 h-3.5 text-muted-foreground" />
                   <span>{project.archived_at ? "Restore Project" : "Archive Project"}</span>
@@ -394,6 +405,7 @@ export default function ProjectsPage() {
               onEdit={setProjectToEdit}
               onDelete={setProjectToDelete}
               onSelect={setActiveProjectId}
+              memberCount={members.length}
             />
           ))}
         </div>
@@ -413,9 +425,9 @@ export default function ProjectsPage() {
       )}
 
       {projectToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-[1px] animate-fade-in select-none">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-[2px] animate-fade-in select-none">
           <div
-            className="relative w-full max-w-md bg-[#1B212B] border border-[#242B36] rounded-lg shadow-[0_20px_40px_rgba(0,0,0,0.45)] p-5 m-4 animate-scale-in"
+            className="relative w-full max-w-md bg-elevated border border-border rounded-[20px] shadow-2xl p-5 m-4 animate-scale-in"
             role="dialog"
             aria-modal="true"
           >
