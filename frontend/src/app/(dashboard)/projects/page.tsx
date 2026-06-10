@@ -2,6 +2,9 @@
 
 import * as React from "react";
 import { useProjects, useDeleteProject, useUpdateProject } from "@/features/projects/hooks/use-projects";
+import { useQuery, useQueries } from "@tanstack/react-query";
+import { boardService } from "@/features/boards/services/board.service";
+import { taskService } from "@/features/tasks/services/task.service";
 import { useWorkspaceStore } from "@/stores/workspace.store";
 import { useWorkspaceMembers } from "@/features/workspaces/hooks/use-workspace-members";
 import { useAuthStore } from "@/stores/auth.store";
@@ -79,6 +82,26 @@ function ProjectCard({
     day: "numeric",
   });
 
+  // Fetch boards for this project
+  const { data: boards = [] } = useQuery({
+    queryKey: ["boards", project.id],
+    queryFn: () => boardService.listBoards(project.id),
+  });
+
+  // Fetch tasks for each board to sum active tasks
+  const tasksQueries = useQueries({
+    queries: boards.map((b) => ({
+      queryKey: ["tasks", b.id],
+      queryFn: () => taskService.listTasks(b.id),
+      enabled: !!b.id,
+    })),
+  });
+
+  const totalTasks = tasksQueries.reduce((sum, q) => {
+    const taskCount = Array.isArray(q.data) ? q.data.length : 0;
+    return sum + taskCount;
+  }, 0);
+
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const menuRef = React. useRef<HTMLDivElement>(null);
 
@@ -118,7 +141,7 @@ function ProjectCard({
               className="w-3.5 h-3.5 rounded-full shrink-0"
               style={{ backgroundColor: color }}
             />
-            <h3 className="font-bold text-sm text-foreground truncate" title={project.name}>
+            <h3 className="font-bold text-lg md:text-xl text-foreground truncate" title={project.name}>
               {project.name}
             </h3>
           </div>
@@ -127,9 +150,20 @@ function ProjectCard({
           </span>
         </div>
 
-        <p className="text-xs text-muted-foreground mt-2.5 line-clamp-2 min-h-[32px] leading-relaxed">
+        <p className="text-sm text-muted-foreground/90 mt-2.5 line-clamp-2 min-h-[40px] leading-relaxed">
           {project.description || "No description provided."}
         </p>
+
+        <div className="flex flex-wrap gap-2 mt-4">
+          <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-secondary border border-border text-foreground flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+            {boards.length} {boards.length === 1 ? "board" : "boards"}
+          </span>
+          <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-secondary border border-border text-foreground flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            {totalTasks} {totalTasks === 1 ? "task" : "tasks"}
+          </span>
+        </div>
 
         <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/80 mt-4 font-medium">
           <Calendar className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
@@ -293,7 +327,7 @@ export default function ProjectsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
         <div>
-          <h2 className="text-xl font-bold text-foreground/90 font-heading">Projects</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground/90 font-heading tracking-tight">Projects</h2>
           <p className="text-xs text-muted-foreground mt-1">
             Manage, select, and customize projects inside this workspace.
           </p>
@@ -379,7 +413,7 @@ export default function ProjectsPage() {
       )}
 
       {projectToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-[2px] animate-fade-in select-none">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-[1px] animate-fade-in select-none">
           <div
             className="relative w-full max-w-md bg-elevated border border-border rounded-lg shadow-xl p-5 m-4 animate-scale-in"
             role="dialog"

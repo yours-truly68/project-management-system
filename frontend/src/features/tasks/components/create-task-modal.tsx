@@ -154,7 +154,7 @@ export function CreateTaskModal({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             {/* Priority */}
             <div className="space-y-1">
               <label
@@ -195,6 +195,22 @@ export function CreateTaskModal({
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Due Date */}
+            <div className="space-y-1">
+              <label
+                htmlFor="task-due-date"
+                className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wide"
+              >
+                Due Date
+              </label>
+              <input
+                id="task-due-date"
+                type="date"
+                className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all cursor-pointer"
+                {...register("due_date")}
+              />
             </div>
           </div>
 

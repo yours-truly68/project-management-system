@@ -81,7 +81,7 @@ export function CreateProjectModal({ isOpen, onClose }: CreateProjectModalProps)
   const errorMessage = error ? getErrorMessage(error) : "";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-[2px] animate-fade-in select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-[1px] animate-fade-in select-none">
       <div
         className="relative w-full max-w-md bg-elevated border border-border rounded-lg shadow-xl p-5 m-4 animate-scale-in"
         role="dialog"

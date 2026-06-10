@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { useBoards, useDeleteBoard } from "@/features/boards/hooks/use-boards";
+import { useProject } from "@/features/projects/hooks/use-projects";
+import { useTasks } from "@/features/tasks/hooks/use-tasks";
 import { useProjectStore } from "@/stores/project.store";
 import { useWorkspaceStore } from "@/stores/workspace.store";
 import { useWorkspaceMembers } from "@/features/workspaces/hooks/use-workspace-members";
@@ -23,6 +25,135 @@ import {
 } from "lucide-react";
 import { getErrorMessage } from "@/lib/utils";
 
+interface BoardCardProps {
+  board: Board;
+  projectKey?: string;
+  isActive: boolean;
+  canManage: boolean;
+  activeMenuId: string | null;
+  setActiveMenuId: (id: string | null) => void;
+  onEdit: (board: Board) => void;
+  onDelete: (board: Board) => void;
+  onSelect: (id: string) => void;
+}
+
+function BoardCard({
+  board,
+  projectKey,
+  isActive,
+  canManage,
+  activeMenuId,
+  setActiveMenuId,
+  onEdit,
+  onDelete,
+  onSelect,
+}: BoardCardProps) {
+  const { data: tasks = [] } = useTasks(board.id);
+  const createdDate = new Date(board.created_at).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
+  return (
+    <div
+      className={`flex flex-col justify-between p-5 rounded-xl border bg-card/50 transition-all ${
+        isActive
+          ? "border-primary shadow-sm shadow-primary/5 bg-card"
+          : "border-border hover:border-border-hover"
+      }`}
+    >
+      {/* Card Header */}
+      <div>
+        <h3 className="font-bold text-lg md:text-xl text-foreground truncate" title={board.name}>
+          {board.name}
+        </h3>
+
+        <p className="text-sm text-muted-foreground/90 mt-2.5 line-clamp-2 min-h-[40px] leading-relaxed">
+          {board.description || "No description provided."}
+        </p>
+
+        <div className="flex flex-wrap gap-2 mt-4">
+          {projectKey && (
+            <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-secondary border border-border text-foreground flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+              Project: {projectKey}
+            </span>
+          )}
+          <span className="text-[11px] px-2 py-0.5 rounded-full font-semibold bg-secondary border border-border text-foreground flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            {tasks.length} {tasks.length === 1 ? "task" : "tasks"}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/80 mt-4 font-medium">
+          <Calendar className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+          <span>Created {createdDate}</span>
+        </div>
+      </div>
+
+      {/* Card Footer Actions */}
+      <div className="flex items-center justify-between gap-2.5 pt-4 mt-5 border-t border-border/60">
+        <button
+          onClick={() => onSelect(board.id)}
+          disabled={isActive}
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+            isActive
+              ? "bg-primary/10 text-primary border border-primary/20 pointer-events-none"
+              : "bg-secondary hover:bg-secondary/80 text-foreground border border-border"
+          }`}
+        >
+          {isActive ? (
+            <>
+              <Check className="w-3.5 h-3.5 shrink-0" />
+              Active
+            </>
+          ) : (
+            "Select Board"
+          )}
+        </button>
+
+        <div className="relative">
+          {canManage && (
+            <button
+              onClick={() => setActiveMenuId(activeMenuId === board.id ? null : board.id)}
+              className="board-menu-trigger p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-all cursor-pointer focus-visible:outline-none"
+              aria-label="Board actions"
+            >
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+          )}
+
+          {activeMenuId === board.id && (
+            <div className="board-menu-dropdown absolute right-0 mt-1 w-36 rounded-lg border border-border bg-elevated shadow-lg py-1 z-10 animate-fade-in text-left select-none">
+              <button
+                onClick={() => {
+                  onEdit(board);
+                  setActiveMenuId(null);
+                }}
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer font-medium"
+              >
+                <Edit3 className="w-3.5 h-3.5 text-muted-foreground" />
+                <span>Edit Board</span>
+              </button>
+              <button
+                onClick={() => {
+                  onDelete(board);
+                  setActiveMenuId(null);
+                }}
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-rose-500 hover:bg-rose-500/10 transition-colors text-left cursor-pointer font-semibold"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Board</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function BoardsPage() {
   const { activeWorkspaceId } = useWorkspaceStore();
   const { activeProjectId } = useProjectStore();
@@ -30,6 +161,7 @@ export default function BoardsPage() {
   const { members } = useWorkspaceMembers(activeWorkspaceId);
   const { boards, activeBoardId, setActiveBoardId, isLoading } = useBoards();
   const { mutateAsync: deleteBoard, isPending: isDeleting } = useDeleteBoard();
+  const { data: project } = useProject(activeProjectId);
 
   // Dialog / Modal states
   const [isCreateOpen, setIsCreateOpen] = React.useState(false);
@@ -109,11 +241,11 @@ export default function BoardsPage() {
   }
 
   return (
-    <div className="space-y-6 select-none animate-fade-in">
+    <div className="space-y-6 select-none animate-fade-in max-w-[1000px] w-full mx-auto px-4 py-2">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
         <div>
-          <h2 className="text-xl font-bold text-foreground/90 font-heading">Boards</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground/90 font-heading tracking-tight">Boards</h2>
           <p className="text-xs text-muted-foreground mt-1">
             Manage, select, and organize task pipelines inside the active project.
           </p>
@@ -131,100 +263,20 @@ export default function BoardsPage() {
 
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {boards.map((board) => {
-          const isActive = board.id === activeBoardId;
-          const createdDate = new Date(board.created_at).toLocaleDateString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          });
-
-          return (
-            <div
-              key={board.id}
-              className={`flex flex-col justify-between p-5 rounded-xl border bg-card/50 transition-all ${
-                isActive
-                  ? "border-primary shadow-sm shadow-primary/5 bg-card"
-                  : "border-border hover:border-border-hover"
-              }`}
-            >
-              {/* Card Header */}
-              <div>
-                <h3 className="font-bold text-sm text-foreground truncate" title={board.name}>
-                  {board.name}
-                </h3>
-
-                <p className="text-xs text-muted-foreground mt-2.5 line-clamp-2 min-h-[32px] leading-relaxed">
-                  {board.description || "No description provided."}
-                </p>
-
-                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/80 mt-4 font-medium">
-                  <Calendar className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
-                  <span>Created {createdDate}</span>
-                </div>
-              </div>
-
-              {/* Card Footer Actions */}
-              <div className="flex items-center justify-between gap-2.5 pt-4 mt-5 border-t border-border/60">
-                <button
-                  onClick={() => setActiveBoardId(board.id)}
-                  disabled={isActive}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                    isActive
-                      ? "bg-primary/10 text-primary border border-primary/20 pointer-events-none"
-                      : "bg-secondary hover:bg-secondary/80 text-foreground border border-border"
-                  }`}
-                >
-                  {isActive ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 shrink-0" />
-                      Active
-                    </>
-                  ) : (
-                    "Select Board"
-                  )}
-                </button>
-
-                <div className="relative">
-                  {canManage && (
-                    <button
-                      onClick={() => setActiveMenuId(activeMenuId === board.id ? null : board.id)}
-                      className="board-menu-trigger p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-all cursor-pointer focus-visible:outline-none"
-                      aria-label="Board actions"
-                    >
-                      <MoreHorizontal className="w-4 h-4" />
-                    </button>
-                  )}
-
-                  {activeMenuId === board.id && (
-                    <div className="board-menu-dropdown absolute right-0 mt-1 w-36 rounded-lg border border-border bg-elevated shadow-lg py-1 z-10 animate-fade-in text-left select-none">
-                      <button
-                        onClick={() => {
-                          setBoardToEdit(board);
-                          setActiveMenuId(null);
-                        }}
-                        className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer font-medium"
-                      >
-                        <Edit3 className="w-3.5 h-3.5 text-muted-foreground" />
-                        <span>Edit Board</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          setBoardToDelete(board);
-                          setActiveMenuId(null);
-                        }}
-                        className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-rose-500 hover:bg-rose-500/10 transition-colors text-left cursor-pointer font-semibold"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Delete Board</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+        {boards.map((board) => (
+          <BoardCard
+            key={board.id}
+            board={board}
+            projectKey={project?.key}
+            isActive={board.id === activeBoardId}
+            canManage={canManage}
+            activeMenuId={activeMenuId}
+            setActiveMenuId={setActiveMenuId}
+            onEdit={setBoardToEdit}
+            onDelete={setBoardToDelete}
+            onSelect={setActiveBoardId}
+          />
+        ))}
       </div>
 
       {/* Modals & Dialogs */}
@@ -241,7 +293,7 @@ export default function BoardsPage() {
       )}
 
       {boardToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-[2px] animate-fade-in select-none">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-[1px] animate-fade-in select-none">
           <div
             className="relative w-full max-w-md bg-elevated border border-border rounded-lg shadow-xl p-5 m-4 animate-scale-in"
             role="dialog"

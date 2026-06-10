@@ -10,6 +10,8 @@ import { useWorkspaceMembers } from "../hooks/use-workspace-members";
 import { Workspace } from "../types/workspace.types";
 import { Loader2 } from "lucide-react";
 import { getErrorMessage } from "@/lib/utils";
+import { WorkspaceMemberList } from "./workspace-member-list";
+import { WorkspaceDangerZone } from "./workspace-danger-zone";
 
 const workspaceSettingsSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name cannot exceed 100 characters"),
@@ -192,7 +194,13 @@ export function WorkspaceSettings({ workspace }: WorkspaceSettingsProps) {
         </form>
       </div>
 
+      <div className="border-t border-border/80 pt-8 mt-8">
+        <WorkspaceMemberList workspace={workspace} />
+      </div>
 
+      <div className="border-t border-border/80 pt-8 mt-8">
+        <WorkspaceDangerZone workspace={workspace} />
+      </div>
     </div>
   );
 }

@@ -75,9 +75,9 @@ export function WorkspaceSwitcher({ isCollapsed }: WorkspaceSwitcherProps) {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute left-0 mt-1 w-64 rounded-lg border border-border bg-elevated shadow-lg py-1.5 z-50 animate-fade-in focus:outline-none select-none">
-          <div className="px-3 py-1.5 border-b border-border">
-            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+        <div className="absolute left-0 mt-1.5 w-64 rounded-lg border border-border bg-elevated shadow-lg py-1.5 z-[9999] animate-fade-in focus:outline-none select-none">
+          <div className="px-3.5 py-1.5 border-b border-border">
+            <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider">
               Workspaces
             </span>
           </div>
@@ -99,13 +99,13 @@ export function WorkspaceSwitcher({ isCollapsed }: WorkspaceSwitcherProps) {
                     setActiveWorkspaceId(ws.id);
                     setIsOpen(false);
                   }}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs text-left cursor-pointer transition-colors ${
+                  className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-sm font-semibold text-left cursor-pointer transition-colors ${
                     isActive
                       ? "bg-secondary text-foreground font-semibold"
                       : "text-foreground hover:bg-secondary/60"
                   }`}
                 >
-                  <div className="w-5 h-5 rounded bg-sidebar-accent border border-border/40 flex items-center justify-center text-[10px] font-bold shrink-0 text-foreground">
+                  <div className="w-6 h-6 rounded bg-sidebar-accent border border-border/40 flex items-center justify-center text-xs font-bold shrink-0 text-foreground">
                     {wsInitials}
                   </div>
                   <span className="truncate flex-1">{ws.name}</span>
@@ -114,7 +114,7 @@ export function WorkspaceSwitcher({ isCollapsed }: WorkspaceSwitcherProps) {
             })}
 
             {workspaces.length === 0 && (
-              <div className="px-3 py-2 text-xs text-muted-foreground text-center">
+              <div className="px-3.5 py-2 text-xs text-muted-foreground text-center">
                 No workspaces found
               </div>
             )}
@@ -126,9 +126,9 @@ export function WorkspaceSwitcher({ isCollapsed }: WorkspaceSwitcherProps) {
                 setIsModalOpen(true);
                 setIsOpen(false);
               }}
-              className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer"
+              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm font-semibold text-foreground hover:bg-secondary transition-colors text-left cursor-pointer"
             >
-              <Plus className="w-3.5 h-3.5 text-muted-foreground" />
+              <Plus className="w-4 h-4 text-muted-foreground" />
               <span>Create Workspace</span>
             </button>
 
@@ -136,9 +136,9 @@ export function WorkspaceSwitcher({ isCollapsed }: WorkspaceSwitcherProps) {
               <Link
                 href="/settings/workspace"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors"
+                className="flex items-center gap-2.5 px-3.5 py-2 text-sm font-semibold text-foreground hover:bg-secondary transition-colors"
               >
-                <Settings className="w-3.5 h-3.5 text-muted-foreground" />
+                <Settings className="w-4 h-4 text-muted-foreground" />
                 <span>Workspace Settings</span>
               </Link>
             )}

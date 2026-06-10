@@ -29,28 +29,14 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
       disabled: !activeWorkspace,
       icon: Settings,
     },
-    {
-      name: "Members",
-      href: "/settings/members",
-      active: pathname === "/settings/members",
-      disabled: !activeWorkspace,
-      icon: Users,
-    },
-    {
-      name: "Danger Zone",
-      href: "/settings/danger",
-      active: pathname === "/settings/danger",
-      disabled: !activeWorkspace,
-      icon: AlertTriangle,
-    },
   ];
 
   return (
-    <div className="flex flex-col h-full space-y-5 select-none max-w-[1000px] w-full mx-auto px-4 py-4">
+    <div className="flex flex-col h-full space-y-5 select-none max-w-[1000px] w-full mx-auto px-4 py-4 animate-fade-in">
       {/* Settings Header */}
       <div className="space-y-1 border-b border-border pb-4">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">Settings</h1>
-        <p className="text-xs text-muted-foreground">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Settings</h1>
+        <p className="text-xs text-muted-foreground mt-1">
           Manage your account preferences, theme settings, workspaces, and team memberships.
         </p>
       </div>
@@ -67,10 +53,10 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium transition-colors shrink-0",
+                  "flex items-center gap-2.5 px-3 py-2 rounded-r-md border-l-2 text-sm font-medium transition-all shrink-0",
                   item.active
-                    ? "bg-accent text-foreground font-semibold"
-                    : "text-muted-foreground hover:bg-accent/40 hover:text-foreground"
+                    ? "bg-accent border-primary text-foreground font-semibold"
+                    : "border-transparent text-muted-foreground hover:bg-accent/40 hover:text-foreground"
                 )}
               >
                 <Icon className="w-4 h-4 shrink-0" />
