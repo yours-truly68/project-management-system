@@ -9,7 +9,6 @@ import { useUpdateWorkspace } from "../hooks/use-workspaces";
 import { useWorkspaceMembers } from "../hooks/use-workspace-members";
 import { Workspace } from "../types/workspace.types";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { getErrorMessage } from "@/lib/utils";
 
 const workspaceSettingsSchema = z.object({
@@ -29,7 +28,6 @@ interface WorkspaceSettingsProps {
 }
 
 export function WorkspaceSettings({ workspace }: WorkspaceSettingsProps) {
-  const router = useRouter();
   const { user } = useAuthStore();
   const { members } = useWorkspaceMembers(workspace.id);
   const { mutateAsync: updateWorkspace, isPending: isUpdating } = useUpdateWorkspace(workspace.id);
@@ -38,7 +36,6 @@ export function WorkspaceSettings({ workspace }: WorkspaceSettingsProps) {
   const [errorMsg, setErrorMsg] = React.useState("");
 
   const currentUserMember = members.find((m) => m.user_id === user?.id);
-  const isOwner = currentUserMember?.role === "OWNER";
   const isAdminOrOwner =
     currentUserMember?.role === "OWNER" || currentUserMember?.role === "ADMIN";
 
@@ -83,8 +80,6 @@ export function WorkspaceSettings({ workspace }: WorkspaceSettingsProps) {
     } catch (err: unknown) {
       setErrorMsg(getErrorMessage(err));
     }
-  };
-
   };
 
   return (

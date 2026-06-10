@@ -7,7 +7,7 @@ import { ProjectUpdateInput } from "../types/project.types";
 
 export function useProjects(includeArchived: boolean = false) {
   const { activeWorkspaceId } = useWorkspaceStore();
-  const { activeProjectId, setActiveProjectId, setArchivedEntity } = useProjectStore();
+  const { activeProjectId, setActiveProjectId, archivedEntity, setArchivedEntity } = useProjectStore();
 
   const query = useQuery({
     queryKey: ["projects", activeWorkspaceId, includeArchived],
@@ -16,6 +16,11 @@ export function useProjects(includeArchived: boolean = false) {
   });
 
   const projects = query.data;
+
+  // Clear archivedEntity when workspace changes
+  useEffect(() => {
+    setArchivedEntity(null);
+  }, [activeWorkspaceId, setArchivedEntity]);
 
   // Load initial project ID from cookie on client-side mount
   useEffect(() => {
@@ -52,6 +57,9 @@ export function useProjects(includeArchived: boolean = false) {
 
   // Sync activeProjectId with available projects
   useEffect(() => {
+    if (archivedEntity) {
+      return; // Do not auto-select if active entity is archived
+    }
     if (!includeArchived && projects && projects.length > 0) {
       const hasCookie = getCookie("kando_active_project");
       if (hasCookie && !activeProjectId && projects.some((p) => p.id === hasCookie)) {
@@ -71,7 +79,7 @@ export function useProjects(includeArchived: boolean = false) {
     } else if (!includeArchived && projects && projects.length === 0) {
       setActiveProjectId(null);
     }
-  }, [projects, activeProjectId, setActiveProjectId, includeArchived, activeProjectQuery.data, activeProjectQuery.isError, activeProjectQuery.isLoading]);
+  }, [projects, activeProjectId, setActiveProjectId, includeArchived, activeProjectQuery.data, activeProjectQuery.isError, activeProjectQuery.isLoading, archivedEntity]);
 
   const activeProject = projects?.find((p) => p.id === activeProjectId) || null;
 

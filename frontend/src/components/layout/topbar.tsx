@@ -15,6 +15,12 @@ import { useWorkspaces } from "@/features/workspaces/hooks/use-workspaces";
 import { useProjects } from "@/features/projects/hooks/use-projects";
 import { useBoards } from "@/features/boards/hooks/use-boards";
 import Link from "next/link";
+interface BreadcrumbItem {
+  label: string | null;
+  href?: string;
+  isLast?: boolean;
+  isLoading?: boolean;
+}
 
 export function Topbar() {
   const isCollapsed = useSidebarStore((state) => state.isCollapsed);
@@ -26,7 +32,7 @@ export function Topbar() {
   const { activeProject, isLoading: projLoading } = useProjects();
   const { activeBoard, isLoading: boardLoading } = useBoards();
  
-  const getBreadcrumbs = () => {
+  const getBreadcrumbs = (): BreadcrumbItem[] => {
     // 1. Settings Routes
     if (pathname === "/settings") {
       return [{ label: "Settings", isLast: true }];

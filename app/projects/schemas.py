@@ -74,4 +74,3 @@ class ProjectResponse(BaseModel):
     @property
     def is_archived(self) -> bool:
         return self.archived_at is not None
-
