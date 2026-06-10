@@ -38,7 +38,7 @@ class ProjectRepository:
         """List all projects in a workspace, optionally including archived ones."""
         stmt = select(Project).where(Project.workspace_id == workspace_id)
         if not include_archived:
-            stmt = stmt.where(Project.is_archived == False)  # noqa: E712
+            stmt = stmt.where(Project.archived_at.is_(None))
         stmt = stmt.order_by(Project.created_at.desc())
 
         result = await self.session.execute(stmt)

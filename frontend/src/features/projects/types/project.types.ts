@@ -5,6 +5,7 @@ export interface Project {
   key: string;
   description: string | null;
   created_by: string;
+  archived_at: string | null;
   is_archived: boolean;
   created_at: string;
   updated_at: string;
@@ -21,5 +22,6 @@ export interface ProjectUpdateInput {
   name?: string;
   key?: string;
   description?: string | null;
+  archived_at?: string | null;
   is_archived?: boolean;
 }

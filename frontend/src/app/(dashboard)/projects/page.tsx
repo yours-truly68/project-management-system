@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useProjects, useDeleteProject } from "@/features/projects/hooks/use-projects";
+import { useProjects, useDeleteProject, useUpdateProject } from "@/features/projects/hooks/use-projects";
 import { useWorkspaceStore } from "@/stores/workspace.store";
 import { useWorkspaceMembers } from "@/features/workspaces/hooks/use-workspace-members";
 import { useAuthStore } from "@/stores/auth.store";
@@ -9,6 +9,7 @@ import { Project } from "@/features/projects/types/project.types";
 import { CreateProjectModal } from "@/features/projects/components/create-project-modal";
 import { EditProjectModal } from "@/features/projects/components/edit-project-modal";
 import { ProjectEmptyState } from "@/features/projects/components/project-empty-state";
+import { cn } from "@/lib/utils";
 import {
   Plus,
   Loader2,
@@ -18,6 +19,7 @@ import {
   AlertTriangle,
   X,
   Calendar,
+  Archive,
 } from "lucide-react";
 import { getErrorMessage } from "@/lib/utils";
 
@@ -49,11 +51,163 @@ function getProjectColor(key: string): string {
   return colors[index];
 }
 
+interface ProjectCardProps {
+  project: Project;
+  isActive: boolean;
+  canCreateOrEdit: boolean;
+  canDelete: boolean;
+  onEdit: (project: Project) => void;
+  onDelete: (project: Project) => void;
+  onSelect: (id: string) => void;
+}
+
+function ProjectCard({
+  project,
+  isActive,
+  canCreateOrEdit,
+  canDelete,
+  onEdit,
+  onDelete,
+  onSelect,
+}: ProjectCardProps) {
+  const { mutateAsync: updateProject, isPending: isUpdating } = useUpdateProject(project.id);
+  const color = getProjectColor(project.key);
+  const createdDate = new Date(project.created_at).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
+  const handleArchive = async () => {
+    try {
+      await updateProject({ is_archived: !project.is_archived });
+    } catch (err) {
+      console.error("Failed to archive project:", err);
+    }
+  };
+
+  return (
+    <div
+      className={`flex flex-col justify-between p-5 rounded-xl border bg-card/50 transition-all ${
+        isActive
+          ? "border-primary shadow-sm shadow-primary/5 bg-card"
+          : "border-border hover:border-border-hover"
+      }`}
+    >
+      {/* Card Header */}
+      <div>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-2.5 overflow-hidden">
+            <div
+              className="w-3.5 h-3.5 rounded-full shrink-0"
+              style={{ backgroundColor: color }}
+            />
+            <h3 className="font-bold text-sm text-foreground truncate" title={project.name}>
+              {project.name}
+            </h3>
+          </div>
+          <span className="text-[10px] px-2.5 py-0.5 rounded font-bold uppercase tracking-wider bg-secondary border border-border text-muted-foreground shrink-0">
+            {project.key}
+          </span>
+        </div>
+
+        <p className="text-xs text-muted-foreground mt-2.5 line-clamp-2 min-h-[32px] leading-relaxed">
+          {project.description || "No description provided."}
+        </p>
+
+        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/80 mt-4 font-medium">
+          <Calendar className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
+          <span>Created {createdDate}</span>
+          {project.archived_at && (
+            <span className="ml-auto text-[9px] px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded font-semibold uppercase tracking-wider">
+              Archived
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Card Footer Actions */}
+      <div className="flex items-center justify-between gap-2.5 pt-4 mt-5 border-t border-border/60">
+        {project.archived_at ? (
+          <button
+            onClick={handleArchive}
+            disabled={isUpdating}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-secondary hover:bg-secondary/80 text-foreground border border-border transition-all cursor-pointer disabled:opacity-50"
+          >
+            {isUpdating ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <Archive className="w-3.5 h-3.5 text-muted-foreground/75" />
+            )}
+            Restore Project
+          </button>
+        ) : (
+          <button
+            onClick={() => onSelect(project.id)}
+            disabled={isActive}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+              isActive
+                ? "bg-primary/10 text-primary border border-primary/20 pointer-events-none"
+                : "bg-secondary hover:bg-secondary/80 text-foreground border border-border"
+            }`}
+          >
+            {isActive ? (
+              <>
+                <Check className="w-3.5 h-3.5 shrink-0" />
+                Active
+              </>
+            ) : (
+              "Select Project"
+            )}
+          </button>
+        )}
+
+        <div className="flex items-center gap-1.5">
+          {canCreateOrEdit && !project.archived_at && (
+            <button
+              onClick={() => onEdit(project)}
+              className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-all cursor-pointer"
+              title="Edit Project"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+            </button>
+          )}
+          {canCreateOrEdit && !project.archived_at && (
+            <button
+              onClick={handleArchive}
+              disabled={isUpdating}
+              className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-amber-500 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 transition-all cursor-pointer"
+              title="Archive Project"
+            >
+              {isUpdating ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Archive className="w-3.5 h-3.5" />
+              )}
+            </button>
+          )}
+          {canDelete && (
+            <button
+              onClick={() => onDelete(project)}
+              className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-rose-500 hover:bg-rose-50/50 dark:hover:bg-rose-950/20 transition-all cursor-pointer"
+              title="Delete Project"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function ProjectsPage() {
   const { activeWorkspaceId } = useWorkspaceStore();
   const { user } = useAuthStore();
   const { members } = useWorkspaceMembers(activeWorkspaceId);
-  const { projects, activeProjectId, setActiveProjectId, isLoading } = useProjects();
+  const [showArchived, setShowArchived] = React.useState(false);
+
+  const { projects, activeProjectId, setActiveProjectId, isLoading } = useProjects(showArchived);
   const { mutateAsync: deleteProject, isPending: isDeleting } = useDeleteProject();
 
   // Dialog / Modal states
@@ -104,12 +258,13 @@ export default function ProjectsPage() {
     );
   }
 
-  if (projects.length === 0) {
-    return <ProjectEmptyState />;
-  }
+  // Filter projects relative to showArchived selection
+  const filteredProjects = projects.filter((p) =>
+    showArchived ? p.archived_at !== null : p.archived_at === null
+  );
 
   return (
-    <div className="space-y-6 select-none animate-fade-in">
+    <div className="space-y-6 select-none animate-fade-in max-w-[1000px] w-full mx-auto px-4 py-2">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
         <div>
@@ -129,99 +284,61 @@ export default function ProjectsPage() {
         )}
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {projects.map((project) => {
-          const isActive = project.id === activeProjectId;
-          const color = getProjectColor(project.key);
-          const createdDate = new Date(project.created_at).toLocaleDateString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          });
-
-          return (
-            <div
-              key={project.id}
-              className={`flex flex-col justify-between p-5 rounded-xl border bg-card/50 transition-all ${
-                isActive
-                  ? "border-primary shadow-sm shadow-primary/5 bg-card"
-                  : "border-border hover:border-border-hover"
-              }`}
-            >
-              {/* Card Header */}
-              <div>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2.5 overflow-hidden">
-                    <div
-                      className="w-3.5 h-3.5 rounded-full shrink-0"
-                      style={{ backgroundColor: color }}
-                    />
-                    <h3 className="font-bold text-sm text-foreground truncate" title={project.name}>
-                      {project.name}
-                    </h3>
-                  </div>
-                  <span className="text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider bg-secondary border border-border text-muted-foreground shrink-0">
-                    {project.key}
-                  </span>
-                </div>
-
-                <p className="text-xs text-muted-foreground mt-2.5 line-clamp-2 min-h-[32px] leading-relaxed">
-                  {project.description || "No description provided."}
-                </p>
-
-                <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground/80 mt-4 font-medium">
-                  <Calendar className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
-                  <span>Created {createdDate}</span>
-                </div>
-              </div>
-
-              {/* Card Footer Actions */}
-              <div className="flex items-center justify-between gap-2.5 pt-4 mt-5 border-t border-border/60">
-                <button
-                  onClick={() => setActiveProjectId(project.id)}
-                  disabled={isActive}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                    isActive
-                      ? "bg-primary/10 text-primary border border-primary/20 pointer-events-none"
-                      : "bg-secondary hover:bg-secondary/80 text-foreground border border-border"
-                  }`}
-                >
-                  {isActive ? (
-                    <>
-                      <Check className="w-3.5 h-3.5 shrink-0" />
-                      Active
-                    </>
-                  ) : (
-                    "Select Project"
-                  )}
-                </button>
-
-                <div className="flex items-center gap-1.5">
-                  {canCreateOrEdit && (
-                    <button
-                      onClick={() => setProjectToEdit(project)}
-                      className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-all cursor-pointer"
-                      title="Edit Project"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                  {canDelete && (
-                    <button
-                      onClick={() => setProjectToDelete(project)}
-                      className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-rose-500 hover:bg-rose-50/50 dark:hover:bg-rose-950/20 transition-all cursor-pointer"
-                      title="Delete Project"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          );
-        })}
+      {/* Tabs Switcher */}
+      <div className="flex border-b border-border gap-4 text-xs font-semibold pb-px">
+        <button
+          onClick={() => setShowArchived(false)}
+          className={cn(
+            "pb-2.5 border-b-2 transition-all cursor-pointer px-1 -mb-px text-sm",
+            !showArchived
+              ? "border-primary text-foreground font-bold"
+              : "border-transparent text-muted-foreground hover:text-foreground font-medium"
+          )}
+        >
+          Active Projects
+        </button>
+        <button
+          onClick={() => setShowArchived(true)}
+          className={cn(
+            "pb-2.5 border-b-2 transition-all cursor-pointer px-1 -mb-px text-sm",
+            showArchived
+              ? "border-primary text-foreground font-bold"
+              : "border-transparent text-muted-foreground hover:text-foreground font-medium"
+          )}
+        >
+          Archived Projects
+        </button>
       </div>
+
+      {filteredProjects.length === 0 ? (
+        showArchived ? (
+          <div className="flex flex-col items-center justify-center min-h-[300px] p-8 text-center rounded-xl border border-dashed border-border bg-card/20 animate-fade-in select-none">
+            <Archive className="w-8 h-8 text-muted-foreground/30 mb-3" />
+            <h3 className="text-base font-semibold text-foreground mb-1">No Archived Projects</h3>
+            <p className="text-xs text-muted-foreground max-w-sm mt-1">
+              Projects you archive will appear here. Archiving hides projects from the active sidebar and lists while keeping all history.
+            </p>
+          </div>
+        ) : (
+          <ProjectEmptyState />
+        )
+      ) : (
+        /* Grid */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredProjects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              isActive={project.id === activeProjectId}
+              canCreateOrEdit={canCreateOrEdit}
+              canDelete={canDelete}
+              onEdit={setProjectToEdit}
+              onDelete={setProjectToDelete}
+              onSelect={setActiveProjectId}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Modals & Dialogs */}
       {isCreateOpen && (
@@ -286,7 +403,7 @@ export default function ProjectsPage() {
                   type="text"
                   value={confirmKey}
                   onChange={(e) => setConfirmKey(e.target.value.toUpperCase())}
-                  className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all uppercase animate-pulse"
+                  className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all uppercase"
                   placeholder="Type key to confirm..."
                 />
               </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useSidebarStore } from "@/stores/sidebar.store";
 import {
   Bell,
@@ -9,11 +10,74 @@ import {
   Search,
 } from "lucide-react";
 import { ProfileDropdown } from "./profile-dropdown";
+import { usePathname } from "next/navigation";
+import { useWorkspaces } from "@/features/workspaces/hooks/use-workspaces";
+import { useProjects } from "@/features/projects/hooks/use-projects";
+import { useBoards } from "@/features/boards/hooks/use-boards";
+import Link from "next/link";
 
 export function Topbar() {
   const isCollapsed = useSidebarStore((state) => state.isCollapsed);
   const toggleCollapsed = useSidebarStore((state) => state.toggleCollapsed);
   const toggleMobileOpen = useSidebarStore((state) => state.toggleMobileOpen);
+ 
+  const pathname = usePathname();
+  const { activeWorkspace, isLoading: wsLoading } = useWorkspaces();
+  const { activeProject, isLoading: projLoading } = useProjects();
+  const { activeBoard, isLoading: boardLoading } = useBoards();
+ 
+  const getBreadcrumbs = () => {
+    // 1. Settings Routes
+    if (pathname === "/settings") {
+      return [{ label: "Settings", isLast: true }];
+    }
+    if (pathname === "/settings/workspace") {
+      return [
+        { label: "Settings", href: "/settings" },
+        { label: "Workspace", isLast: true }
+      ];
+    }
+    if (pathname === "/settings/members") {
+      return [
+        { label: "Settings", href: "/settings" },
+        { label: "Members", isLast: true }
+      ];
+    }
+    if (pathname === "/settings/danger") {
+      return [
+        { label: "Settings", href: "/settings" },
+        { label: "Danger Zone", isLast: true }
+      ];
+    }
+ 
+    // 2. Main Dashboard & Project/Board List Routes
+    const wsName = wsLoading ? null : activeWorkspace?.name || "Workspace";
+    const projName = projLoading ? null : activeProject?.name || "Project";
+    const boardName = boardLoading ? null : activeBoard?.name || "Board";
+ 
+    if (pathname === "/projects") {
+      return [
+        { label: wsName, href: "/", isLoading: wsLoading },
+        { label: "Projects", isLast: true }
+      ];
+    }
+ 
+    if (pathname === "/boards") {
+      return [
+        { label: wsName, href: "/", isLoading: wsLoading },
+        { label: "Boards", isLast: true }
+      ];
+    }
+ 
+    // Default: Dashboard / Board view
+    return [
+      { label: wsName, href: "/", isLoading: wsLoading },
+      { label: projName, href: "/projects", isLoading: projLoading },
+      { label: boardName, isLast: true, isLoading: boardLoading }
+    ];
+  };
+ 
+  const breadcrumbs = getBreadcrumbs();
 
   return (
     <header className="flex items-center justify-between border-b border-border bg-card px-5 h-14 shrink-0 select-none">
@@ -43,23 +107,30 @@ export function Topbar() {
           )}
         </button>
 
-        {/* Breadcrumbs placeholder */}
-        <nav className="flex items-center gap-2 text-[13px] text-muted-foreground" aria-label="Breadcrumb navigation">
-          <button
-            className="hover:text-foreground font-medium rounded px-1.5 py-0.5 hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            aria-label="Workspace: KanDo Workspace"
-          >
-            KanDo Workspace
-          </button>
-          <span>/</span>
-          <button
-            className="hover:text-foreground font-medium rounded px-1.5 py-0.5 hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            aria-label="Project: Website Redesign"
-          >
-            Website Redesign
-          </button>
-          <span>/</span>
-          <span className="text-foreground font-semibold px-1.5 py-0.5" aria-current="page">Sprint 1 Board</span>
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-1.5 text-[13px] text-muted-foreground font-medium select-none" aria-label="Breadcrumb navigation">
+          {breadcrumbs.map((item, idx) => {
+            const showSkeleton = item.isLoading || !item.label;
+            return (
+              <React.Fragment key={idx}>
+                {idx > 0 && <span className="text-muted-foreground/30 font-normal">/</span>}
+                {showSkeleton ? (
+                  <div className="w-14 h-4 bg-muted animate-pulse rounded" />
+                ) : item.isLast ? (
+                  <span className="text-foreground font-semibold px-1 py-0.5 truncate max-w-[100px] sm:max-w-[160px]" aria-current="page">
+                    {item.label}
+                  </span>
+                ) : (
+                  <Link
+                    href={item.href || "#"}
+                    className="hover:text-foreground rounded px-1 py-0.5 hover:bg-accent transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring truncate max-w-[100px] sm:max-w-[160px]"
+                  >
+                    {item.label}
+                  </Link>
+                )}
+              </React.Fragment>
+            );
+          })}
         </nav>
       </div>
 

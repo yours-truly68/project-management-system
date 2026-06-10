@@ -8,7 +8,7 @@ import re
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, computed_field
 
 _KEY_PATTERN = re.compile(r"^[A-Z0-9]+$")
 
@@ -66,6 +66,12 @@ class ProjectResponse(BaseModel):
     key: str
     description: str | None = None
     created_by: uuid.UUID
-    is_archived: bool
+    archived_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
+
+    @computed_field
+    @property
+    def is_archived(self) -> bool:
+        return self.archived_at is not None
+

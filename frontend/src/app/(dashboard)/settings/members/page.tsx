@@ -2,10 +2,10 @@
 
 import * as React from "react";
 import { useWorkspaces } from "@/features/workspaces/hooks/use-workspaces";
-import { WorkspaceSettings } from "@/features/workspaces/components/workspace-settings";
+import { WorkspaceMemberList } from "@/features/workspaces/components/workspace-member-list";
 import { Loader2 } from "lucide-react";
 
-export default function WorkspaceSettingsPage() {
+export default function WorkspaceMembersPage() {
   const { activeWorkspace, isLoading } = useWorkspaces();
 
   if (isLoading) {
@@ -21,7 +21,7 @@ export default function WorkspaceSettingsPage() {
       <div className="bg-secondary/20 rounded-xl border border-border p-8 text-center max-w-xl">
         <h2 className="text-lg font-bold text-foreground/90 font-heading">No Active Workspace</h2>
         <p className="text-xs text-muted-foreground mt-2">
-          You must select or create a workspace first to configure its settings.
+          You must select or create a workspace first to view its members.
         </p>
       </div>
     );
@@ -29,7 +29,7 @@ export default function WorkspaceSettingsPage() {
 
   return (
     <div className="space-y-8 select-none">
-      <WorkspaceSettings workspace={activeWorkspace} />
+      <WorkspaceMemberList workspace={activeWorkspace} />
     </div>
   );
 }

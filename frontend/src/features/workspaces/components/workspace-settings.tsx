@@ -5,10 +5,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuthStore } from "@/stores/auth.store";
-import { useUpdateWorkspace, useDeleteWorkspace } from "../hooks/use-workspaces";
+import { useUpdateWorkspace } from "../hooks/use-workspaces";
 import { useWorkspaceMembers } from "../hooks/use-workspace-members";
 import { Workspace } from "../types/workspace.types";
-import { Loader2, Trash2, AlertTriangle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getErrorMessage } from "@/lib/utils";
 
@@ -33,10 +33,7 @@ export function WorkspaceSettings({ workspace }: WorkspaceSettingsProps) {
   const { user } = useAuthStore();
   const { members } = useWorkspaceMembers(workspace.id);
   const { mutateAsync: updateWorkspace, isPending: isUpdating } = useUpdateWorkspace(workspace.id);
-  const { mutateAsync: deleteWorkspace, isPending: isDeleting } = useDeleteWorkspace();
 
-  const [confirmSlug, setConfirmSlug] = React.useState("");
-  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false);
   const [successMsg, setSuccessMsg] = React.useState("");
   const [errorMsg, setErrorMsg] = React.useState("");
 
@@ -70,8 +67,6 @@ export function WorkspaceSettings({ workspace }: WorkspaceSettingsProps) {
     setTimeout(() => {
       setSuccessMsg("");
       setErrorMsg("");
-      setShowDeleteConfirm(false);
-      setConfirmSlug("");
     }, 0);
   }, [workspace, reset]);
 
@@ -90,15 +85,6 @@ export function WorkspaceSettings({ workspace }: WorkspaceSettingsProps) {
     }
   };
 
-  const handleDelete = async () => {
-    if (confirmSlug !== workspace.slug) return;
-    setErrorMsg("");
-    try {
-      await deleteWorkspace(workspace.id);
-      router.push("/settings");
-    } catch (err: unknown) {
-      setErrorMsg(getErrorMessage(err));
-    }
   };
 
   return (
@@ -118,7 +104,7 @@ export function WorkspaceSettings({ workspace }: WorkspaceSettingsProps) {
           </div>
         )}
 
-        {errorMsg && !showDeleteConfirm && (
+        {errorMsg && (
           <div className="p-2.5 rounded border border-destructive/20 bg-destructive/10 text-destructive text-xs font-semibold leading-normal">
             {errorMsg}
           </div>
@@ -211,80 +197,7 @@ export function WorkspaceSettings({ workspace }: WorkspaceSettingsProps) {
         </form>
       </div>
 
-      {/* Danger Zone (Delete Workspace) */}
-      {isOwner && (
-        <div className="bg-rose-500/5 rounded-xl border border-rose-500/20 p-6 space-y-4 animate-fade-in">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
-            <div>
-              <h2 className="text-xl font-bold text-rose-500 font-heading">Danger Zone</h2>
-              <p className="text-xs text-muted-foreground mt-1">
-                Once you delete a workspace, there is no going back. All projects, boards, tasks,
-                and members will be permanently deleted.
-              </p>
-            </div>
-          </div>
 
-          {!showDeleteConfirm ? (
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => setShowDeleteConfirm(true)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-rose-500/30 hover:bg-rose-500/10 text-rose-500 text-xs font-bold transition-all cursor-pointer"
-              >
-                <Trash2 className="w-4 h-4" />
-                Delete Workspace
-              </button>
-            </div>
-          ) : (
-            <div className="pt-2 space-y-3.5 max-w-md">
-              {errorMsg && (
-                <div className="p-2.5 rounded border border-destructive/20 bg-destructive/10 text-destructive text-xs font-semibold leading-normal animate-fade-in">
-                  {errorMsg}
-                </div>
-              )}
-              <div className="space-y-1.5">
-                <p className="text-xs font-medium text-foreground">
-                  To confirm, type{" "}
-                  <span className="font-bold font-mono text-rose-500 select-all">
-                    {workspace.slug}
-                  </span>{" "}
-                  below:
-                </p>
-                <input
-                  type="text"
-                  value={confirmSlug}
-                  onChange={(e) => setConfirmSlug(e.target.value)}
-                  className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all"
-                  placeholder="Type the slug here..."
-                />
-              </div>
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={handleDelete}
-                  disabled={confirmSlug !== workspace.slug || isDeleting}
-                  className="flex items-center gap-1 px-3.5 py-2 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold transition-all disabled:opacity-40 disabled:hover:bg-rose-500 cursor-pointer"
-                >
-                  {isDeleting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                  Confirm Deletion
-                </button>
-                <button
-                  type="button"
-                  disabled={isDeleting}
-                  onClick={() => {
-                    setShowDeleteConfirm(false);
-                    setConfirmSlug("");
-                  }}
-                  className="px-3.5 py-2 rounded-lg border border-border text-foreground hover:bg-secondary text-xs font-bold transition-all cursor-pointer"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 }

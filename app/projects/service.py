@@ -1,4 +1,5 @@
 import uuid
+from datetime import UTC, datetime
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -108,6 +109,10 @@ class ProjectService:
             )
 
         update_dict = data.model_dump(exclude_unset=True)
+
+        if "is_archived" in update_dict:
+            is_archived = update_dict.pop("is_archived")
+            update_dict["archived_at"] = datetime.now(UTC) if is_archived else None
 
         # If key is changing, validate uniqueness
         if "key" in update_dict and update_dict["key"] != project.key:

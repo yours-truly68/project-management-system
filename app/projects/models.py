@@ -11,8 +11,9 @@ defined in the Permissions Matrix (OWNER/ADMIN can archive projects).
 """
 
 import uuid as _uuid
+from datetime import datetime
 
-from sqlalchemy import ForeignKey, Index, String, Text, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, Index, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
@@ -26,6 +27,7 @@ class Project(UUIDMixin, TimestampMixin, Base):
         UniqueConstraint("workspace_id", "key", name="uq_projects_workspace_key"),
         Index("ix_projects_workspace_id", "workspace_id"),
         Index("ix_projects_created_by", "created_by"),
+        Index("ix_projects_archived_at", "archived_at"),
     )
 
     workspace_id: Mapped[_uuid.UUID] = mapped_column(
@@ -48,9 +50,10 @@ class Project(UUIDMixin, TimestampMixin, Base):
         ForeignKey("users.id", ondelete="RESTRICT"),
         nullable=False,
     )
-    is_archived: Mapped[bool] = mapped_column(
-        default=False,
-        server_default="false",
+    archived_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
     )
 
     # Relationships

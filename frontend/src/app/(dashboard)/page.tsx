@@ -19,7 +19,10 @@ import {
   GripVertical,
   Loader2,
   Edit3,
+  Archive,
 } from "lucide-react";
+import { useProjectStore } from "@/stores/project.store";
+import { useUpdateProject } from "@/features/projects/hooks/use-projects";
 
 export default function Page() {
   const { activeWorkspace, isLoading: isWorkspaceLoading } = useWorkspaces();
@@ -36,6 +39,23 @@ export default function Page() {
   const [isEditOpen, setIsEditOpen] = React.useState(false);
   const [isColumnCreateOpen, setIsColumnCreateOpen] = React.useState(false);
   const [columnToEdit, setColumnToEdit] = React.useState<Column | null>(null);
+
+  const archivedEntity = useProjectStore((s) => s.archivedEntity);
+  const setArchivedEntity = useProjectStore((s) => s.setArchivedEntity);
+
+  const { mutateAsync: updateProject, isPending: isRestoring } = useUpdateProject(archivedEntity?.id || "");
+
+  const handleRestore = async () => {
+    if (!archivedEntity) return;
+    try {
+      await updateProject({ is_archived: false });
+      const { setActiveProjectId } = useProjectStore.getState();
+      setActiveProjectId(archivedEntity.id);
+      setArchivedEntity(null);
+    } catch (err) {
+      console.error("Failed to restore archived project:", err);
+    }
+  };
 
   // Permission checks
   const currentUserMember = members.find((m) => m.user_id === user?.id);
@@ -57,6 +77,37 @@ export default function Page() {
         <p className="text-xs text-muted-foreground max-w-sm mt-1">
           Select or create a workspace from the sidebar switcher to start.
         </p>
+      </div>
+    );
+  }
+
+  if (archivedEntity) {
+    const isProject = archivedEntity.type === "project";
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[450px] p-8 text-center rounded-xl border border-dashed border-border bg-card/40 animate-fade-in select-none max-w-xl mx-auto my-12">
+        <Archive className="w-10 h-10 text-amber-500 mb-4 shrink-0" />
+        <h3 className="text-lg font-bold text-foreground mb-1">
+          {isProject ? "Project" : "Board"} Archived
+        </h3>
+        <p className="text-xs text-muted-foreground max-w-sm mt-1.5 leading-relaxed">
+          The {archivedEntity.type} <span className="font-semibold text-foreground">&quot;{archivedEntity.name}&quot;</span> has been archived. You cannot edit it or add columns/tasks while it remains archived.
+        </p>
+        <div className="flex items-center gap-3 mt-6">
+          <button
+            onClick={handleRestore}
+            disabled={isRestoring}
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 transition-colors cursor-pointer disabled:opacity-50"
+          >
+            {isRestoring && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+            Restore {isProject ? "Project" : "Board"}
+          </button>
+          <button
+            onClick={() => setArchivedEntity(null)}
+            className="px-4 py-2 text-xs font-semibold rounded-lg border border-border text-foreground hover:bg-secondary transition-colors cursor-pointer"
+          >
+            Dismiss
+          </button>
+        </div>
       </div>
     );
   }
