@@ -12,28 +12,18 @@ interface TaskCardProps {
   onClick: () => void;
   members: WorkspaceMemberDetailed[];
   boardId: string;
+  columnName?: string;
 }
 
-interface TaskCardMetaProps {
-  left?: React.ReactNode;
-  right?: React.ReactNode;
-}
-
-// Reusable metadata component prepared for comments, attachments, etc.
-export function TaskCardMeta({ left, right }: TaskCardMetaProps) {
-  return (
-    <div className="flex items-center justify-between w-full mt-2 pt-2 border-t border-border/40">
-      {/* Left Metadata Slots (Due dates, future comments, attachments, checklists) */}
-      <div className="flex items-center gap-2 text-muted-foreground min-w-0 flex-1">
-        {left}
-        {/* Future Slots: Comments, Attachments, Subtasks, Activity */}
-      </div>
-      {/* Right Metadata Slots (Assignees, labels, flags) */}
-      <div className="flex items-center gap-1.5 shrink-0">
-        {right}
-      </div>
-    </div>
-  );
+// Soft background mapping based on name
+function getTagStyles(name: string) {
+  const norm = name.toLowerCase();
+  if (norm.includes("design")) return "bg-lime-500/10 text-lime-400 border border-lime-500/20";
+  if (norm.includes("todo") || norm.includes("backlog")) return "bg-amber-500/10 text-amber-400 border border-amber-500/20";
+  if (norm.includes("progress")) return "bg-blue-500/10 text-blue-400 border border-blue-500/20";
+  if (norm.includes("review")) return "bg-purple-500/10 text-purple-400 border border-purple-500/20";
+  if (norm.includes("done")) return "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+  return "bg-slate-500/10 text-slate-400 border border-slate-500/20";
 }
 
 // Map priorities to colors & labels
@@ -41,10 +31,10 @@ const PRIORITY_MAP: Record<
   TaskPriority,
   { label: string; bg: string; text: string; dot: string }
 > = {
-  URGENT: { label: "Urgent", bg: "bg-red-500/10 border border-red-500/20", text: "text-red-500", dot: "bg-red-500" },
-  HIGH: { label: "High", bg: "bg-orange-500/10 border border-orange-500/20", text: "text-orange-500", dot: "bg-orange-500" },
-  MEDIUM: { label: "Medium", bg: "bg-amber-500/10 border border-amber-500/20", text: "text-amber-500", dot: "bg-amber-500" },
-  LOW: { label: "Low", bg: "bg-emerald-500/10 border border-emerald-500/20", text: "text-emerald-500", dot: "bg-emerald-500" },
+  URGENT: { label: "Urgent", bg: "bg-red-500/10 border border-red-500/20", text: "text-red-400", dot: "bg-red-500" },
+  HIGH: { label: "High", bg: "bg-orange-500/10 border border-orange-500/20", text: "text-orange-400", dot: "bg-orange-500" },
+  MEDIUM: { label: "Medium", bg: "bg-amber-500/10 border border-amber-500/20", text: "text-amber-400", dot: "bg-amber-500" },
+  LOW: { label: "Low", bg: "bg-emerald-500/10 border border-emerald-500/20", text: "text-emerald-400", dot: "bg-emerald-500" },
 };
 
 function getInitials(name: string): string {
@@ -56,7 +46,6 @@ function getInitials(name: string): string {
   return parts[0][0]?.toUpperCase() || "";
 }
 
-// Helper to generate deterministic bg color for assignee initials fallback
 function getAvatarBg(name: string): string {
   const colors = [
     "bg-red-500/10 text-red-500 border-red-500/20",
@@ -79,7 +68,7 @@ function getAvatarBg(name: string): string {
   return colors[index];
 }
 
-export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
+export function TaskCard({ task, onClick, members, boardId, columnName }: TaskCardProps) {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
   const { mutateAsync: deleteTask } = useDeleteTask(boardId);
@@ -93,7 +82,6 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
 
   const isOverdue = React.useMemo(() => {
     if (!task.due_date) return false;
-    // Set hours to end of day to make check nicer
     const d = new Date(task.due_date);
     d.setHours(23, 59, 59, 999);
     return d < new Date();
@@ -107,7 +95,6 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
     });
   }, [task.due_date]);
 
-  // Handle outside menu click
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -138,41 +125,14 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
     onClick();
   };
 
-  // Due date rendering helper
-  const renderDueDate = () => {
-    if (!formattedDueDate) return null;
-    return (
-      <span
-        className={cn(
-          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-semibold transition-all duration-150 border",
-          isOverdue
-            ? "bg-rose-500/10 text-rose-500 border-rose-500/20 font-bold"
-            : "bg-secondary text-muted-foreground/80 border-border/40"
-        )}
-        title={isOverdue ? "Overdue task!" : "Due Date"}
-      >
-        <Clock className={cn("w-3.5 h-3.5 shrink-0", isOverdue ? "text-rose-500" : "text-muted-foreground/50")} />
-        <span>{formattedDueDate}</span>
-      </span>
-    );
-  };
-
-  // Assignee Avatar rendering helper
   const renderAssigneeAvatar = () => {
     if (!assignee) {
-      return (
-        <div
-          className="w-5 h-5 rounded-full border border-dashed border-border/80 flex items-center justify-center text-[10px] text-muted-foreground/30 shrink-0 select-none"
-          title="Unassigned"
-        >
-          —
-        </div>
-      );
+      return null;
     }
     return (
       <div
         className={cn(
-          "flex items-center justify-center w-5 h-5 rounded-full border text-[9px] font-bold shrink-0 select-none transition-all",
+          "flex items-center justify-center w-[22px] h-[22px] rounded-full border text-[9px] font-bold shrink-0 select-none transition-all",
           getAvatarBg(assignee.full_name)
         )}
         title={assignee.full_name}
@@ -185,7 +145,7 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
   return (
     <div
       onClick={onClick}
-      className="group relative flex flex-col p-3 bg-card border border-border/80 dark:border-border/60 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.02)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.45)] hover:border-primary/40 dark:hover:border-primary/45 hover:shadow-md dark:hover:shadow-[0_4px_12px_rgba(0,0,0,0.55)] hover:-translate-y-[1.5px] transition-all duration-200 cursor-pointer select-none space-y-2.5"
+      className="group relative flex flex-col p-4 bg-card border border-[#242B36] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.45)] hover:border-primary/45 hover:shadow-lg hover:-translate-y-[1.5px] transition-all duration-200 cursor-pointer select-none space-y-3"
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
@@ -196,20 +156,46 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
       }}
       aria-label={`Task: ${task.title}`}
     >
-      {/* Header: Priority Badge & Always Visible Overflow Actions */}
+      {/* 1. Tags Row */}
       <div className="flex items-center justify-between gap-2">
-        <span
-          className={cn(
-            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider",
-            priority.bg,
-            priority.text
+        <div className="flex flex-wrap items-center gap-1.5">
+          {/* Status/Category Pill (Column Name) */}
+          {columnName && (
+            <span className={cn("inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider", getTagStyles(columnName))}>
+              {columnName}
+            </span>
           )}
-        >
-          <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", priority.dot)} />
-          {priority.label}
-        </span>
 
-        {/* Overflow Menu (Always visible) */}
+          {/* Priority Pill */}
+          <span
+            className={cn(
+              "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider",
+              priority.bg,
+              priority.text
+            )}
+          >
+            <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", priority.dot)} />
+            {priority.label}
+          </span>
+
+          {/* Optional Due Date tag */}
+          {formattedDueDate && (
+            <span
+              className={cn(
+                "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold border",
+                isOverdue
+                  ? "bg-rose-500/10 text-rose-400 border-rose-500/20 font-bold"
+                  : "bg-secondary text-muted-foreground/80 border-border/40"
+              )}
+              title={isOverdue ? "Overdue task!" : "Due Date"}
+            >
+              <Clock className={cn("w-3 h-3 shrink-0", isOverdue ? "text-rose-500" : "text-muted-foreground/50")} />
+              <span>{formattedDueDate}</span>
+            </span>
+          )}
+        </div>
+
+        {/* Actions menu */}
         <div className="relative" ref={menuRef} onClick={(e) => e.stopPropagation()}>
           <button
             onClick={(e) => {
@@ -223,7 +209,7 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
           </button>
 
           {isMenuOpen && (
-            <div className="absolute right-0 mt-1 w-32 rounded-lg border border-border bg-elevated shadow-lg py-1 z-20 animate-fade-in focus:outline-none text-left select-none">
+            <div className="absolute right-0 mt-1.5 w-32 rounded-lg border border-[#242B36] bg-[#1B212B] shadow-[0_20px_40px_rgba(0,0,0,0.45)] py-1 z-[9999] animate-fade-in focus:outline-none text-left select-none">
               <button
                 onClick={handleEdit}
                 className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer font-medium"
@@ -243,9 +229,9 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
         </div>
       </div>
 
-      {/* Task Content */}
+      {/* 2. Middle Section (Title & Description) */}
       <div className="space-y-1">
-        <h4 className="text-lg font-semibold text-foreground leading-snug group-hover:text-foreground transition-colors break-words">
+        <h4 className="text-[16px] font-semibold text-foreground leading-snug group-hover:text-foreground transition-colors break-words">
           {task.title}
         </h4>
         {task.description && (
@@ -255,14 +241,25 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
         )}
       </div>
 
-      {/* Reusable Metadata Row */}
-      <TaskCardMeta
-        left={renderDueDate()}
-        right={renderAssigneeAvatar()}
-      />
+      {/* 3. Media Preview Row (Hidden when no attachments present to avoid fake data) */}
+
+      {/* 4. Divider */}
+      <div className="border-t border-[#242B36] my-1" />
+
+      {/* 5. Footer Metadata */}
+      <div className="flex items-center justify-between w-full h-[22px]">
+        {/* Left: Assignee avatars */}
+        <div className="flex items-center gap-1">
+          {renderAssigneeAvatar()}
+        </div>
+
+        {/* Right: Comments/Attachments counts (only populated if real data exists) */}
+        <div className="flex items-center gap-2.5 text-muted-foreground/50">
+          {/* Reserved for future comments/attachments stats */}
+        </div>
+      </div>
     </div>
   );
 }
 
 export default TaskCard;
-

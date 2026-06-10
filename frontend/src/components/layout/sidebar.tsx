@@ -6,9 +6,7 @@ import { usePathname } from "next/navigation";
 import { useSidebarStore } from "@/stores/sidebar.store";
 import { MAIN_NAV_ITEMS, OTHER_NAV_ITEMS } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
-import {
-  Star,
-} from "lucide-react";
+
 import { WorkspaceSwitcher } from "@/features/workspaces/components/workspace-switcher";
 import { ProjectListSidebar } from "@/features/projects/components/project-list-sidebar";
 import { BoardListSidebar } from "@/features/boards/components/board-list-sidebar";

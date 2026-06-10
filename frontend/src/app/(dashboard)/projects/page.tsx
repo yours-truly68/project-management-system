@@ -215,7 +215,7 @@ function ProjectCard({
           )}
 
           {isMenuOpen && (
-            <div className="absolute right-0 mt-1 w-36 rounded-lg border border-border bg-elevated shadow-lg py-1 z-10 animate-fade-in text-left select-none">
+            <div className="absolute right-0 mt-1.5 w-36 rounded-lg border border-[#242B36] bg-[#1B212B] shadow-[0_20px_40px_rgba(0,0,0,0.45)] py-1 z-[9999] animate-fade-in text-left select-none">
               {canCreateOrEdit && !project.archived_at && (
                 <button
                   onClick={() => {
@@ -415,7 +415,7 @@ export default function ProjectsPage() {
       {projectToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-[1px] animate-fade-in select-none">
           <div
-            className="relative w-full max-w-md bg-elevated border border-border rounded-lg shadow-xl p-5 m-4 animate-scale-in"
+            className="relative w-full max-w-md bg-[#1B212B] border border-[#242B36] rounded-lg shadow-[0_20px_40px_rgba(0,0,0,0.45)] p-5 m-4 animate-scale-in"
             role="dialog"
             aria-modal="true"
           >

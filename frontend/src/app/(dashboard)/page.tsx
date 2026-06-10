@@ -103,11 +103,11 @@ export default function Page() {
         </div>
 
         {/* Columns & Cards Skeleton */}
-        <div className="flex-1 flex gap-3 overflow-x-auto min-h-0 pb-3">
+        <div className="flex-1 flex gap-4 overflow-x-auto min-h-0 pb-3">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="flex flex-col bg-secondary/80 rounded-xl border border-border/50 p-3.5 space-y-3.5 w-[340px] shrink-0 h-full overflow-hidden animate-pulse"
+              className="flex flex-col bg-secondary rounded-xl border border-[#242B36] p-4 space-y-3 w-[320px] shrink-0 h-full overflow-hidden animate-pulse"
             >
               {/* Column Header Shimmer */}
               <div className="flex items-center justify-between pb-0.5">
@@ -204,7 +204,7 @@ export default function Page() {
     return <BoardEmptyState />;
   }
 
-  const getColumnColor = (name: string, defaultColor: string) => {
+  const getColumnColor = (name: string, defaultColor: string | null) => {
     const norm = name.toLowerCase().replace(/[^a-z0-9]/g, "");
     if (norm.includes("todo") || norm.includes("backlog")) return "#f97316"; // Orange
     if (norm.includes("progress") || norm.includes("active")) return "#3b82f6"; // Blue
@@ -221,7 +221,7 @@ export default function Page() {
       {/* Board Header Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5 pt-3 shrink-0">
         <div>
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground/95 select-none animate-fade-in">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground select-none animate-fade-in">
             {activeBoard.name}
           </h1>
           {activeBoard.description && (
@@ -258,11 +258,11 @@ export default function Page() {
       {sortedColumns.length === 0 ? (
         <ColumnEmptyState boardId={activeBoard.id} />
       ) : (
-        <div className="flex-1 flex gap-3 overflow-x-auto min-h-0 pb-3">
+        <div className="flex-1 flex gap-4 overflow-x-auto min-h-0 pb-3">
           {sortedColumns.map((column) => (
             <div
               key={column.id}
-              className="flex flex-col bg-secondary rounded-xl border border-border/60 dark:border-border/50 p-3.5 space-y-3 w-[340px] shrink-0 h-full overflow-hidden shadow-xs dark:shadow-none"
+              className="flex flex-col bg-secondary rounded-xl border border-[#242B36] p-4 space-y-3 w-[320px] shrink-0 h-full overflow-hidden shadow-sm"
             >
               {/* Column Header */}
               <div className="flex items-center justify-between pb-1 select-none shrink-0">
@@ -291,7 +291,7 @@ export default function Page() {
               {canManageBoard && (
                 <button
                   onClick={() => setTaskToCreateColId(column.id)}
-                  className="w-full h-9 bg-secondary border border-border/50 hover:border-border/80 hover:bg-accent rounded-lg flex items-center justify-center transition-all text-muted-foreground hover:text-foreground cursor-pointer shrink-0 gap-2 text-xs font-bold"
+                  className="w-full h-9 bg-card border border-[#242B36] hover:border-primary/45 rounded-lg flex items-center justify-center transition-all text-muted-foreground hover:text-foreground cursor-pointer shrink-0 gap-2 text-xs font-bold"
                   aria-label="Add Task"
                 >
                   <Plus className="w-4 h-4" />
@@ -311,6 +311,7 @@ export default function Page() {
                       <TaskCard
                         key={task.id}
                         task={task}
+                        columnName={column.name}
                         onClick={() => setSelectedTask(task)}
                         members={members}
                         boardId={activeBoard.id}

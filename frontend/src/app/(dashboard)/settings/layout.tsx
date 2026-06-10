@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useWorkspaces } from "@/features/workspaces/hooks/use-workspaces";
 import { cn } from "@/lib/utils";
-import { User, Settings, Users, AlertTriangle } from "lucide-react";
+import { User, Settings } from "lucide-react";
 
 interface SettingsLayoutProps {
   children: React.ReactNode;
