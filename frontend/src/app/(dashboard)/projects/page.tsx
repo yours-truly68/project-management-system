@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useProjects, useDeleteProject, useUpdateProject } from "@/features/projects/hooks/use-projects";
-import { useQuery, useQueries } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { boardService } from "@/features/boards/services/board.service";
 import { taskService } from "@/features/tasks/services/task.service";
 import { useWorkspaceStore } from "@/stores/workspace.store";

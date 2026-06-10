@@ -57,7 +57,7 @@ export function ProfileDropdown() {
 
       {/* Dropdown Menu Card */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 rounded-lg border border-[#242B36] bg-[#1B212B] shadow-[0_20px_40px_rgba(0,0,0,0.45)] py-1 z-[9999] animate-fade-in focus:outline-none select-none">
+        <div className="absolute right-0 mt-2 w-56 rounded-[20px] border border-border bg-elevated shadow-2xl py-1 z-[9999] animate-fade-in focus:outline-none select-none">
           {/* User Profile info header */}
           <div className="px-3 py-2 border-b border-border">
             <p className="text-xs font-semibold text-foreground truncate">

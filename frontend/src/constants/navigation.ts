@@ -1,7 +1,6 @@
 import {
   Inbox,
   Search,
-  Star,
   Folder,
   LayoutGrid,
   Bell,
