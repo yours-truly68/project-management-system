@@ -94,19 +94,19 @@ export function TaskDetailsDrawer({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[1px] transition-opacity select-none"
+        className="fixed inset-0 z-40 bg-black/75 backdrop-blur-[2px] transition-opacity select-none"
         onClick={onClose}
       />
 
       {/* Drawer Container */}
       <div
-        className="fixed top-0 right-0 h-full w-full sm:w-[460px] bg-[#1B212B] border-l border-[#242B36] shadow-2xl z-50 transform translate-x-0 transition-transform duration-300 flex flex-col justify-between select-none"
+        className="fixed top-0 right-0 h-full w-full sm:w-[460px] bg-elevated border-l border-border shadow-2xl z-50 transform translate-x-0 transition-transform duration-300 flex flex-col justify-between select-none"
         role="dialog"
         aria-modal="true"
         aria-label="Task details panel"
       >
         {/* Header toolbar */}
-        <div className="flex items-center justify-between px-5 h-14 border-b border-[#242B36] bg-[#1B212B] shrink-0">
+        <div className="flex items-center justify-between px-5 h-14 border-b border-border bg-elevated shrink-0">
           <div className="flex items-center gap-2">
             {!showConfirmDelete ? (
               <button
