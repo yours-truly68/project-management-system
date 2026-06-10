@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { WorkspaceSwitcher } from "@/features/workspaces/components/workspace-switcher";
 import { ProjectListSidebar } from "@/features/projects/components/project-list-sidebar";
+import { BoardListSidebar } from "@/features/boards/components/board-list-sidebar";
 import {
   Tooltip,
   TooltipContent,
@@ -144,6 +145,9 @@ export function Sidebar() {
 
           {/* 4. Projects List Section (Dynamic) */}
           <ProjectListSidebar isCollapsed={isCollapsed} />
+
+          {/* 5. Boards List Section (Dynamic) */}
+          <BoardListSidebar isCollapsed={isCollapsed} />
 
           {/* Other navigation section */}
           <div className="pt-2 border-t border-sidebar-border space-y-0.5">

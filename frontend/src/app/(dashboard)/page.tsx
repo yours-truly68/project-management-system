@@ -1,7 +1,23 @@
 "use client";
 
 import * as React from "react";
-import { Plus, MoreHorizontal, Calendar, GripVertical, MessageSquare, Paperclip } from "lucide-react";
+import { useWorkspaces } from "@/features/workspaces/hooks/use-workspaces";
+import { useProjects } from "@/features/projects/hooks/use-projects";
+import { useBoards } from "@/features/boards/hooks/use-boards";
+import { useWorkspaceMembers } from "@/features/workspaces/hooks/use-workspace-members";
+import { useAuthStore } from "@/stores/auth.store";
+import { BoardEmptyState } from "@/features/boards/components/board-empty-state";
+import { EditBoardModal } from "@/features/boards/components/edit-board-modal";
+import {
+  Plus,
+  MoreHorizontal,
+  Calendar,
+  GripVertical,
+  MessageSquare,
+  Paperclip,
+  Loader2,
+  Edit3,
+} from "lucide-react";
 
 interface Assignee {
   name: string;
@@ -60,6 +76,19 @@ function PriorityBadge({ priority }: { priority: string }) {
 }
 
 export default function Page() {
+  const { activeWorkspace, isLoading: isWorkspaceLoading } = useWorkspaces();
+  const { activeProject, isLoading: isProjectLoading } = useProjects();
+  const { activeBoard, isLoading: isBoardLoading } = useBoards();
+  const { user } = useAuthStore();
+  const { members } = useWorkspaceMembers(activeWorkspace?.id || null);
+
+  const [isEditOpen, setIsEditOpen] = React.useState(false);
+
+  // Permission checks
+  const currentUserMember = members.find((m) => m.user_id === user?.id);
+  const role = currentUserMember?.role || "MEMBER";
+  const canEditBoard = role === "OWNER" || role === "ADMIN";
+
   const mockColumns: Column[] = [
     {
       id: "todo",
@@ -76,7 +105,7 @@ export default function Page() {
           assignee: { name: "Sarah Connor", initials: "SC", color: "bg-purple-600 text-white" },
           labels: ["Auth", "Security"],
           commentsCount: 45,
-          attachmentsCount: 2
+          attachmentsCount: 2,
         },
         {
           id: "task-2",
@@ -88,7 +117,7 @@ export default function Page() {
           assignee: { name: "John Doe", initials: "JD", color: "bg-blue-600 text-white" },
           labels: ["Design"],
           commentsCount: 12,
-          attachmentsCount: 14
+          attachmentsCount: 14,
         },
       ],
     },
@@ -107,7 +136,7 @@ export default function Page() {
           assignee: { name: "Marcus Wright", initials: "MW", color: "bg-emerald-600 text-white" },
           labels: ["API", "Backend"],
           commentsCount: 45,
-          attachmentsCount: 2
+          attachmentsCount: 2,
         },
       ],
     },
@@ -132,27 +161,76 @@ export default function Page() {
           assignee: { name: "Kyle Reese", initials: "KR", color: "bg-indigo-600 text-white" },
           labels: ["Setup"],
           commentsCount: 5,
-          attachmentsCount: 3
+          attachmentsCount: 3,
         },
       ],
     },
   ];
 
+  if (isWorkspaceLoading || isProjectLoading || isBoardLoading) {
+    return (
+      <div className="flex justify-center items-center py-24 select-none">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!activeWorkspace) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[450px] p-8 text-center rounded-xl border border-dashed border-border bg-card/40 animate-fade-in select-none">
+        <h3 className="text-base font-semibold text-foreground mb-1">No Active Workspace</h3>
+        <p className="text-xs text-muted-foreground max-w-sm mt-1">
+          Select or create a workspace from the sidebar switcher to start.
+        </p>
+      </div>
+    );
+  }
+
+  if (!activeProject) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[450px] p-8 text-center rounded-xl border border-dashed border-border bg-card/40 animate-fade-in select-none">
+        <h3 className="text-base font-semibold text-foreground mb-1">No Active Project</h3>
+        <p className="text-xs text-muted-foreground max-w-sm mt-1">
+          Select or create a project from the sidebar to view its board.
+        </p>
+      </div>
+    );
+  }
+
+  if (!activeBoard) {
+    return <BoardEmptyState />;
+  }
+
   return (
     <div className="flex flex-col h-full space-y-4">
       {/* Board Header Toolbar */}
-      <div className="flex items-center justify-between border-b border-border pb-3">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-foreground/90">Sprint 1 Board</h1>
-          <p className="text-sm text-muted-foreground leading-none mt-1.5">Main delivery board for foundation items</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground/90">
+            {activeBoard.name}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
+            {activeBoard.description || "No description provided."}
+          </p>
         </div>
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
+          {canEditBoard && (
+            <button
+              onClick={() => setIsEditOpen(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-border text-foreground hover:bg-secondary text-xs font-semibold transition-all cursor-pointer"
+              aria-label="Edit board"
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>Edit Board</span>
+            </button>
+          )}
           <button
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/95 text-sm font-semibold rounded-md shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer animate-fade-in"
-            aria-label="Create new task"
+            disabled
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg bg-secondary border border-border text-muted-foreground cursor-not-allowed opacity-60"
+            aria-label="Create new column"
           >
-            <Plus className="w-4 h-4" />
-            <span>Create Task</span>
+            <Plus className="w-3.5 h-3.5" />
+            <span>Create Column</span>
           </button>
         </div>
       </div>
@@ -178,13 +256,15 @@ export default function Page() {
               </div>
               <div className="flex items-center gap-0.5">
                 <button
-                  className="text-muted-foreground/60 hover:text-foreground hover:bg-secondary/80 p-0.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-1 cursor-pointer"
+                  disabled
+                  className="text-muted-foreground/40 p-0.5 rounded-lg transition-colors cursor-not-allowed"
                   aria-label={`Add task to ${column.name}`}
                 >
                   <Plus className="w-4 h-4" />
                 </button>
                 <button
-                  className="text-muted-foreground/60 hover:text-foreground hover:bg-secondary/80 p-0.5 rounded-lg transition-colors focus-visible:outline-none focus-visible:ring-1 cursor-pointer"
+                  disabled
+                  className="text-muted-foreground/40 p-0.5 rounded-lg transition-colors cursor-not-allowed"
                   aria-label={`Column actions for ${column.name}`}
                 >
                   <MoreHorizontal className="w-4 h-4" />
@@ -194,7 +274,8 @@ export default function Page() {
 
             {/* Quick Add Task Button Block (Reference matching) */}
             <button
-              className="w-full flex items-center justify-center py-2.5 rounded-lg border border-dashed border-border/60 hover:border-border hover:bg-secondary/25 transition-all text-muted-foreground/65 hover:text-foreground cursor-pointer text-xs"
+              disabled
+              className="w-full flex items-center justify-center py-2.5 rounded-lg border border-dashed border-border/60 text-muted-foreground/40 cursor-not-allowed text-xs"
               aria-label={`Quick add task to ${column.name}`}
             >
               <Plus className="w-4 h-4" />
@@ -216,7 +297,8 @@ export default function Page() {
                       </span>
                     </div>
                     <button
-                      className="opacity-0 group-hover:opacity-100 text-muted-foreground/60 hover:text-foreground p-0.5 rounded hover:bg-secondary transition-opacity focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+                      disabled
+                      className="opacity-0 group-hover:opacity-100 text-muted-foreground/40 p-0.5 rounded transition-opacity cursor-not-allowed"
                       aria-label="Task options"
                     >
                       <MoreHorizontal className="w-4 h-4" />
@@ -293,6 +375,14 @@ export default function Page() {
           </div>
         ))}
       </div>
+
+      {isEditOpen && activeBoard && (
+        <EditBoardModal
+          board={activeBoard}
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+        />
+      )}
     </div>
   );
 }

@@ -54,6 +54,7 @@ class BoardService:
         )
         board = await self.board_repo.create(board)
         await self.session.commit()
+        await self.session.refresh(board)
 
         return BoardResponse.model_validate(board)
 
@@ -139,6 +140,7 @@ class BoardService:
 
         updated_board = await self.board_repo.update(board_id, update_dict)
         await self.session.commit()
+        await self.session.refresh(updated_board)
 
         return BoardResponse.model_validate(updated_board)
 
