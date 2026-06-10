@@ -17,7 +17,6 @@ export const MAIN_NAV_ITEMS: NavigationItem[] = [
 ];
 
 export const OTHER_NAV_ITEMS: NavigationItem[] = [
-  { name: "Favorites", href: "/favorites", icon: Star },
   { name: "Projects", href: "/projects", icon: Folder },
   { name: "Boards", href: "/boards", icon: LayoutGrid },
   { name: "Notifications", href: "/notifications", icon: Bell },

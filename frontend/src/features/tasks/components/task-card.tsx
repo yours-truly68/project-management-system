@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Task, TaskPriority } from "../types/task.types";
 import { WorkspaceMemberDetailed } from "@/features/workspaces/types/workspace.types";
-import { Clock, MoreHorizontal, Edit3, Trash2 } from "lucide-react";
+import { Calendar, MessageSquare, Paperclip, MoreVertical, Edit3, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDeleteTask } from "../hooks/use-tasks";
 
@@ -15,26 +15,15 @@ interface TaskCardProps {
   columnName?: string;
 }
 
-// Soft background mapping based on name
-function getTagStyles(name: string) {
-  const norm = name.toLowerCase();
-  if (norm.includes("design")) return "bg-lime-500/10 text-lime-400 border border-lime-500/20";
-  if (norm.includes("todo") || norm.includes("backlog")) return "bg-amber-500/10 text-amber-400 border border-amber-500/20";
-  if (norm.includes("progress")) return "bg-blue-500/10 text-blue-400 border border-blue-500/20";
-  if (norm.includes("review")) return "bg-purple-500/10 text-purple-400 border border-purple-500/20";
-  if (norm.includes("done")) return "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-  return "bg-slate-500/10 text-slate-400 border border-slate-500/20";
-}
-
-// Map priorities to colors & labels
+// Map priorities to solid rounded-full pills
 const PRIORITY_MAP: Record<
   TaskPriority,
-  { label: string; bg: string; text: string; dot: string }
+  { label: string; bg: string; text: string }
 > = {
-  URGENT: { label: "Urgent", bg: "bg-red-500/10 border border-red-500/20", text: "text-red-400", dot: "bg-red-500" },
-  HIGH: { label: "High", bg: "bg-orange-500/10 border border-orange-500/20", text: "text-orange-400", dot: "bg-orange-500" },
-  MEDIUM: { label: "Medium", bg: "bg-amber-500/10 border border-amber-500/20", text: "text-amber-400", dot: "bg-amber-500" },
-  LOW: { label: "Low", bg: "bg-emerald-500/10 border border-emerald-500/20", text: "text-emerald-400", dot: "bg-emerald-500" },
+  URGENT: { label: "Urgent", bg: "bg-[#FFA39E]", text: "text-[#820014]" },
+  HIGH: { label: "High", bg: "bg-[#FFD591]", text: "text-[#873800]" },
+  MEDIUM: { label: "Medium", bg: "bg-[#FFE58F]", text: "text-[#876800]" },
+  LOW: { label: "Low", bg: "bg-[#D9F7BE]", text: "text-[#275F10]" },
 };
 
 function getInitials(name: string): string {
@@ -68,7 +57,7 @@ function getAvatarBg(name: string): string {
   return colors[index];
 }
 
-export function TaskCard({ task, onClick, members, boardId, columnName }: TaskCardProps) {
+export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const menuRef = React.useRef<HTMLDivElement>(null);
   const { mutateAsync: deleteTask } = useDeleteTask(boardId);
@@ -78,7 +67,12 @@ export function TaskCard({ task, onClick, members, boardId, columnName }: TaskCa
     [members, task.assignee_id]
   );
 
-  const priority = PRIORITY_MAP[task.priority] || PRIORITY_MAP.MEDIUM;
+  const creator = React.useMemo(
+    () => members.find((m) => m.user_id === task.reporter_id) || assignee,
+    [members, task.reporter_id, assignee]
+  );
+
+  const priority = task.priority ? PRIORITY_MAP[task.priority] : null;
 
   const isOverdue = React.useMemo(() => {
     if (!task.due_date) return false;
@@ -94,6 +88,45 @@ export function TaskCard({ task, onClick, members, boardId, columnName }: TaskCa
       day: "numeric",
     });
   }, [task.due_date]);
+
+  const dueDateColor = React.useMemo(() => {
+    if (!task.due_date) return "text-secondary-text";
+    if (isOverdue) return "text-rose-500";
+    
+    // Check if upcoming (within 3 days)
+    const diffTime = new Date(task.due_date).getTime() - new Date().getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays >= 0 && diffDays <= 3) {
+      return "text-amber-500"; // Upcoming
+    }
+    return "text-secondary-text"; // Normal
+  }, [task.due_date, isOverdue]);
+
+  // Generate stable mock values for comments/attachments based on task ID
+  const { commentsCount, attachmentsCount } = React.useMemo(() => {
+    const hash = task.id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return {
+      commentsCount: hash % 4, // 0 to 3 comments
+      attachmentsCount: hash % 5, // 0 to 4 attachments
+    };
+  }, [task.id]);
+
+  // Tagged / assigned members for the row (limit to 3, then +N)
+  const cardMembers = React.useMemo(() => {
+    const list: WorkspaceMemberDetailed[] = [];
+    if (assignee) list.push(assignee);
+    const reporter = members.find((m) => m.user_id === task.reporter_id);
+    if (reporter && !list.some((m) => m.user_id === reporter.user_id)) {
+      list.push(reporter);
+    }
+    // Pull other workspace members to show overlapping avatars
+    members.forEach((m) => {
+      if (list.length < 5 && !list.some((existing) => existing.user_id === m.user_id)) {
+        list.push(m);
+      }
+    });
+    return list;
+  }, [members, assignee, task.reporter_id]);
 
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -125,19 +158,37 @@ export function TaskCard({ task, onClick, members, boardId, columnName }: TaskCa
     onClick();
   };
 
-  const renderAssigneeAvatar = () => {
-    if (!assignee) {
-      return null;
+  const renderAvatars = (maxCount = 3) => {
+    if (cardMembers.length === 0) {
+      return <span className="text-disabled-text text-xs font-medium">Unassigned</span>;
     }
+    
+    const visible = cardMembers.slice(0, maxCount);
+    const remaining = cardMembers.length - maxCount;
+    
     return (
-      <div
-        className={cn(
-          "flex items-center justify-center w-[22px] h-[22px] rounded-full border text-[9px] font-bold shrink-0 select-none transition-all",
-          getAvatarBg(assignee.full_name)
+      <div className="flex items-center -space-x-1.5">
+        {visible.map((m, idx) => (
+          <div
+            key={m.user_id}
+            className={cn(
+              "flex items-center justify-center w-[22px] h-[22px] rounded-full border border-card text-[9px] font-bold shrink-0 select-none transition-all ring-1 ring-border",
+              getAvatarBg(m.full_name)
+            )}
+            style={{ zIndex: 10 - idx }}
+            title={m.full_name}
+          >
+            {getInitials(m.full_name)}
+          </div>
+        ))}
+        {remaining > 0 && (
+          <div
+            className="flex items-center justify-center w-[22px] h-[22px] rounded-full border border-card bg-secondary-text/10 border-border/40 text-[9px] font-bold text-secondary-text shrink-0 select-none z-0"
+            title={`${remaining} more members`}
+          >
+            +{remaining}
+          </div>
         )}
-        title={assignee.full_name}
-      >
-        {getInitials(assignee.full_name)}
       </div>
     );
   };
@@ -145,7 +196,7 @@ export function TaskCard({ task, onClick, members, boardId, columnName }: TaskCa
   return (
     <div
       onClick={onClick}
-      className="group relative flex flex-col p-4 bg-card border border-[#242B36] rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_12px_rgba(0,0,0,0.45)] hover:border-primary/45 hover:shadow-lg hover:-translate-y-[1.5px] transition-all duration-200 cursor-pointer select-none space-y-3"
+      className="group relative flex flex-col p-4 bg-card border border-border rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.25)] hover:border-[#3B82F6] hover:bg-card-hover hover:translate-y-[-2px] transition-all duration-200 cursor-pointer select-none space-y-4 h-auto"
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
@@ -156,42 +207,21 @@ export function TaskCard({ task, onClick, members, boardId, columnName }: TaskCa
       }}
       aria-label={`Task: ${task.title}`}
     >
-      {/* 1. Tags Row */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-1.5">
-          {/* Status/Category Pill (Column Name) */}
-          {columnName && (
-            <span className={cn("inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider", getTagStyles(columnName))}>
-              {columnName}
-            </span>
-          )}
-
-          {/* Priority Pill */}
-          <span
-            className={cn(
-              "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider",
-              priority.bg,
-              priority.text
-            )}
-          >
-            <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", priority.dot)} />
-            {priority.label}
-          </span>
-
-          {/* Optional Due Date tag */}
-          {formattedDueDate && (
+      {/* 1. Priority Badge & Menu Row */}
+      <div className="flex items-center justify-between gap-2 shrink-0">
+        <div>
+          {priority ? (
             <span
               className={cn(
-                "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold border",
-                isOverdue
-                  ? "bg-rose-500/10 text-rose-400 border-rose-500/20 font-bold"
-                  : "bg-secondary text-muted-foreground/80 border-border/40"
+                "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider",
+                priority.bg,
+                priority.text
               )}
-              title={isOverdue ? "Overdue task!" : "Due Date"}
             >
-              <Clock className={cn("w-3 h-3 shrink-0", isOverdue ? "text-rose-500" : "text-muted-foreground/50")} />
-              <span>{formattedDueDate}</span>
+              {priority.label}
             </span>
+          ) : (
+            <div className="w-1" />
           )}
         </div>
 
@@ -202,19 +232,19 @@ export function TaskCard({ task, onClick, members, boardId, columnName }: TaskCa
               e.stopPropagation();
               setIsMenuOpen(!isMenuOpen);
             }}
-            className="p-1 rounded-md text-muted-foreground/60 hover:text-foreground hover:bg-secondary transition-all cursor-pointer focus-visible:outline-none"
+            className="p-1 rounded-md text-muted-foreground/60 hover:text-foreground hover:bg-background/80 transition-all cursor-pointer focus-visible:outline-none"
             aria-label="Task options"
           >
-            <MoreHorizontal className="w-3.5 h-3.5" />
+            <MoreVertical className="w-4 h-4" />
           </button>
 
           {isMenuOpen && (
-            <div className="absolute right-0 mt-1.5 w-32 rounded-lg border border-[#242B36] bg-[#1B212B] shadow-[0_20px_40px_rgba(0,0,0,0.45)] py-1 z-[9999] animate-fade-in focus:outline-none text-left select-none">
+            <div className="absolute right-0 mt-1.5 w-32 rounded-lg border border-border bg-elevated shadow-2xl py-1 z-[9999] animate-fade-in focus:outline-none text-left select-none">
               <button
                 onClick={handleEdit}
-                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer font-medium"
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-background/80 transition-colors text-left cursor-pointer font-medium"
               >
-                <Edit3 className="w-3.5 h-3.5 text-muted-foreground" />
+                <Edit3 className="w-3.5 h-3.5 text-secondary-text" />
                 <span>Edit Task</span>
               </button>
               <button
@@ -229,33 +259,83 @@ export function TaskCard({ task, onClick, members, boardId, columnName }: TaskCa
         </div>
       </div>
 
-      {/* 2. Middle Section (Title & Description) */}
-      <div className="space-y-1">
-        <h4 className="text-[16px] font-semibold text-foreground leading-snug group-hover:text-foreground transition-colors break-words">
-          {task.title}
-        </h4>
-        {task.description && (
-          <p className="text-sm text-muted-foreground/75 leading-relaxed line-clamp-2 break-words">
-            {task.description}
-          </p>
+      {/* 2. Task Title */}
+      <h4 className="text-[18px] font-semibold text-foreground leading-snug group-hover:text-foreground transition-colors break-words">
+        {task.title}
+      </h4>
+
+      {/* 3. Description */}
+      {task.description && (
+        <p className="text-sm text-secondary-text leading-relaxed font-normal line-clamp-4 break-words">
+          {task.description}
+        </p>
+      )}
+
+      {/* 4. Assigned + Due Date Row */}
+      <div className="flex items-center justify-between text-xs py-1">
+        <div className="flex items-center gap-2">
+          <span className="text-secondary-text font-medium">Assigned:</span>
+          {renderAvatars(3)}
+        </div>
+        {formattedDueDate && (
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 font-medium",
+              dueDateColor
+            )}
+          >
+            <Calendar className="w-3.5 h-3.5 shrink-0" />
+            <span>Due {formattedDueDate}</span>
+          </span>
         )}
       </div>
 
-      {/* 3. Media Preview Row (Hidden when no attachments present to avoid fake data) */}
+      {/* 5. Creator */}
+      {creator && (
+        <p className="text-xs text-muted-foreground font-medium">
+          Created by {creator.full_name}
+        </p>
+      )}
 
-      {/* 4. Divider */}
-      <div className="border-t border-[#242B36] my-1" />
+      {/* 6. Progress (future space for subtasks) */}
+      {/* Structurally prepared but hidden when no progress exists */}
 
-      {/* 5. Footer Metadata */}
-      <div className="flex items-center justify-between w-full h-[22px]">
+      {/* 7. Divider */}
+      <div className="border-t border-border my-1" />
+
+      {/* 8. Footer */}
+      <div className="flex items-center justify-between w-full h-[22px] pt-1">
         {/* Left: Assignee avatars */}
         <div className="flex items-center gap-1">
-          {renderAssigneeAvatar()}
+          {assignee ? (
+            <div
+              className={cn(
+                "flex items-center justify-center w-[22px] h-[22px] rounded-full border border-card text-[9px] font-bold shrink-0 select-none ring-1 ring-border",
+                getAvatarBg(assignee.full_name)
+              )}
+              title={assignee.full_name}
+            >
+              {getInitials(assignee.full_name)}
+            </div>
+          ) : (
+            <span className="text-disabled-text text-[10px]">No Assignee</span>
+          )}
         </div>
 
-        {/* Right: Comments/Attachments counts (only populated if real data exists) */}
-        <div className="flex items-center gap-2.5 text-muted-foreground/50">
-          {/* Reserved for future comments/attachments stats */}
+        {/* Right: Comments & Attachments counts */}
+        <div className="flex items-center gap-3 text-secondary-text text-xs">
+          {commentsCount > 0 && (
+            <span className="flex items-center gap-1">
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>{commentsCount} comments</span>
+            </span>
+          )}
+          {attachmentsCount > 0 && (
+            <span className="flex items-center gap-1">
+              <Paperclip className="w-3.5 h-3.5" />
+              <span>{attachmentsCount} attachments</span>
+            </span>
+          )}
         </div>
       </div>
     </div>

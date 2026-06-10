@@ -96,10 +96,10 @@ export default function Page() {
         {/* Board Header Skeleton */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
           <div className="space-y-2">
-            <div className="h-8 w-48 bg-secondary rounded-lg animate-pulse" />
-            <div className="h-4 w-96 bg-secondary rounded animate-pulse" />
+            <div className="h-8 w-48 bg-column-surface rounded-lg animate-pulse" />
+            <div className="h-4 w-96 bg-column-surface rounded animate-pulse" />
           </div>
-          <div className="flex items-center gap-2.5 h-10 w-48 bg-secondary rounded-lg animate-pulse" />
+          <div className="flex items-center gap-2.5 h-10 w-48 bg-column-surface rounded-lg animate-pulse" />
         </div>
 
         {/* Columns & Cards Skeleton */}
@@ -107,35 +107,35 @@ export default function Page() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="flex flex-col bg-secondary rounded-xl border border-[#242B36] p-4 space-y-3 w-[320px] shrink-0 h-full overflow-hidden animate-pulse"
+              className="flex flex-col bg-column-surface rounded-[18px] border border-border p-4 space-y-4 w-[360px] shrink-0 h-full overflow-hidden animate-pulse"
             >
               {/* Column Header Shimmer */}
               <div className="flex items-center justify-between pb-0.5">
                 <div className="flex items-center gap-2.5 w-1/2">
-                  <div className="w-2 h-2 rounded-full bg-secondary shrink-0" />
-                  <div className="h-5 bg-secondary rounded w-28" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-accent shrink-0" />
+                  <div className="h-5 bg-accent rounded w-28" />
                 </div>
-                <div className="w-6 h-6 bg-secondary rounded" />
+                <div className="w-6 h-6 bg-accent rounded" />
               </div>
 
               {/* Add Task CTA Shimmer */}
-              <div className="w-full h-12 bg-secondary/50 rounded-xl" />
+              <div className="w-full h-11 bg-accent rounded-xl" />
 
               {/* Tasks Shimmer list */}
-              <div className="flex-1 space-y-2">
+              <div className="flex-1 space-y-3">
                 {[1, 2].map((j) => (
                   <div
                     key={j}
-                    className="p-3 border border-border/80 bg-card rounded-xl space-y-2.5 shadow-xs"
+                    className="p-4 border border-border bg-card rounded-2xl space-y-3 shadow-sm"
                   >
-                    <div className="h-3 w-10 bg-secondary rounded" />
-                    <div className="space-y-1.5">
-                      <div className="h-3.5 bg-secondary rounded w-5/6" />
-                      <div className="h-3 bg-secondary rounded w-3/4" />
+                    <div className="h-4 w-12 bg-accent rounded-full" />
+                    <div className="space-y-2">
+                      <div className="h-4 bg-accent rounded w-5/6" />
+                      <div className="h-3.5 bg-accent rounded w-3/4" />
                     </div>
-                    <div className="flex items-center justify-between pt-2 border-t border-border/40">
-                      <div className="h-4 bg-secondary rounded w-16" />
-                      <div className="w-5 h-5 rounded-full bg-secondary" />
+                    <div className="flex items-center justify-between pt-3 border-t border-border">
+                      <div className="h-4 bg-accent rounded w-16" />
+                      <div className="w-6 h-6 rounded-full bg-accent" />
                     </div>
                   </div>
                 ))}
@@ -206,11 +206,11 @@ export default function Page() {
 
   const getColumnColor = (name: string, defaultColor: string | null) => {
     const norm = name.toLowerCase().replace(/[^a-z0-9]/g, "");
-    if (norm.includes("todo") || norm.includes("backlog")) return "#f97316"; // Orange
-    if (norm.includes("progress") || norm.includes("active")) return "#3b82f6"; // Blue
-    if (norm.includes("review") || norm.includes("qa") || norm.includes("test")) return "#a855f7"; // Purple
-    if (norm.includes("done") || norm.includes("complete") || norm.includes("finish")) return "#22c55e"; // Green
-    return defaultColor || "#3b82f6";
+    if (norm.includes("todo") || norm.includes("backlog")) return "#FF8A3D"; // Orange
+    if (norm.includes("progress") || norm.includes("active")) return "#3B82F6"; // Blue
+    if (norm.includes("review") || norm.includes("qa") || norm.includes("test")) return "#A855F7"; // Purple
+    if (norm.includes("done") || norm.includes("complete") || norm.includes("finish")) return "#22C55E"; // Green
+    return defaultColor || "#3B82F6";
   };
 
   // Sorted columns based on their sequential position property
@@ -219,22 +219,22 @@ export default function Page() {
   return (
     <div className="flex flex-col h-full space-y-4">
       {/* Board Header Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5 pt-3 shrink-0">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-border pb-5 pt-6 shrink-0">
         <div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground select-none animate-fade-in">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground select-none animate-fade-in">
             {activeBoard.name}
           </h1>
           {activeBoard.description && (
-            <p className="text-sm text-muted-foreground mt-1.5 max-w-2xl truncate leading-relaxed">
+            <p className="text-sm text-secondary-text mt-1.5 max-w-2xl truncate leading-relaxed">
               {activeBoard.description}
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
+        <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 pt-1">
           {canManageBoard && (
             <button
               onClick={() => setIsEditOpen(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-border text-foreground hover:bg-secondary text-xs font-semibold transition-all cursor-pointer animate-fade-in"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-border text-foreground hover:bg-card-hover text-xs font-semibold transition-all cursor-pointer animate-fade-in"
               aria-label="Edit board"
             >
               <Edit3 className="w-3.5 h-3.5" />
@@ -262,18 +262,18 @@ export default function Page() {
           {sortedColumns.map((column) => (
             <div
               key={column.id}
-              className="flex flex-col bg-secondary rounded-xl border border-[#242B36] p-4 space-y-3 w-[320px] shrink-0 h-full overflow-hidden shadow-sm"
+              className="flex flex-col bg-column-surface rounded-[18px] border border-border p-4 space-y-4 w-[360px] shrink-0 h-full overflow-hidden shadow-sm"
             >
               {/* Column Header */}
               <div className="flex items-center justify-between pb-1 select-none shrink-0">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span
-                    className="w-2 h-2 rounded-full shrink-0"
+                    className="w-2.5 h-2.5 rounded-full shrink-0"
                     style={{ backgroundColor: getColumnColor(column.name, column.color) }}
                   />
-                  <h3 className="text-[14px] font-bold text-foreground/90 tracking-tight truncate flex items-center gap-2">
+                  <h3 className="text-base font-bold text-foreground/90 tracking-tight truncate flex items-center gap-2">
                     <span>{column.name}</span>
-                    <span className="text-[11px] font-bold text-muted-foreground px-2 py-0.5 rounded-full bg-secondary border border-border/40 font-mono">
+                    <span className="text-xs font-semibold text-secondary-text px-2 py-0.5 rounded-full bg-background/50 border border-border/40 font-mono">
                       {tasksByColumn[column.id]?.length || 0}
                     </span>
                   </h3>
@@ -291,22 +291,22 @@ export default function Page() {
               {canManageBoard && (
                 <button
                   onClick={() => setTaskToCreateColId(column.id)}
-                  className="w-full h-9 bg-card border border-[#242B36] hover:border-primary/45 rounded-lg flex items-center justify-center transition-all text-muted-foreground hover:text-foreground cursor-pointer shrink-0 gap-2 text-xs font-bold"
+                  className="w-full h-11 bg-accent border border-border hover:bg-card-hover rounded-xl flex items-center justify-center transition-all text-foreground hover:text-foreground cursor-pointer shrink-0 gap-2 text-sm font-semibold"
                   aria-label="Add Task"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-4 h-4 text-foreground/80" />
                   <span>Add Task</span>
                 </button>
               )}
 
               {/* Column Task List Area */}
-              <div className="flex-1 overflow-y-auto space-y-2.5 pr-0.5 min-h-0">
+              <div className="flex-1 overflow-y-auto space-y-3 pr-0.5 min-h-0">
                 {!tasksByColumn[column.id] || tasksByColumn[column.id].length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-10 px-4 border border-dashed border-border/30 rounded-xl select-none text-center h-full justify-center my-auto">
                     <span className="text-sm font-semibold text-muted-foreground/50">No tasks in this stage</span>
                   </div>
                 ) : (
-                  <div className="space-y-2.5">
+                  <div className="space-y-3">
                     {tasksByColumn[column.id].map((task) => (
                       <TaskCard
                         key={task.id}
