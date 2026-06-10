@@ -87,7 +87,7 @@ export function CreateColumnModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-[2px] animate-fade-in select-none">
       <div
-        className="relative w-full max-w-md bg-card border border-border rounded-lg shadow-xl p-5 m-4 animate-scale-in"
+        className="relative w-full max-w-md bg-elevated border border-border rounded-lg shadow-xl p-5 m-4 animate-scale-in"
         role="dialog"
         aria-modal="true"
       >
