@@ -103,36 +103,39 @@ export default function Page() {
         </div>
 
         {/* Columns & Cards Skeleton */}
-        <div className="flex-1 flex gap-4 overflow-x-auto min-h-0 pb-4">
+        <div className="flex-1 flex gap-3 overflow-x-auto min-h-0 pb-3">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="flex flex-col bg-secondary/20 rounded-xl border border-border p-4.5 space-y-4 w-[320px] shrink-0 h-full overflow-hidden animate-pulse"
+              className="flex flex-col bg-secondary/80 rounded-xl border border-border/50 p-3.5 space-y-3.5 w-[340px] shrink-0 h-full overflow-hidden animate-pulse"
             >
               {/* Column Header Shimmer */}
               <div className="flex items-center justify-between pb-0.5">
                 <div className="flex items-center gap-2.5 w-1/2">
-                  <div className="w-2.5 h-2.5 rounded-full bg-secondary shrink-0" />
+                  <div className="w-2 h-2 rounded-full bg-secondary shrink-0" />
                   <div className="h-5 bg-secondary rounded w-28" />
                 </div>
                 <div className="w-6 h-6 bg-secondary rounded" />
               </div>
 
+              {/* Add Task CTA Shimmer */}
+              <div className="w-full h-12 bg-secondary/50 rounded-xl" />
+
               {/* Tasks Shimmer list */}
-              <div className="flex-1 space-y-3">
-                {[1, 2, 3].map((j) => (
+              <div className="flex-1 space-y-2">
+                {[1, 2].map((j) => (
                   <div
                     key={j}
-                    className="p-4 border border-border bg-card/65 rounded-xl space-y-3 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+                    className="p-3 border border-border/80 bg-card rounded-xl space-y-2.5 shadow-xs"
                   >
                     <div className="h-3 w-10 bg-secondary rounded" />
                     <div className="space-y-1.5">
                       <div className="h-3.5 bg-secondary rounded w-5/6" />
                       <div className="h-3 bg-secondary rounded w-3/4" />
                     </div>
-                    <div className="flex items-center justify-between pt-1 border-t border-border/30">
+                    <div className="flex items-center justify-between pt-2 border-t border-border/40">
                       <div className="h-4 bg-secondary rounded w-16" />
-                      <div className="w-5.5 h-5.5 rounded-full bg-secondary" />
+                      <div className="w-5 h-5 rounded-full bg-secondary" />
                     </div>
                   </div>
                 ))}
@@ -244,23 +247,23 @@ export default function Page() {
       {sortedColumns.length === 0 ? (
         <ColumnEmptyState boardId={activeBoard.id} />
       ) : (
-        <div className="flex-1 flex gap-4 overflow-x-auto min-h-0 pb-4">
+        <div className="flex-1 flex gap-3 overflow-x-auto min-h-0 pb-3">
           {sortedColumns.map((column) => (
             <div
               key={column.id}
-              className="flex flex-col bg-secondary/40 rounded-xl border border-border p-4.5 space-y-3 w-[320px] shrink-0 h-full overflow-hidden"
+              className="flex flex-col bg-secondary/80 rounded-xl border border-border/50 p-3.5 space-y-3.5 w-[340px] shrink-0 h-full overflow-hidden"
             >
               {/* Column Header */}
-              <div className="flex items-center justify-between pb-0.5 select-none">
+              <div className="flex items-center justify-between pb-1 select-none">
                 <div className="flex items-center gap-2 min-w-0">
                   <span
                     className="w-2 h-2 rounded-full shrink-0"
                     style={{ backgroundColor: column.color || "#3b82f6" }}
                   />
-                  <h3 className="text-sm font-bold text-foreground/90 truncate">
-                    {column.name}
-                    <span className="text-muted-foreground/60 font-medium ml-1.5 text-xs">
-                      • {tasksByColumn[column.id]?.length || 0}
+                  <h3 className="text-sm font-bold text-foreground/90 tracking-tight truncate flex items-center gap-1.5">
+                    <span className="font-bold text-foreground/95">{column.name}</span>
+                    <span className="text-xs font-semibold text-muted-foreground/60">
+                      {tasksByColumn[column.id]?.length || 0}
                     </span>
                   </h3>
                 </div>
@@ -277,18 +280,25 @@ export default function Page() {
               {canManageBoard && (
                 <button
                   onClick={() => setTaskToCreateColId(column.id)}
-                  className="w-full h-12 border border-dashed border-border/75 hover:border-primary/45 hover:bg-primary/5 rounded-xl flex items-center justify-center gap-1.5 transition-all text-muted-foreground/80 hover:text-primary cursor-pointer text-xs font-bold select-none shrink-0"
+                  className="w-full h-12 bg-card/45 dark:bg-card/25 border border-border/60 hover:border-border hover:bg-secondary rounded-xl flex items-center justify-center transition-all text-muted-foreground/65 hover:text-foreground cursor-pointer shrink-0"
+                  aria-label="Add Task"
                 >
-                  <Plus className="w-3.5 h-3.5 shrink-0" />
-                  <span>Add Task</span>
+                  <Plus className="w-4.5 h-4.5" />
                 </button>
               )}
 
               {/* Column Task List Area */}
-              <div className="flex-1 overflow-y-auto space-y-2.5 pr-0.5 min-h-0">
+              <div className="flex-1 overflow-y-auto space-y-2 pr-0.5 min-h-0">
                 {!tasksByColumn[column.id] || tasksByColumn[column.id].length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-10 border border-dashed border-border/40 rounded-xl bg-secondary/5 select-none">
-                    <span className="text-[11px] font-semibold text-muted-foreground/45">No tasks</span>
+                  <div className="flex flex-col items-center justify-center py-14 px-4 border border-dashed border-border/30 rounded-xl bg-card/20 select-none text-center h-full justify-center my-auto space-y-3">
+                    <span className="text-xs font-semibold text-muted-foreground/50">No tasks yet</span>
+                    <button
+                      onClick={() => setTaskToCreateColId(column.id)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg bg-card border border-border hover:bg-secondary text-foreground transition-all cursor-pointer shadow-xs hover:shadow-sm"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Create First Task</span>
+                    </button>
                   </div>
                 ) : (
                   <div className="space-y-2">

@@ -1,15 +1,28 @@
+"use client";
+
 import * as React from "react";
+import { usePathname } from "next/navigation";
 
 interface ContentAreaProps {
   children: React.ReactNode;
 }
 
 export function ContentArea({ children }: ContentAreaProps) {
+  const pathname = usePathname();
+  const isDashboard = pathname === "/";
+
   return (
-    <main className="flex-1 overflow-auto p-4 md:p-6 bg-background">
-      <div className="mx-auto max-w-7xl h-full flex flex-col">
+    <main className="flex-1 overflow-auto p-3 md:p-4 bg-background">
+      <div
+        className={
+          isDashboard
+            ? "w-full min-w-0 h-full flex flex-col"
+            : "mx-auto max-w-7xl w-full h-full flex flex-col"
+        }
+      >
         {children}
       </div>
     </main>
   );
 }
+

@@ -14,6 +14,28 @@ interface TaskCardProps {
   boardId: string;
 }
 
+interface TaskCardMetaProps {
+  left?: React.ReactNode;
+  right?: React.ReactNode;
+}
+
+// Reusable metadata component prepared for comments, attachments, etc.
+export function TaskCardMeta({ left, right }: TaskCardMetaProps) {
+  return (
+    <div className="flex items-center justify-between w-full mt-2 pt-2 border-t border-border/40">
+      {/* Left Metadata Slots (Due dates, future comments, attachments, checklists) */}
+      <div className="flex items-center gap-2 text-muted-foreground min-w-0 flex-1">
+        {left}
+        {/* Future Slots: Comments, Attachments, Subtasks, Activity */}
+      </div>
+      {/* Right Metadata Slots (Assignees, labels, flags) */}
+      <div className="flex items-center gap-1.5 shrink-0">
+        {right}
+      </div>
+    </div>
+  );
+}
+
 // Map priorities to colors & labels
 const PRIORITY_MAP: Record<
   TaskPriority,
@@ -116,10 +138,54 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
     onClick();
   };
 
+  // Due date rendering helper
+  const renderDueDate = () => {
+    if (!formattedDueDate) return null;
+    return (
+      <span
+        className={cn(
+          "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-all duration-150 border",
+          isOverdue
+            ? "bg-rose-500/10 text-rose-500 border-rose-500/20 font-bold"
+            : "bg-secondary text-muted-foreground/80 border-border/40"
+        )}
+        title={isOverdue ? "Overdue task!" : "Due Date"}
+      >
+        <Clock className={cn("w-3 h-3 shrink-0", isOverdue ? "text-rose-500" : "text-muted-foreground/50")} />
+        <span>{formattedDueDate}</span>
+      </span>
+    );
+  };
+
+  // Assignee Avatar rendering helper
+  const renderAssigneeAvatar = () => {
+    if (!assignee) {
+      return (
+        <div
+          className="w-5 h-5 rounded-full border border-dashed border-border/80 flex items-center justify-center text-[10px] text-muted-foreground/30 shrink-0 select-none"
+          title="Unassigned"
+        >
+          —
+        </div>
+      );
+    }
+    return (
+      <div
+        className={cn(
+          "flex items-center justify-center w-5 h-5 rounded-full border text-[9px] font-bold shrink-0 select-none transition-all",
+          getAvatarBg(assignee.full_name)
+        )}
+        title={assignee.full_name}
+      >
+        {getInitials(assignee.full_name)}
+      </div>
+    );
+  };
+
   return (
     <div
       onClick={onClick}
-      className="group relative flex flex-col justify-between p-4 bg-card border border-border/80 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:border-primary/40 hover:shadow-sm hover:-translate-y-[2px] transition-all duration-200 cursor-pointer select-none space-y-3"
+      className="group relative flex flex-col p-3 bg-card border border-border/80 dark:border-border/60 rounded-xl shadow-[0_1px_3px_rgba(0,0,0,0.05),0_1px_2px_rgba(0,0,0,0.02)] dark:shadow-[0_2px_8px_rgba(0,0,0,0.45)] hover:border-primary/40 dark:hover:border-primary/45 hover:shadow-md dark:hover:shadow-[0_4px_12px_rgba(0,0,0,0.55)] hover:-translate-y-[1.5px] transition-all duration-200 cursor-pointer select-none space-y-2.5"
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
@@ -130,7 +196,7 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
       }}
       aria-label={`Task: ${task.title}`}
     >
-      {/* Header with Priority & Always Visible Overflow Actions */}
+      {/* Header: Priority Badge & Always Visible Overflow Actions */}
       <div className="flex items-center justify-between gap-2">
         <span
           className={cn(
@@ -178,59 +244,25 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
       </div>
 
       {/* Task Content */}
-      <div className="space-y-1.5">
-        <h4 className="text-xs font-bold text-foreground/90 leading-snug group-hover:text-foreground transition-colors break-words">
+      <div className="space-y-1">
+        <h4 className="text-[13px] font-semibold text-foreground/90 leading-snug group-hover:text-foreground transition-colors break-words">
           {task.title}
         </h4>
         {task.description && (
-          <p className="text-[11px] text-muted-foreground/80 leading-relaxed line-clamp-2 break-words">
+          <p className="text-[11px] text-muted-foreground/75 leading-relaxed line-clamp-2 break-words">
             {task.description}
           </p>
         )}
       </div>
 
-      {/* Task Footer with Due Date & Assignee */}
-      <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/40 mt-1">
-        {/* Due Date Indicator */}
-        {formattedDueDate ? (
-          <span
-            className={cn(
-              "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-medium transition-all duration-150",
-              isOverdue
-                ? "bg-rose-500/10 text-rose-600 font-bold border border-rose-500/20"
-                : "bg-secondary text-muted-foreground/80 border border-border/40"
-            )}
-            title={isOverdue ? "Overdue task!" : "Due Date"}
-          >
-            <Clock className={cn("w-3 h-3 shrink-0", isOverdue ? "text-rose-600" : "text-muted-foreground/45")} />
-            <span>{formattedDueDate}</span>
-          </span>
-        ) : (
-          <div className="h-4" /> /* Empty spacing block to preserve height structure */
-        )}
-
-        {/* Custom Assignee Avatar with Fallback & Tooltip */}
-        {assignee ? (
-          <div
-            className={cn(
-              "flex items-center justify-center w-5.5 h-5.5 rounded-full border text-[9px] font-extrabold shrink-0 select-none transition-all",
-              getAvatarBg(assignee.full_name)
-            )}
-            title={assignee.full_name}
-          >
-            {getInitials(assignee.full_name)}
-          </div>
-        ) : (
-          <div
-            className="w-5.5 h-5.5 rounded-full border border-dashed border-border/80 flex items-center justify-center text-[10px] text-muted-foreground/30 shrink-0 select-none hover:border-border transition-all"
-            title="Unassigned"
-          >
-            —
-          </div>
-        )}
-      </div>
+      {/* Reusable Metadata Row */}
+      <TaskCardMeta
+        left={renderDueDate()}
+        right={renderAssigneeAvatar()}
+      />
     </div>
   );
 }
 
 export default TaskCard;
+
