@@ -87,7 +87,7 @@ export function WorkspaceSettings({ workspace }: WorkspaceSettingsProps) {
       {/* General Settings */}
       <div className="bg-secondary/20 rounded-xl border border-border p-6 space-y-4">
         <div>
-          <h2 className="text-xl font-bold text-foreground/90 font-heading">General Settings</h2>
+          <h2 className="text-sm font-semibold text-foreground">General Settings</h2>
           <p className="text-xs text-muted-foreground mt-1">
             Update workspace name, URL slug, and description details.
           </p>

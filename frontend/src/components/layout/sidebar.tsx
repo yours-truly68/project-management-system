@@ -90,7 +90,7 @@ export function Sidebar() {
                   <Link
                     href={item.disabled ? "#" : item.href}
                     className={cn(
-                      "flex items-center gap-2.5 px-2.5 py-1.5 rounded text-[15px] transition-colors font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                      "flex items-center gap-2.5 px-2.5 py-1.5 rounded text-[13px] transition-colors font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                       isActive
                         ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
                         : "hover:bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground",
@@ -107,11 +107,11 @@ export function Sidebar() {
               );
             })}
           </div>
-
+ 
           {/* 3. Favorites List (Placeholder) */}
           <div className="space-y-0.5">
             {!isCollapsed && (
-              <div className="px-2.5 py-1 text-[11px] font-bold text-sidebar-foreground/45 uppercase tracking-wider">
+              <div className="px-2.5 py-1 text-[10px] font-bold text-sidebar-foreground/45 uppercase tracking-wider">
                 Favorites
               </div>
             )}
@@ -142,13 +142,13 @@ export function Sidebar() {
               </SidebarTooltip>
             </div>
           </div>
-
+ 
           {/* 4. Projects List Section (Dynamic) */}
           <ProjectListSidebar isCollapsed={isCollapsed} />
-
+ 
           {/* 5. Boards List Section (Dynamic) */}
           <BoardListSidebar isCollapsed={isCollapsed} />
-
+ 
           {/* Other navigation section */}
           <div className="pt-2 border-t border-sidebar-border space-y-0.5">
             {OTHER_NAV_ITEMS.map((item) => {
@@ -159,7 +159,7 @@ export function Sidebar() {
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-2.5 px-2.5 py-1.5 rounded text-[15px] transition-colors font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                      "flex items-center gap-2.5 px-2.5 py-1.5 rounded text-[13px] transition-colors font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                       isActive
                         ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
                         : "hover:bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground",
@@ -173,7 +173,7 @@ export function Sidebar() {
                   </Link>
                 </SidebarTooltip>
               );
-            })}
+            })}   })}
           </div>
         </div>
       </aside>

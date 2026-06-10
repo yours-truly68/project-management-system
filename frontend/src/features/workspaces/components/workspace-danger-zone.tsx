@@ -71,7 +71,7 @@ export function WorkspaceDangerZone({ workspace }: WorkspaceDangerZoneProps) {
       <div className="flex items-start gap-3">
         <AlertTriangle className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
         <div>
-          <h2 className="text-xl font-bold text-rose-500 font-heading">Delete Workspace</h2>
+          <h2 className="text-sm font-semibold text-rose-500">Delete Workspace</h2>
           <p className="text-xs text-muted-foreground mt-1">
             Once you delete a workspace, there is no going back. All projects, boards, tasks,
             and members will be permanently deleted.

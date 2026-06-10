@@ -46,11 +46,11 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
   ];
 
   return (
-    <div className="flex flex-col h-full space-y-6 select-none max-w-[1000px] w-full mx-auto px-4 py-6">
+    <div className="flex flex-col h-full space-y-5 select-none max-w-[1000px] w-full mx-auto px-4 py-4">
       {/* Settings Header */}
-      <div className="space-y-1.5 border-b border-border pb-5">
-        <h1 className="text-3xl font-extrabold tracking-tight text-foreground/90 font-heading">Settings</h1>
-        <p className="text-sm text-muted-foreground">
+      <div className="space-y-1 border-b border-border pb-4">
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">Settings</h1>
+        <p className="text-xs text-muted-foreground">
           Manage your account preferences, theme settings, workspaces, and team memberships.
         </p>
       </div>

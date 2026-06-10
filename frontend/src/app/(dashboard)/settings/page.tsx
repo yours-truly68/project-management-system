@@ -9,7 +9,7 @@ export default function SettingsPage() {
 
       {/* Profile Section Preview (Utility mockup) */}
       <div className="bg-secondary/20 rounded-xl border border-border p-6 space-y-4">
-        <h2 className="text-xl font-bold text-foreground/90">User Profile</h2>
+        <h2 className="text-sm font-semibold text-foreground">User Profile</h2>
         <p className="text-xs text-muted-foreground">
           Your account credentials and email notification settings are synchronized with your authenticated session.
         </p>
@@ -26,7 +26,7 @@ export default function SettingsPage() {
       {/* Appearance Section */}
       <div className="bg-secondary/20 rounded-xl border border-border p-6 space-y-4">
         <div>
-          <h2 className="text-xl font-bold text-foreground/90">Appearance</h2>
+          <h2 className="text-sm font-semibold text-foreground">Appearance</h2>
           <p className="text-xs text-muted-foreground mt-1">
             Select how KanDo looks on your interface. Choose light mode, dark mode, or follow your operating system settings.
           </p>

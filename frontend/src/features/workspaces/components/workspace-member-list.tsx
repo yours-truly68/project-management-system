@@ -113,7 +113,7 @@ export function WorkspaceMemberList({ workspace }: WorkspaceMemberListProps) {
       {canInvite && (
         <div className="bg-secondary/20 rounded-xl border border-border p-6 space-y-4">
           <div>
-            <h2 className="text-xl font-bold text-foreground/90 font-heading">Invite Member</h2>
+            <h2 className="text-sm font-semibold text-foreground">Invite Member</h2>
             <p className="text-xs text-muted-foreground mt-1">
               Add users to your workspace by email. Admins can manage tasks, projects, and other
               members.
@@ -181,7 +181,7 @@ export function WorkspaceMemberList({ workspace }: WorkspaceMemberListProps) {
       {/* Members List Section */}
       <div className="bg-secondary/20 rounded-xl border border-border p-6 space-y-4">
         <div>
-          <h2 className="text-xl font-bold text-foreground/90 font-heading">Workspace Members</h2>
+          <h2 className="text-sm font-semibold text-foreground">Workspace Members</h2>
           <p className="text-xs text-muted-foreground mt-1">
             A list of all users currently in this workspace and their permission roles.
           </p>
