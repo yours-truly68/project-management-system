@@ -1,15 +1,16 @@
 "use client";
-
 import * as React from "react";
 import { Task, TaskPriority } from "../types/task.types";
 import { WorkspaceMemberDetailed } from "@/features/workspaces/types/workspace.types";
-import { Calendar, AlertCircle } from "lucide-react";
+import { Calendar, AlertCircle, MoreHorizontal, Edit3, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useDeleteTask } from "../hooks/use-tasks";
 
 interface TaskCardProps {
   task: Task;
   onClick: () => void;
   members: WorkspaceMemberDetailed[];
+  boardId: string;
 }
 
 // Map priorities to colors & labels
@@ -17,10 +18,10 @@ const PRIORITY_MAP: Record<
   TaskPriority,
   { label: string; bg: string; text: string; dot: string }
 > = {
-  URGENT: { label: "Urgent", bg: "bg-rose-500/10", text: "text-rose-500", dot: "bg-rose-500" },
-  HIGH: { label: "High", bg: "bg-amber-500/10", text: "text-amber-500", dot: "bg-amber-500" },
-  MEDIUM: { label: "Medium", bg: "bg-sky-500/10", text: "text-sky-500", dot: "bg-sky-500" },
-  LOW: { label: "Low", bg: "bg-secondary", text: "text-muted-foreground", dot: "bg-muted-foreground" },
+  URGENT: { label: "Urgent", bg: "bg-red-500/10 dark:bg-red-500/10", text: "text-red-500", dot: "bg-red-500" },
+  HIGH: { label: "High", bg: "bg-amber-500/10 dark:bg-amber-500/10", text: "text-amber-500", dot: "bg-amber-500" },
+  MEDIUM: { label: "Medium", bg: "bg-blue-500/10 dark:bg-blue-500/10", text: "text-blue-500", dot: "bg-blue-500" },
+  LOW: { label: "Low", bg: "bg-neutral-100 dark:bg-neutral-800", text: "text-neutral-500 dark:text-neutral-400", dot: "bg-neutral-400 dark:bg-neutral-500" },
 };
 
 function getInitials(name: string): string {
@@ -32,7 +33,34 @@ function getInitials(name: string): string {
   return parts[0][0]?.toUpperCase() || "";
 }
 
-export function TaskCard({ task, onClick, members }: TaskCardProps) {
+// Helper to generate deterministic bg color for assignee initials fallback
+function getAvatarBg(name: string): string {
+  const colors = [
+    "bg-red-500/10 text-red-500 border-red-500/20",
+    "bg-orange-500/10 text-orange-500 border-orange-500/20",
+    "bg-amber-500/10 text-amber-500 border-amber-500/20",
+    "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+    "bg-teal-500/10 text-teal-500 border-teal-500/20",
+    "bg-sky-500/10 text-sky-500 border-sky-500/20",
+    "bg-blue-500/10 text-blue-500 border-blue-500/20",
+    "bg-indigo-500/10 text-indigo-500 border-indigo-500/20",
+    "bg-purple-500/10 text-purple-500 border-purple-500/20",
+    "bg-fuchsia-500/10 text-fuchsia-500 border-fuchsia-500/20",
+    "bg-pink-500/10 text-pink-500 border-pink-500/20",
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % colors.length;
+  return colors[index];
+}
+
+export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+  const { mutateAsync: deleteTask } = useDeleteTask(boardId);
+
   const assignee = React.useMemo(
     () => members.find((m) => m.user_id === task.assignee_id),
     [members, task.assignee_id]
@@ -42,7 +70,10 @@ export function TaskCard({ task, onClick, members }: TaskCardProps) {
 
   const isOverdue = React.useMemo(() => {
     if (!task.due_date) return false;
-    return new Date(task.due_date) < new Date();
+    // Set hours to end of day to make check nicer
+    const d = new Date(task.due_date);
+    d.setHours(23, 59, 59, 999);
+    return d < new Date();
   }, [task.due_date]);
 
   const formattedDueDate = React.useMemo(() => {
@@ -53,10 +84,41 @@ export function TaskCard({ task, onClick, members }: TaskCardProps) {
     });
   }, [task.due_date]);
 
+  // Handle outside menu click
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    }
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isMenuOpen]);
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMenuOpen(false);
+    if (confirm("Are you sure you want to delete this task?")) {
+      try {
+        await deleteTask(task.id);
+      } catch (err) {
+        console.error("Failed to delete task:", err);
+      }
+    }
+  };
+
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMenuOpen(false);
+    onClick();
+  };
+
   return (
     <div
       onClick={onClick}
-      className="group flex flex-col justify-between p-3.5 bg-card hover:bg-accent/10 border border-border hover:border-border-hover rounded-xl shadow-sm transition-all cursor-pointer select-none space-y-3"
+      className="group relative flex flex-col justify-between p-4 bg-card border border-border/80 hover:border-neutral-300 dark:hover:border-neutral-700 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-md transition-all duration-200 cursor-pointer select-none space-y-3"
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
@@ -67,58 +129,105 @@ export function TaskCard({ task, onClick, members }: TaskCardProps) {
       }}
       aria-label={`Task: ${task.title}`}
     >
-      {/* Title */}
-      <h4 className="text-xs font-bold text-foreground/90 leading-snug group-hover:text-foreground transition-colors line-clamp-2">
-        {task.title}
-      </h4>
+      {/* Redesigned Card Header with Priority & Overflow Actions */}
+      <div className="flex items-center justify-between gap-2">
+        <span
+          className={cn(
+            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider border border-border/40",
+            priority.bg,
+            priority.text
+          )}
+        >
+          <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", priority.dot)} />
+          {priority.label}
+        </span>
 
-      {/* Footer Info */}
-      <div className="flex items-center justify-between gap-2 pt-1">
-        <div className="flex items-center gap-2">
-          {/* Priority */}
-          <span
-            className={cn(
-              "inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border border-border/50",
-              priority.bg,
-              priority.text
-            )}
+        {/* Overflow Menu */}
+        <div className="relative" ref={menuRef} onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsMenuOpen(!isMenuOpen);
+            }}
+            className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-muted-foreground/60 hover:text-foreground hover:bg-secondary transition-all cursor-pointer focus-visible:outline-none"
+            aria-label="Task options"
           >
-            <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", priority.dot)} />
-            {priority.label}
-          </span>
+            <MoreHorizontal className="w-3.5 h-3.5" />
+          </button>
 
-          {/* Due Date */}
-          {formattedDueDate && (
+          {isMenuOpen && (
+            <div className="absolute right-0 mt-1 w-32 rounded-lg border border-border bg-card shadow-lg py-1 z-20 animate-fade-in focus:outline-none text-left select-none">
+              <button
+                onClick={handleEdit}
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer font-medium"
+              >
+                <Edit3 className="w-3.5 h-3.5 text-muted-foreground" />
+                <span>Edit Task</span>
+              </button>
+              <button
+                onClick={handleDelete}
+                className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-rose-500 hover:bg-rose-500/10 transition-colors text-left cursor-pointer font-semibold"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete Task</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Task Content */}
+      <div className="space-y-1.5">
+        <h4 className="text-xs font-bold text-foreground/90 leading-snug group-hover:text-foreground transition-colors break-words">
+          {task.title}
+        </h4>
+        {task.description && (
+          <p className="text-[11px] text-muted-foreground/80 leading-relaxed line-clamp-2 break-words">
+            {task.description}
+          </p>
+        )}
+      </div>
+
+      {/* Redesigned Card Footer with Metadata (Date & Avatar) */}
+      <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40 mt-1">
+        <div className="flex items-center gap-2">
+          {/* Due Date Indicator */}
+          {formattedDueDate ? (
             <span
               className={cn(
-                "inline-flex items-center gap-1.5 text-[10px] font-medium transition-colors",
+                "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-all",
                 isOverdue
-                  ? "text-rose-500 font-bold"
-                  : "text-muted-foreground/80"
+                  ? "bg-rose-500/10 text-rose-600 font-bold border border-rose-500/20"
+                  : "bg-secondary text-muted-foreground/80 border border-border/40"
               )}
               title={isOverdue ? "Overdue task!" : "Due Date"}
             >
               {isOverdue ? (
-                <AlertCircle className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                <AlertCircle className="w-3 h-3 text-rose-600 shrink-0" />
               ) : (
                 <Calendar className="w-3.5 h-3.5 text-muted-foreground/45 shrink-0" />
               )}
               <span>{formattedDueDate}</span>
             </span>
+          ) : (
+            <div className="h-4" /> /* Empty spacing block to match density */
           )}
         </div>
 
-        {/* Assignee Avatar */}
+        {/* Custom Assignee Avatar with Fallback & Tooltip */}
         {assignee ? (
           <div
-            className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/10 border border-primary/20 text-[9px] font-bold text-primary shrink-0 select-none"
-            title={`Assigned to ${assignee.full_name}`}
+            className={cn(
+              "flex items-center justify-center w-5.5 h-5.5 rounded-full border text-[9px] font-extrabold shrink-0 select-none transition-all",
+              getAvatarBg(assignee.full_name)
+            )}
+            title={assignee.full_name}
           >
             {getInitials(assignee.full_name)}
           </div>
         ) : (
           <div
-            className="w-5 h-5 rounded-full border border-dashed border-border/70 flex items-center justify-center text-[10px] text-muted-foreground/40 shrink-0 select-none"
+            className="w-5.5 h-5.5 rounded-full border border-dashed border-border/80 flex items-center justify-center text-[10px] text-muted-foreground/30 shrink-0 select-none hover:border-border transition-all"
             title="Unassigned"
           >
             —

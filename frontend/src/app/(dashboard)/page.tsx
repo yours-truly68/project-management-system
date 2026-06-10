@@ -93,8 +93,54 @@ export default function Page() {
 
   if (isWorkspaceLoading || isProjectLoading || isBoardLoading || isColumnsLoading || isTasksLoading) {
     return (
-      <div className="flex justify-center items-center py-24 select-none">
-        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      <div className="flex flex-col h-full space-y-4">
+        {/* Board Header Skeleton */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+          <div className="space-y-2">
+            <div className="h-8 w-48 bg-secondary rounded-lg animate-pulse" />
+            <div className="h-4 w-96 bg-secondary rounded animate-pulse" />
+          </div>
+          <div className="flex items-center gap-2.5 h-10 w-48 bg-secondary rounded-lg animate-pulse" />
+        </div>
+
+        {/* Columns & Cards Skeleton */}
+        <div className="flex-1 flex gap-4 overflow-x-auto min-h-0 pb-4">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="flex flex-col bg-secondary/20 rounded-xl border border-border p-4.5 space-y-4 min-w-[350px] flex-1 h-full overflow-hidden animate-pulse"
+            >
+              {/* Column Header Shimmer */}
+              <div className="flex items-center justify-between pb-0.5">
+                <div className="flex items-center gap-2.5 w-1/2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-secondary shrink-0" />
+                  <div className="h-5 bg-secondary rounded w-28" />
+                </div>
+                <div className="w-6 h-6 bg-secondary rounded" />
+              </div>
+
+              {/* Tasks Shimmer list */}
+              <div className="flex-1 space-y-3">
+                {[1, 2, 3].map((j) => (
+                  <div
+                    key={j}
+                    className="p-4 border border-border bg-card/65 rounded-xl space-y-3 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+                  >
+                    <div className="h-3 w-10 bg-secondary rounded" />
+                    <div className="space-y-1.5">
+                      <div className="h-3.5 bg-secondary rounded w-5/6" />
+                      <div className="h-3 bg-secondary rounded w-3/4" />
+                    </div>
+                    <div className="flex items-center justify-between pt-1 border-t border-border/30">
+                      <div className="h-4 bg-secondary rounded w-16" />
+                      <div className="w-5.5 h-5.5 rounded-full bg-secondary" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -236,30 +282,46 @@ export default function Page() {
               </div>
 
               {/* Column Task List Area */}
-              <div className="flex-1 overflow-y-auto space-y-2.5 pr-0.5">
-                {!tasksByColumn[column.id] || tasksByColumn[column.id].length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-border/60 rounded-xl bg-secondary/5 select-none">
-                    <span className="text-[11px] font-semibold text-muted-foreground/60">No tasks in column</span>
-                    {canManageBoard && (
+              <div className="flex-1 flex flex-col justify-between overflow-hidden">
+                <div className="flex-1 overflow-y-auto space-y-2.5 pr-0.5 min-h-0">
+                  {!tasksByColumn[column.id] || tasksByColumn[column.id].length === 0 ? (
+                    canManageBoard ? (
                       <button
                         onClick={() => setTaskToCreateColId(column.id)}
-                        className="text-[10px] text-primary hover:underline mt-1 font-semibold cursor-pointer"
+                        className="w-full flex flex-col items-center justify-center py-10 border border-dashed border-border hover:border-primary/40 hover:bg-primary/5 rounded-xl transition-all group/cta cursor-pointer select-none"
                       >
-                        + Add Task
+                        <span className="text-xs font-bold text-muted-foreground group-hover/cta:text-primary transition-colors">
+                          + Add First Task
+                        </span>
                       </button>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {tasksByColumn[column.id].map((task) => (
-                      <TaskCard
-                        key={task.id}
-                        task={task}
-                        onClick={() => setSelectedTask(task)}
-                        members={members}
-                      />
-                    ))}
-                  </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-10 border border-dashed border-border/40 rounded-xl bg-secondary/5 select-none">
+                        <span className="text-[11px] font-semibold text-muted-foreground/40">No tasks in column</span>
+                      </div>
+                    )
+                  ) : (
+                    <div className="space-y-2">
+                      {tasksByColumn[column.id].map((task) => (
+                        <TaskCard
+                          key={task.id}
+                          task={task}
+                          onClick={() => setSelectedTask(task)}
+                          members={members}
+                          boardId={activeBoard.id}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Larger bottom CTA when tasks exist */}
+                {canManageBoard && tasksByColumn[column.id] && tasksByColumn[column.id].length > 0 && (
+                  <button
+                    onClick={() => setTaskToCreateColId(column.id)}
+                    className="w-full mt-3 py-2 border border-dashed border-border hover:border-primary/40 hover:bg-primary/5 rounded-xl flex items-center justify-center gap-1.5 transition-all text-muted-foreground hover:text-primary cursor-pointer text-xs font-semibold select-none"
+                  >
+                    <span>+ Add Task</span>
+                  </button>
                 )}
               </div>
             </div>
@@ -301,6 +363,7 @@ export default function Page() {
           isOpen={!!taskToCreateColId}
           onClose={() => setTaskToCreateColId(null)}
           nextPosition={tasksByColumn[taskToCreateColId]?.length || 0}
+          members={members}
         />
       )}
 

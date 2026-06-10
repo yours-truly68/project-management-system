@@ -40,7 +40,7 @@ export function useProjects(includeArchived: boolean = false) {
 
   // Watch the active project query to detect if it has been archived
   useEffect(() => {
-    if (activeProjectQuery.data && activeProjectQuery.data.archived_at) {
+    if (activeProjectQuery.data && activeProjectQuery.data.archived_at && activeProjectQuery.data.id === activeProjectId) {
       const pName = activeProjectQuery.data.name;
       // It is archived! Clear active project and board, set archived entity
       setActiveProjectId(null);
@@ -53,7 +53,7 @@ export function useProjects(includeArchived: boolean = false) {
         name: pName,
       });
     }
-  }, [activeProjectQuery.data, setActiveProjectId, setArchivedEntity]);
+  }, [activeProjectQuery.data, activeProjectId, setActiveProjectId, setArchivedEntity]);
 
   // Sync activeProjectId with available projects
   useEffect(() => {
@@ -121,7 +121,8 @@ export function useUpdateProject(projectId: string) {
   return useMutation({
     mutationFn: (data: ProjectUpdateInput) =>
       projectService.updateProject(projectId, data),
-    onSuccess: () => {
+    onSuccess: (updatedProject) => {
+      queryClient.setQueryData(["project", projectId], updatedProject);
       queryClient.invalidateQueries({ queryKey: ["projects", activeWorkspaceId] });
       queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     },

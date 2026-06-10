@@ -19,6 +19,7 @@ import {
   AlertTriangle,
   X,
   Calendar,
+  MoreHorizontal,
 } from "lucide-react";
 import { getErrorMessage } from "@/lib/utils";
 
@@ -36,6 +37,21 @@ export default function BoardsPage() {
   const [boardToDelete, setBoardToDelete] = React.useState<Board | null>(null);
   const [confirmName, setConfirmName] = React.useState("");
   const [deleteError, setDeleteError] = React.useState("");
+
+  const [activeMenuId, setActiveMenuId] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      const target = event.target as HTMLElement;
+      if (!target.closest(".board-menu-trigger") && !target.closest(".board-menu-dropdown")) {
+        setActiveMenuId(null);
+      }
+    }
+    if (activeMenuId !== null) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [activeMenuId]);
 
   // Determine permissions: OWNER and ADMIN can manage boards, MEMBER can only view
   const currentUserMember = members.find((m) => m.user_id === user?.id);
@@ -169,24 +185,40 @@ export default function BoardsPage() {
                   )}
                 </button>
 
-                <div className="flex items-center gap-1.5">
+                <div className="relative">
                   {canManage && (
                     <button
-                      onClick={() => setBoardToEdit(board)}
-                      className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-all cursor-pointer"
-                      title="Edit Board"
+                      onClick={() => setActiveMenuId(activeMenuId === board.id ? null : board.id)}
+                      className="board-menu-trigger p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-all cursor-pointer focus-visible:outline-none"
+                      aria-label="Board actions"
                     >
-                      <Edit3 className="w-3.5 h-3.5" />
+                      <MoreHorizontal className="w-4 h-4" />
                     </button>
                   )}
-                  {canManage && (
-                    <button
-                      onClick={() => setBoardToDelete(board)}
-                      className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-rose-500 hover:bg-rose-50/50 dark:hover:bg-rose-950/20 transition-all cursor-pointer"
-                      title="Delete Board"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+
+                  {activeMenuId === board.id && (
+                    <div className="board-menu-dropdown absolute right-0 mt-1 w-36 rounded-lg border border-border bg-card shadow-lg py-1 z-10 animate-fade-in text-left select-none">
+                      <button
+                        onClick={() => {
+                          setBoardToEdit(board);
+                          setActiveMenuId(null);
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer font-medium"
+                      >
+                        <Edit3 className="w-3.5 h-3.5 text-muted-foreground" />
+                        <span>Edit Board</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setBoardToDelete(board);
+                          setActiveMenuId(null);
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-rose-500 hover:bg-rose-500/10 transition-colors text-left cursor-pointer font-semibold"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Delete Board</span>
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>

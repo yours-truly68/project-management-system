@@ -20,6 +20,7 @@ import {
   X,
   Calendar,
   Archive,
+  MoreHorizontal,
 } from "lucide-react";
 import { getErrorMessage } from "@/lib/utils";
 
@@ -70,13 +71,28 @@ function ProjectCard({
   onDelete,
   onSelect,
 }: ProjectCardProps) {
-  const { mutateAsync: updateProject, isPending: isUpdating } = useUpdateProject(project.id);
+  const { mutateAsync: updateProject } = useUpdateProject(project.id);
   const color = getProjectColor(project.key);
   const createdDate = new Date(project.created_at).toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
     day: "numeric",
   });
+
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const menuRef = React. useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    }
+    if (isMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isMenuOpen]);
 
   const handleArchive = async () => {
     try {
@@ -129,18 +145,9 @@ function ProjectCard({
       {/* Card Footer Actions */}
       <div className="flex items-center justify-between gap-2.5 pt-4 mt-5 border-t border-border/60">
         {project.archived_at ? (
-          <button
-            onClick={handleArchive}
-            disabled={isUpdating}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-secondary hover:bg-secondary/80 text-foreground border border-border transition-all cursor-pointer disabled:opacity-50"
-          >
-            {isUpdating ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Archive className="w-3.5 h-3.5 text-muted-foreground/75" />
-            )}
-            Restore Project
-          </button>
+          <span className="text-[10px] font-semibold text-amber-500 bg-amber-500/5 border border-amber-500/15 px-2.5 py-1 rounded-md select-none uppercase tracking-wider">
+            Archived
+          </span>
         ) : (
           <button
             onClick={() => onSelect(project.id)}
@@ -162,38 +169,56 @@ function ProjectCard({
           </button>
         )}
 
-        <div className="flex items-center gap-1.5">
-          {canCreateOrEdit && !project.archived_at && (
+        <div className="relative" ref={menuRef}>
+          {(canCreateOrEdit || canDelete) && (
             <button
-              onClick={() => onEdit(project)}
-              className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-all cursor-pointer"
-              title="Edit Project"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-secondary transition-all cursor-pointer focus-visible:outline-none"
+              aria-label="Project actions"
             >
-              <Edit3 className="w-3.5 h-3.5" />
+              <MoreHorizontal className="w-4 h-4" />
             </button>
           )}
-          {canCreateOrEdit && !project.archived_at && (
-            <button
-              onClick={handleArchive}
-              disabled={isUpdating}
-              className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-amber-500 hover:bg-amber-50/50 dark:hover:bg-amber-950/20 transition-all cursor-pointer"
-              title="Archive Project"
-            >
-              {isUpdating ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              ) : (
-                <Archive className="w-3.5 h-3.5" />
+
+          {isMenuOpen && (
+            <div className="absolute right-0 mt-1 w-36 rounded-lg border border-border bg-card shadow-lg py-1 z-10 animate-fade-in text-left select-none">
+              {canCreateOrEdit && !project.archived_at && (
+                <button
+                  onClick={() => {
+                    onEdit(project);
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer font-medium"
+                >
+                  <Edit3 className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span>Edit Project</span>
+                </button>
               )}
-            </button>
-          )}
-          {canDelete && (
-            <button
-              onClick={() => onDelete(project)}
-              className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-rose-500 hover:bg-rose-50/50 dark:hover:bg-rose-950/20 transition-all cursor-pointer"
-              title="Delete Project"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
+              {canCreateOrEdit && (
+                <button
+                  onClick={() => {
+                    handleArchive();
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer font-medium"
+                >
+                  <Archive className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span>{project.archived_at ? "Restore Project" : "Archive Project"}</span>
+                </button>
+              )}
+              {canDelete && (
+                <button
+                  onClick={() => {
+                    onDelete(project);
+                    setIsMenuOpen(false);
+                  }}
+                  className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-rose-500 hover:bg-rose-500/10 transition-colors text-left cursor-pointer font-semibold"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete Project</span>
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>
