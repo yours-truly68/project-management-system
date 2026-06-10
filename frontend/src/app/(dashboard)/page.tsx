@@ -204,28 +204,37 @@ export default function Page() {
     return <BoardEmptyState />;
   }
 
+  const getColumnColor = (name: string, defaultColor: string) => {
+    const norm = name.toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (norm.includes("todo") || norm.includes("backlog")) return "#f97316"; // Orange
+    if (norm.includes("progress") || norm.includes("active")) return "#3b82f6"; // Blue
+    if (norm.includes("review") || norm.includes("qa") || norm.includes("test")) return "#a855f7"; // Purple
+    if (norm.includes("done") || norm.includes("complete") || norm.includes("finish")) return "#22c55e"; // Green
+    return defaultColor || "#3b82f6";
+  };
+
   // Sorted columns based on their sequential position property
   const sortedColumns = [...columns].sort((a, b) => a.position - b.position);
 
   return (
-    <div className="flex flex-col h-full space-y-3.5">
+    <div className="flex flex-col h-full space-y-4">
       {/* Board Header Toolbar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-3 shrink-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-5 pt-3 shrink-0">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-foreground/95 select-none animate-fade-in">
             {activeBoard.name}
           </h1>
           {activeBoard.description && (
-            <p className="text-xs text-muted-foreground mt-0.5 max-w-2xl truncate">
+            <p className="text-sm text-muted-foreground mt-1.5 max-w-2xl truncate leading-relaxed">
               {activeBoard.description}
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+        <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
           {canManageBoard && (
             <button
               onClick={() => setIsEditOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-foreground hover:bg-secondary text-xs font-semibold transition-all cursor-pointer animate-fade-in"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-border text-foreground hover:bg-secondary text-xs font-semibold transition-all cursor-pointer animate-fade-in"
               aria-label="Edit board"
             >
               <Edit3 className="w-3.5 h-3.5" />
@@ -235,7 +244,7 @@ export default function Page() {
           {canManageBoard && (
             <button
               onClick={() => setIsColumnCreateOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 transition-colors cursor-pointer animate-fade-in"
+              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 transition-colors cursor-pointer animate-fade-in"
               aria-label="Create new column"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -253,18 +262,18 @@ export default function Page() {
           {sortedColumns.map((column) => (
             <div
               key={column.id}
-              className="flex flex-col bg-secondary rounded-xl border border-border/60 dark:border-border/50 p-3 space-y-2.5 w-[340px] shrink-0 h-full overflow-hidden shadow-xs dark:shadow-none"
+              className="flex flex-col bg-secondary rounded-xl border border-border/60 dark:border-border/50 p-3.5 space-y-3 w-[340px] shrink-0 h-full overflow-hidden shadow-xs dark:shadow-none"
             >
               {/* Column Header */}
-              <div className="flex items-center justify-between pb-0.5 select-none shrink-0">
-                <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center justify-between pb-1 select-none shrink-0">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <span
-                    className="w-1.5 h-1.5 rounded-full shrink-0"
-                    style={{ backgroundColor: column.color || "#3b82f6" }}
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: getColumnColor(column.name, column.color) }}
                   />
-                  <h3 className="text-xs font-semibold text-foreground/90 tracking-tight truncate flex items-center gap-1.5">
+                  <h3 className="text-[14px] font-bold text-foreground/90 tracking-tight truncate flex items-center gap-2">
                     <span>{column.name}</span>
-                    <span className="text-[10px] font-medium text-muted-foreground px-1.5 py-0.5 rounded-full bg-secondary border border-border/40 font-mono">
+                    <span className="text-[11px] font-bold text-muted-foreground px-2 py-0.5 rounded-full bg-secondary border border-border/40 font-mono">
                       {tasksByColumn[column.id]?.length || 0}
                     </span>
                   </h3>
@@ -282,22 +291,22 @@ export default function Page() {
               {canManageBoard && (
                 <button
                   onClick={() => setTaskToCreateColId(column.id)}
-                  className="w-full h-8 bg-secondary border border-border/50 hover:border-border/80 hover:bg-accent rounded-lg flex items-center justify-center transition-all text-muted-foreground hover:text-foreground cursor-pointer shrink-0 gap-1.5 text-xs font-semibold"
+                  className="w-full h-9 bg-secondary border border-border/50 hover:border-border/80 hover:bg-accent rounded-lg flex items-center justify-center transition-all text-muted-foreground hover:text-foreground cursor-pointer shrink-0 gap-2 text-xs font-bold"
                   aria-label="Add Task"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-4 h-4" />
                   <span>Add Task</span>
                 </button>
               )}
 
               {/* Column Task List Area */}
-              <div className="flex-1 overflow-y-auto space-y-2 pr-0.5 min-h-0">
+              <div className="flex-1 overflow-y-auto space-y-2.5 pr-0.5 min-h-0">
                 {!tasksByColumn[column.id] || tasksByColumn[column.id].length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-10 px-4 border border-dashed border-border/30 rounded-xl select-none text-center h-full justify-center my-auto">
-                    <span className="text-[11px] font-semibold text-muted-foreground/50">No tasks in this stage</span>
+                    <span className="text-sm font-semibold text-muted-foreground/50">No tasks in this stage</span>
                   </div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     {tasksByColumn[column.id].map((task) => (
                       <TaskCard
                         key={task.id}

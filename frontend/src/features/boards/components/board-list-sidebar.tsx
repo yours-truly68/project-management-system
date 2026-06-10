@@ -115,15 +115,17 @@ export function BoardListSidebar({ isCollapsed }: BoardListSidebarProps) {
                 <button
                   onClick={() => setActiveBoardId(board.id)}
                   className={cn(
-                    "flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] text-sidebar-foreground/70 hover:text-sidebar-foreground rounded hover:bg-sidebar-accent/40 w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer",
-                    isActive && "bg-sidebar-accent text-sidebar-foreground font-semibold",
-                    isCollapsed && "justify-center px-0"
+                    "flex items-center gap-2.5 px-2.5 py-1.5 rounded-r-md border-l-2 text-[15px] text-sidebar-foreground/70 hover:text-sidebar-foreground w-full text-left transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer",
+                    isActive
+                      ? "bg-sidebar-accent border-primary text-sidebar-foreground font-semibold"
+                      : "border-transparent hover:bg-sidebar-accent/40",
+                    isCollapsed && "justify-center px-0 border-l-0 rounded-md"
                   )}
                   aria-label={`Board: ${board.name}`}
                 >
                   <LayoutGrid className="w-3.5 h-3.5 text-sidebar-foreground/60 shrink-0" />
                   {!isCollapsed && (
-                    <span className="truncate text-[13px] font-medium flex-1">
+                    <span className="truncate text-[15px] font-medium flex-1">
                       {board.name}
                     </span>
                   )}

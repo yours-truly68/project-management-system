@@ -41,10 +41,10 @@ const PRIORITY_MAP: Record<
   TaskPriority,
   { label: string; bg: string; text: string; dot: string }
 > = {
-  URGENT: { label: "Urgent", bg: "bg-red-500/10 dark:bg-red-500/10", text: "text-red-500", dot: "bg-red-500" },
-  HIGH: { label: "High", bg: "bg-amber-500/10 dark:bg-amber-500/10", text: "text-amber-500", dot: "bg-amber-500" },
-  MEDIUM: { label: "Medium", bg: "bg-blue-500/10 dark:bg-blue-500/10", text: "text-blue-500", dot: "bg-blue-500" },
-  LOW: { label: "Low", bg: "bg-neutral-100 dark:bg-neutral-800", text: "text-neutral-500 dark:text-neutral-400", dot: "bg-neutral-400 dark:bg-neutral-500" },
+  URGENT: { label: "Urgent", bg: "bg-red-500/10 border border-red-500/20", text: "text-red-500", dot: "bg-red-500" },
+  HIGH: { label: "High", bg: "bg-orange-500/10 border border-orange-500/20", text: "text-orange-500", dot: "bg-orange-500" },
+  MEDIUM: { label: "Medium", bg: "bg-amber-500/10 border border-amber-500/20", text: "text-amber-500", dot: "bg-amber-500" },
+  LOW: { label: "Low", bg: "bg-emerald-500/10 border border-emerald-500/20", text: "text-emerald-500", dot: "bg-emerald-500" },
 };
 
 function getInitials(name: string): string {
@@ -144,14 +144,14 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
     return (
       <span
         className={cn(
-          "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-all duration-150 border",
+          "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-semibold transition-all duration-150 border",
           isOverdue
             ? "bg-rose-500/10 text-rose-500 border-rose-500/20 font-bold"
             : "bg-secondary text-muted-foreground/80 border-border/40"
         )}
         title={isOverdue ? "Overdue task!" : "Due Date"}
       >
-        <Clock className={cn("w-3 h-3 shrink-0", isOverdue ? "text-rose-500" : "text-muted-foreground/50")} />
+        <Clock className={cn("w-3.5 h-3.5 shrink-0", isOverdue ? "text-rose-500" : "text-muted-foreground/50")} />
         <span>{formattedDueDate}</span>
       </span>
     );
@@ -200,7 +200,7 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
       <div className="flex items-center justify-between gap-2">
         <span
           className={cn(
-            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider border border-border/40",
+            "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider",
             priority.bg,
             priority.text
           )}
@@ -245,11 +245,11 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
 
       {/* Task Content */}
       <div className="space-y-1">
-        <h4 className="text-[13px] font-semibold text-foreground/90 leading-snug group-hover:text-foreground transition-colors break-words">
+        <h4 className="text-lg font-semibold text-foreground leading-snug group-hover:text-foreground transition-colors break-words">
           {task.title}
         </h4>
         {task.description && (
-          <p className="text-[11px] text-muted-foreground/75 leading-relaxed line-clamp-2 break-words">
+          <p className="text-sm text-muted-foreground/75 leading-relaxed line-clamp-2 break-words">
             {task.description}
           </p>
         )}

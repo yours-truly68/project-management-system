@@ -79,9 +79,9 @@ export function Sidebar() {
         </div>
 
         {/* Main Scrollable Navigation Area */}
-        <div className="flex-1 overflow-y-auto px-2 py-1.5 space-y-3.5">
+        <div className="flex-1 overflow-y-auto px-2 py-2.5 space-y-4">
           {/* Navigation Items (Main & Links) */}
-          <div className="space-y-0.5">
+          <div className="space-y-1">
             {MAIN_NAV_ITEMS.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -90,12 +90,12 @@ export function Sidebar() {
                   <Link
                     href={item.disabled ? "#" : item.href}
                     className={cn(
-                      "flex items-center gap-2.5 px-2.5 py-1.5 rounded text-[13px] transition-colors font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                      "flex items-center gap-2.5 px-2.5 py-1.5 rounded-r-md border-l-2 text-[15px] transition-all font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                        : "hover:bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground",
+                        ? "bg-sidebar-accent border-primary text-sidebar-accent-foreground font-semibold"
+                        : "border-transparent hover:bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground",
                       item.disabled && "pointer-events-none opacity-50",
-                      isCollapsed && "justify-center px-0"
+                      isCollapsed && "justify-center px-0 border-l-0 rounded-md"
                     )}
                     title={isCollapsed ? undefined : item.name}
                     aria-label={item.name}
@@ -107,50 +107,15 @@ export function Sidebar() {
               );
             })}
           </div>
- 
-          {/* 3. Favorites List (Placeholder) */}
-          <div className="space-y-0.5">
-            {!isCollapsed && (
-              <div className="px-2.5 py-1 text-[10px] font-bold text-sidebar-foreground/45 uppercase tracking-wider">
-                Favorites
-              </div>
-            )}
-            <div className="space-y-0.5">
-              <SidebarTooltip content="Website Redesign" disabled={!isCollapsed}>
-                <button
-                  className={cn(
-                    "flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] text-sidebar-foreground/70 hover:text-sidebar-foreground rounded hover:bg-sidebar-accent/40 w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                    isCollapsed && "justify-center px-0"
-                  )}
-                  aria-label="Favorite workspace item: Website Redesign"
-                >
-                  <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" />
-                  {!isCollapsed && <span className="truncate text-[13px] font-medium">Website Redesign</span>}
-                </button>
-              </SidebarTooltip>
-              <SidebarTooltip content="Release V1 Specs" disabled={!isCollapsed}>
-                <button
-                  className={cn(
-                    "flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] text-sidebar-foreground/70 hover:text-sidebar-foreground rounded hover:bg-sidebar-accent/40 w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                    isCollapsed && "justify-center px-0"
-                  )}
-                  aria-label="Favorite workspace item: Release V1 Specs"
-                >
-                  <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" />
-                  {!isCollapsed && <span className="truncate text-[13px] font-medium">Release V1 Specs</span>}
-                </button>
-              </SidebarTooltip>
-            </div>
-          </div>
- 
+
           {/* 4. Projects List Section (Dynamic) */}
           <ProjectListSidebar isCollapsed={isCollapsed} />
- 
+
           {/* 5. Boards List Section (Dynamic) */}
           <BoardListSidebar isCollapsed={isCollapsed} />
- 
+
           {/* Other navigation section */}
-          <div className="pt-2 border-t border-sidebar-border space-y-0.5">
+          <div className="pt-2.5 border-t border-sidebar-border space-y-1">
             {OTHER_NAV_ITEMS.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -159,21 +124,21 @@ export function Sidebar() {
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-2.5 px-2.5 py-1.5 rounded text-[13px] transition-colors font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+                      "flex items-center gap-2.5 px-2.5 py-1.5 rounded-r-md border-l-2 text-[15px] transition-all font-medium focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
                       isActive
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
-                        : "hover:bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground",
-                      isCollapsed && "justify-center px-0"
+                        ? "bg-sidebar-accent border-primary text-sidebar-accent-foreground font-semibold"
+                        : "border-transparent hover:bg-sidebar-accent/50 text-sidebar-foreground/80 hover:text-sidebar-foreground",
+                      isCollapsed && "justify-center px-0 border-l-0 rounded-md"
                     )}
                     title={isCollapsed ? undefined : item.name}
                     aria-label={item.name}
                   >
                     <Icon className="w-4 h-4 shrink-0" />
-                    {!isCollapsed && <span className="truncate text-[13px] font-medium">{item.name}</span>}
+                    {!isCollapsed && <span className="truncate">{item.name}</span>}
                   </Link>
                 </SidebarTooltip>
               );
-            })}   })}
+            })}
           </div>
         </div>
       </aside>

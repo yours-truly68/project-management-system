@@ -15,6 +15,7 @@ const createTaskSchema = z.object({
   description: z.string().optional(),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]),
   assignee_id: z.string().optional().nullable(),
+  due_date: z.string().optional().nullable(),
 });
 
 type CreateTaskFormData = z.infer<typeof createTaskSchema>;
@@ -50,6 +51,7 @@ export function CreateTaskModal({
       description: "",
       priority: "MEDIUM",
       assignee_id: "",
+      due_date: "",
     },
   });
 
@@ -60,6 +62,7 @@ export function CreateTaskModal({
         description: "",
         priority: "MEDIUM",
         assignee_id: "",
+        due_date: "",
       });
     }
   }, [isOpen, reset]);
@@ -74,6 +77,7 @@ export function CreateTaskModal({
         description: data.description || null,
         priority: data.priority as TaskPriority,
         assignee_id: data.assignee_id || null,
+        due_date: data.due_date ? new Date(data.due_date).toISOString() : null,
         position: nextPosition,
       });
       onClose();
@@ -85,7 +89,7 @@ export function CreateTaskModal({
   const errorMessage = error ? getErrorMessage(error) : "";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 backdrop-blur-[2px] animate-fade-in select-none">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-[1px] animate-fade-in select-none">
       <div
         className="relative w-full max-w-lg bg-elevated border border-border rounded-xl shadow-xl p-6 m-4 animate-scale-in"
         role="dialog"
