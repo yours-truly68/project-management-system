@@ -47,9 +47,20 @@ class ColumnRepository:
 
     async def reorder_columns(self, ordered_ids: list[uuid.UUID]) -> None:
         """Update positions of columns according to their index in the ordered_ids list."""
+        # 1. Temporarily move to unique negative positions to avoid unique constraint violations
+        for index, column_id in enumerate(ordered_ids):
+            stmt = (
+                update(Column)
+                .where(Column.id == column_id)
+                .values(position=-(index + 1))
+            )
+            await self.session.execute(stmt)
+
+        # 2. Assign final positions
         for index, column_id in enumerate(ordered_ids):
             stmt = update(Column).where(Column.id == column_id).values(position=index)
             await self.session.execute(stmt)
+
         await self.session.flush()
 
     async def update(self, column_id: uuid.UUID, data: dict) -> Column | None:
