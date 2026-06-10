@@ -16,7 +16,6 @@ import { ColumnEmptyState } from "@/features/columns/components/column-empty-sta
 import { Column } from "@/features/columns/types/column.types";
 import {
   Plus,
-  GripVertical,
   Loader2,
   Edit3,
   Archive,
@@ -108,7 +107,7 @@ export default function Page() {
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="flex flex-col bg-secondary/20 rounded-xl border border-border p-4.5 space-y-4 min-w-[350px] flex-1 h-full overflow-hidden animate-pulse"
+              className="flex flex-col bg-secondary/20 rounded-xl border border-border p-4.5 space-y-4 w-[320px] shrink-0 h-full overflow-hidden animate-pulse"
             >
               {/* Column Header Shimmer */}
               <div className="flex items-center justify-between pb-0.5">
@@ -249,30 +248,23 @@ export default function Page() {
           {sortedColumns.map((column) => (
             <div
               key={column.id}
-              className="flex flex-col bg-secondary/40 rounded-xl border border-border p-4.5 space-y-4 min-w-[350px] flex-1 h-full overflow-hidden"
+              className="flex flex-col bg-secondary/40 rounded-xl border border-border p-4.5 space-y-3 w-[320px] shrink-0 h-full overflow-hidden"
             >
               {/* Column Header */}
               <div className="flex items-center justify-between pb-0.5 select-none">
                 <div className="flex items-center gap-2 min-w-0">
-                  <GripVertical className="w-4 h-4 text-muted-foreground/30 shrink-0 cursor-not-allowed opacity-40" />
                   <span
-                    className="w-2.5 h-2.5 rounded-full shrink-0"
+                    className="w-2 h-2 rounded-full shrink-0"
                     style={{ backgroundColor: column.color || "#3b82f6" }}
                   />
-                  <h3 className="text-lg font-bold text-foreground/90 truncate">
+                  <h3 className="text-sm font-bold text-foreground/90 truncate">
                     {column.name}
+                    <span className="text-muted-foreground/60 font-medium ml-1.5 text-xs">
+                      • {tasksByColumn[column.id]?.length || 0}
+                    </span>
                   </h3>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  {canManageBoard && (
-                    <button
-                      onClick={() => setTaskToCreateColId(column.id)}
-                      className="p-1 hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-all cursor-pointer"
-                      title="Create task in this column"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                    </button>
-                  )}
                   <ColumnActionsMenu
                     canManage={canManageBoard}
                     onEdit={() => setColumnToEdit(column)}
@@ -281,47 +273,35 @@ export default function Page() {
                 </div>
               </div>
 
-              {/* Column Task List Area */}
-              <div className="flex-1 flex flex-col justify-between overflow-hidden">
-                <div className="flex-1 overflow-y-auto space-y-2.5 pr-0.5 min-h-0">
-                  {!tasksByColumn[column.id] || tasksByColumn[column.id].length === 0 ? (
-                    canManageBoard ? (
-                      <button
-                        onClick={() => setTaskToCreateColId(column.id)}
-                        className="w-full flex flex-col items-center justify-center py-10 border border-dashed border-border hover:border-primary/40 hover:bg-primary/5 rounded-xl transition-all group/cta cursor-pointer select-none"
-                      >
-                        <span className="text-xs font-bold text-muted-foreground group-hover/cta:text-primary transition-colors">
-                          + Add First Task
-                        </span>
-                      </button>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center py-10 border border-dashed border-border/40 rounded-xl bg-secondary/5 select-none">
-                        <span className="text-[11px] font-semibold text-muted-foreground/40">No tasks in column</span>
-                      </div>
-                    )
-                  ) : (
-                    <div className="space-y-2">
-                      {tasksByColumn[column.id].map((task) => (
-                        <TaskCard
-                          key={task.id}
-                          task={task}
-                          onClick={() => setSelectedTask(task)}
-                          members={members}
-                          boardId={activeBoard.id}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
+              {/* Add Task CTA (Directly below column header) */}
+              {canManageBoard && (
+                <button
+                  onClick={() => setTaskToCreateColId(column.id)}
+                  className="w-full h-12 border border-dashed border-border/75 hover:border-primary/45 hover:bg-primary/5 rounded-xl flex items-center justify-center gap-1.5 transition-all text-muted-foreground/80 hover:text-primary cursor-pointer text-xs font-bold select-none shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5 shrink-0" />
+                  <span>Add Task</span>
+                </button>
+              )}
 
-                {/* Larger bottom CTA when tasks exist */}
-                {canManageBoard && tasksByColumn[column.id] && tasksByColumn[column.id].length > 0 && (
-                  <button
-                    onClick={() => setTaskToCreateColId(column.id)}
-                    className="w-full mt-3 py-2 border border-dashed border-border hover:border-primary/40 hover:bg-primary/5 rounded-xl flex items-center justify-center gap-1.5 transition-all text-muted-foreground hover:text-primary cursor-pointer text-xs font-semibold select-none"
-                  >
-                    <span>+ Add Task</span>
-                  </button>
+              {/* Column Task List Area */}
+              <div className="flex-1 overflow-y-auto space-y-2.5 pr-0.5 min-h-0">
+                {!tasksByColumn[column.id] || tasksByColumn[column.id].length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-10 border border-dashed border-border/40 rounded-xl bg-secondary/5 select-none">
+                    <span className="text-[11px] font-semibold text-muted-foreground/45">No tasks</span>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {tasksByColumn[column.id].map((task) => (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        onClick={() => setSelectedTask(task)}
+                        members={members}
+                        boardId={activeBoard.id}
+                      />
+                    ))}
+                  </div>
                 )}
               </div>
             </div>

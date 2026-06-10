@@ -1,8 +1,9 @@
 "use client";
+
 import * as React from "react";
 import { Task, TaskPriority } from "../types/task.types";
 import { WorkspaceMemberDetailed } from "@/features/workspaces/types/workspace.types";
-import { Calendar, AlertCircle, MoreHorizontal, Edit3, Trash2 } from "lucide-react";
+import { Clock, MoreHorizontal, Edit3, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useDeleteTask } from "../hooks/use-tasks";
 
@@ -118,7 +119,7 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
   return (
     <div
       onClick={onClick}
-      className="group relative flex flex-col justify-between p-4 bg-card border border-border/80 hover:border-neutral-300 dark:hover:border-neutral-700 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:shadow-md transition-all duration-200 cursor-pointer select-none space-y-3"
+      className="group relative flex flex-col justify-between p-4 bg-card border border-border/80 rounded-xl shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:border-primary/40 hover:shadow-sm hover:-translate-y-[2px] transition-all duration-200 cursor-pointer select-none space-y-3"
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
@@ -129,7 +130,7 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
       }}
       aria-label={`Task: ${task.title}`}
     >
-      {/* Redesigned Card Header with Priority & Overflow Actions */}
+      {/* Header with Priority & Always Visible Overflow Actions */}
       <div className="flex items-center justify-between gap-2">
         <span
           className={cn(
@@ -142,14 +143,14 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
           {priority.label}
         </span>
 
-        {/* Overflow Menu */}
+        {/* Overflow Menu (Always visible) */}
         <div className="relative" ref={menuRef} onClick={(e) => e.stopPropagation()}>
           <button
             onClick={(e) => {
               e.stopPropagation();
               setIsMenuOpen(!isMenuOpen);
             }}
-            className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-muted-foreground/60 hover:text-foreground hover:bg-secondary transition-all cursor-pointer focus-visible:outline-none"
+            className="p-1 rounded-md text-muted-foreground/60 hover:text-foreground hover:bg-secondary transition-all cursor-pointer focus-visible:outline-none"
             aria-label="Task options"
           >
             <MoreHorizontal className="w-3.5 h-3.5" />
@@ -188,31 +189,25 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
         )}
       </div>
 
-      {/* Redesigned Card Footer with Metadata (Date & Avatar) */}
-      <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40 mt-1">
-        <div className="flex items-center gap-2">
-          {/* Due Date Indicator */}
-          {formattedDueDate ? (
-            <span
-              className={cn(
-                "inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium transition-all",
-                isOverdue
-                  ? "bg-rose-500/10 text-rose-600 font-bold border border-rose-500/20"
-                  : "bg-secondary text-muted-foreground/80 border border-border/40"
-              )}
-              title={isOverdue ? "Overdue task!" : "Due Date"}
-            >
-              {isOverdue ? (
-                <AlertCircle className="w-3 h-3 text-rose-600 shrink-0" />
-              ) : (
-                <Calendar className="w-3.5 h-3.5 text-muted-foreground/45 shrink-0" />
-              )}
-              <span>{formattedDueDate}</span>
-            </span>
-          ) : (
-            <div className="h-4" /> /* Empty spacing block to match density */
-          )}
-        </div>
+      {/* Task Footer with Due Date & Assignee */}
+      <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/40 mt-1">
+        {/* Due Date Indicator */}
+        {formattedDueDate ? (
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-medium transition-all duration-150",
+              isOverdue
+                ? "bg-rose-500/10 text-rose-600 font-bold border border-rose-500/20"
+                : "bg-secondary text-muted-foreground/80 border border-border/40"
+            )}
+            title={isOverdue ? "Overdue task!" : "Due Date"}
+          >
+            <Clock className={cn("w-3 h-3 shrink-0", isOverdue ? "text-rose-600" : "text-muted-foreground/45")} />
+            <span>{formattedDueDate}</span>
+          </span>
+        ) : (
+          <div className="h-4" /> /* Empty spacing block to preserve height structure */
+        )}
 
         {/* Custom Assignee Avatar with Fallback & Tooltip */}
         {assignee ? (
