@@ -47,6 +47,7 @@ class ProjectService:
         )
         project = await self.project_repo.create(project)
         await self.session.commit()
+        await self.session.refresh(project)
 
         return ProjectResponse.model_validate(project)
 
@@ -123,6 +124,7 @@ class ProjectService:
 
         updated_project = await self.project_repo.update(project_id, update_dict)
         await self.session.commit()
+        await self.session.refresh(updated_project)
 
         return ProjectResponse.model_validate(updated_project)
 

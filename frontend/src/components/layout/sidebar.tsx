@@ -7,12 +7,10 @@ import { useSidebarStore } from "@/stores/sidebar.store";
 import { MAIN_NAV_ITEMS, OTHER_NAV_ITEMS } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
 import {
-  Compass,
-  FolderOpen,
-  Plus,
   Star,
 } from "lucide-react";
 import { WorkspaceSwitcher } from "@/features/workspaces/components/workspace-switcher";
+import { ProjectListSidebar } from "@/features/projects/components/project-list-sidebar";
 import {
   Tooltip,
   TooltipContent,
@@ -144,79 +142,8 @@ export function Sidebar() {
             </div>
           </div>
 
-          {/* 4. Projects List Section (Placeholder) */}
-          <div className="space-y-0.5">
-            {!isCollapsed && (
-              <div className="flex items-center justify-between px-2.5 py-1">
-                <span className="text-[11px] font-bold text-sidebar-foreground/45 uppercase tracking-wider">
-                  Projects
-                </span>
-                <button
-                  className="text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent rounded p-0.5 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  aria-label="Create new project"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
-            <div className="space-y-0.5">
-              <SidebarTooltip content="Mobile Application" disabled={!isCollapsed}>
-                <button
-                  className={cn(
-                    "flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] text-sidebar-foreground/70 hover:text-sidebar-foreground rounded hover:bg-sidebar-accent/40 w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                    isCollapsed && "justify-center px-0"
-                  )}
-                  aria-label="Project: Mobile Application"
-                >
-                  <FolderOpen className="w-3.5 h-3.5 text-sidebar-foreground/60 shrink-0" />
-                  {!isCollapsed && <span className="truncate text-[13px] font-medium">Mobile Application</span>}
-                </button>
-              </SidebarTooltip>
-              <SidebarTooltip content="Internal Core API" disabled={!isCollapsed}>
-                <button
-                  className={cn(
-                    "flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] text-sidebar-foreground/70 hover:text-sidebar-foreground rounded hover:bg-sidebar-accent/40 w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                    isCollapsed && "justify-center px-0"
-                  )}
-                  aria-label="Project: Internal Core API"
-                >
-                  <FolderOpen className="w-3.5 h-3.5 text-sidebar-foreground/60 shrink-0" />
-                  {!isCollapsed && <span className="truncate text-[13px] font-medium">Internal Core API</span>}
-                </button>
-              </SidebarTooltip>
-            </div>
-          </div>
-
-          {/* 5. Boards List Section (Placeholder) */}
-          <div className="space-y-0.5">
-            {!isCollapsed && (
-              <div className="flex items-center justify-between px-2.5 py-1">
-                <span className="text-[11px] font-bold text-sidebar-foreground/45 uppercase tracking-wider">
-                  Boards
-                </span>
-                <button
-                  className="text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent rounded p-0.5 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  aria-label="Create new board"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
-            <div className="space-y-0.5">
-              <SidebarTooltip content="Sprint 1 Board" disabled={!isCollapsed}>
-                <button
-                  className={cn(
-                    "flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] text-sidebar-foreground/70 hover:text-sidebar-foreground rounded hover:bg-sidebar-accent/40 w-full text-left transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                    isCollapsed && "justify-center px-0"
-                  )}
-                  aria-label="Board: Sprint 1 Board"
-                >
-                  <Compass className="w-3.5 h-3.5 text-sidebar-foreground/60 shrink-0" />
-                  {!isCollapsed && <span className="truncate text-[13px] font-medium">Sprint 1 Board</span>}
-                </button>
-              </SidebarTooltip>
-            </div>
-          </div>
+          {/* 4. Projects List Section (Dynamic) */}
+          <ProjectListSidebar isCollapsed={isCollapsed} />
 
           {/* Other navigation section */}
           <div className="pt-2 border-t border-sidebar-border space-y-0.5">
