@@ -18,6 +18,19 @@ from app.tasks.service import TaskService
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
+@router.get("/", response_model=list[TaskResponse])
+async def list_tasks(
+    board_id: uuid.UUID | None = None,
+    column_id: uuid.UUID | None = None,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db),
+) -> list[TaskResponse]:
+    service = TaskService(session)
+    return await service.list_tasks(
+        board_id=board_id, column_id=column_id, current_user=user
+    )
+
+
 @router.post(
     "/",
     response_model=TaskResponse,

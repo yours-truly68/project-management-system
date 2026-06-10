@@ -72,3 +72,16 @@ class TaskRepository:
         )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
+
+    async def get_board_tasks(self, board_id: uuid.UUID) -> list[Task]:
+        """Fetch all tasks on a board ordered by column position and task position ascending."""
+        from app.columns.models import Column
+
+        stmt = (
+            select(Task)
+            .join(Column, Task.column_id == Column.id)
+            .where(Column.board_id == board_id)
+            .order_by(Column.position.asc(), Task.position.asc())
+        )
+        result = await self.session.execute(stmt)
+        return list(result.scalars().all())

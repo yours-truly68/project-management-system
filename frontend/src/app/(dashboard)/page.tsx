@@ -23,6 +23,11 @@ import {
 } from "lucide-react";
 import { useProjectStore } from "@/stores/project.store";
 import { useUpdateProject } from "@/features/projects/hooks/use-projects";
+import { useTasks } from "@/features/tasks/hooks/use-tasks";
+import { TaskCard } from "@/features/tasks/components/task-card";
+import { CreateTaskModal } from "@/features/tasks/components/create-task-modal";
+import { TaskDetailsDrawer } from "@/features/tasks/components/task-details-drawer";
+import { Task } from "@/features/tasks/types/task.types";
 
 export default function Page() {
   const { activeWorkspace, isLoading: isWorkspaceLoading } = useWorkspaces();
@@ -33,6 +38,9 @@ export default function Page() {
   );
   const { mutateAsync: deleteColumn } = useDeleteColumn(activeBoard?.id || null);
 
+  // Fetch tasks for the active board
+  const { data: tasks = [], isLoading: isTasksLoading } = useTasks(activeBoard?.id || null);
+
   const { user } = useAuthStore();
   const { members } = useWorkspaceMembers(activeWorkspace?.id || null);
 
@@ -40,10 +48,31 @@ export default function Page() {
   const [isColumnCreateOpen, setIsColumnCreateOpen] = React.useState(false);
   const [columnToEdit, setColumnToEdit] = React.useState<Column | null>(null);
 
+  // Task quick-create and details drawer states
+  const [taskToCreateColId, setTaskToCreateColId] = React.useState<string | null>(null);
+  const [selectedTask, setSelectedTask] = React.useState<Task | null>(null);
+
   const archivedEntity = useProjectStore((s) => s.archivedEntity);
   const setArchivedEntity = useProjectStore((s) => s.setArchivedEntity);
 
   const { mutateAsync: updateProject, isPending: isRestoring } = useUpdateProject(archivedEntity?.id || "");
+
+  // Group tasks client-side by column_id and sort by position ascending
+  const tasksByColumn = React.useMemo(() => {
+    const groups: Record<string, Task[]> = {};
+    columns.forEach((col) => {
+      groups[col.id] = [];
+    });
+    tasks.forEach((task) => {
+      if (groups[task.column_id]) {
+        groups[task.column_id].push(task);
+      }
+    });
+    Object.keys(groups).forEach((colId) => {
+      groups[colId].sort((a, b) => a.position - b.position);
+    });
+    return groups;
+  }, [columns, tasks]);
 
   const handleRestore = async () => {
     if (!archivedEntity) return;
@@ -62,7 +91,7 @@ export default function Page() {
   const role = currentUserMember?.role || "MEMBER";
   const canManageBoard = role === "OWNER" || role === "ADMIN";
 
-  if (isWorkspaceLoading || isProjectLoading || isBoardLoading || isColumnsLoading) {
+  if (isWorkspaceLoading || isProjectLoading || isBoardLoading || isColumnsLoading || isTasksLoading) {
     return (
       <div className="flex justify-center items-center py-24 select-none">
         <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
@@ -188,21 +217,50 @@ export default function Page() {
                     {column.name}
                   </h3>
                 </div>
-                <ColumnActionsMenu
-                  canManage={canManageBoard}
-                  onEdit={() => setColumnToEdit(column)}
-                  onDelete={() => deleteColumn(column.id)}
-                />
+                <div className="flex items-center gap-1 shrink-0">
+                  {canManageBoard && (
+                    <button
+                      onClick={() => setTaskToCreateColId(column.id)}
+                      className="p-1 hover:bg-accent rounded text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+                      title="Create task in this column"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  <ColumnActionsMenu
+                    canManage={canManageBoard}
+                    onEdit={() => setColumnToEdit(column)}
+                    onDelete={() => deleteColumn(column.id)}
+                  />
+                </div>
               </div>
 
-              {/* Column Task Placeholder Area */}
-              <div className="flex-1 overflow-y-auto space-y-3 pr-0.5">
-                <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-border/70 rounded-xl bg-secondary/10 select-none">
-                  <span className="text-xs font-semibold text-foreground/50">No tasks in column</span>
-                  <span className="text-[10px] text-muted-foreground/60 mt-1 max-w-[180px]">
-                    Tasks will be available in the next phase.
-                  </span>
-                </div>
+              {/* Column Task List Area */}
+              <div className="flex-1 overflow-y-auto space-y-2.5 pr-0.5">
+                {!tasksByColumn[column.id] || tasksByColumn[column.id].length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center border border-dashed border-border/60 rounded-xl bg-secondary/5 select-none">
+                    <span className="text-[11px] font-semibold text-muted-foreground/60">No tasks in column</span>
+                    {canManageBoard && (
+                      <button
+                        onClick={() => setTaskToCreateColId(column.id)}
+                        className="text-[10px] text-primary hover:underline mt-1 font-semibold cursor-pointer"
+                      >
+                        + Add Task
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {tasksByColumn[column.id].map((task) => (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        onClick={() => setSelectedTask(task)}
+                        members={members}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -233,6 +291,26 @@ export default function Page() {
           boardId={activeBoard.id}
           isOpen={!!columnToEdit}
           onClose={() => setColumnToEdit(null)}
+        />
+      )}
+
+      {taskToCreateColId && activeBoard && (
+        <CreateTaskModal
+          boardId={activeBoard.id}
+          columnId={taskToCreateColId}
+          isOpen={!!taskToCreateColId}
+          onClose={() => setTaskToCreateColId(null)}
+          nextPosition={tasksByColumn[taskToCreateColId]?.length || 0}
+        />
+      )}
+
+      {selectedTask && activeBoard && (
+        <TaskDetailsDrawer
+          task={selectedTask}
+          boardId={activeBoard.id}
+          isOpen={!!selectedTask}
+          onClose={() => setSelectedTask(null)}
+          members={members}
         />
       )}
     </div>

@@ -31,6 +31,57 @@ class TaskService:
         self.project_repo = ProjectRepository(session)
         self.workspace_repo = WorkspaceRepository(session)
 
+    async def list_tasks(
+        self,
+        board_id: uuid.UUID | None,
+        column_id: uuid.UUID | None,
+        current_user: User,
+    ) -> list[TaskResponse]:
+        if not board_id and not column_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Either board_id or column_id must be provided.",
+            )
+
+        if board_id:
+            board = await self.board_repo.get_by_id(board_id)
+            if not board:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Board not found.",
+                )
+            project = await self.project_repo.get_by_id(board.project_id)
+            if not project:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Project not found.",
+                )
+            membership = await self.workspace_repo.get_membership(
+                project.workspace_id, current_user.id
+            )
+            if not membership:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You do not belong to this workspace.",
+                )
+            if not has_permission(membership.role, Permission.TASK_VIEW):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You do not have permission to view tasks.",
+                )
+            tasks = await self.task_repo.get_board_tasks(board_id)
+            return [TaskResponse.model_validate(t) for t in tasks]
+
+        if column_id:
+            role = await self._get_column_workspace_role(column_id, current_user.id)
+            if not has_permission(role, Permission.TASK_VIEW):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You do not have permission to view tasks.",
+                )
+            tasks = await self.task_repo.get_column_tasks(column_id)
+            return [TaskResponse.model_validate(t) for t in tasks]
+
     async def create_task(self, data: TaskCreate, current_user: User) -> TaskResponse:
         role = await self._get_column_workspace_role(data.column_id, current_user.id)
         if not has_permission(role, Permission.TASK_CREATE):
@@ -51,7 +102,7 @@ class TaskService:
             assignee_id=data.assignee_id,
             reporter_id=data.reporter_id or current_user.id,
             due_date=data.due_date,
-            position=target_pos,
+            position=-(len(tasks) + 1),
         )
         task = await self.task_repo.create(task)
 
@@ -59,8 +110,15 @@ class TaskService:
         ordered_ids = [t.id for t in tasks]
         ordered_ids.insert(target_pos, task.id)
 
-        mappings = [{"id": tid, "position": idx} for idx, tid in enumerate(ordered_ids)]
-        await self.task_repo.bulk_update_positions(mappings)
+        temp_mappings = [
+            {"id": tid, "position": -(idx + 1)} for idx, tid in enumerate(ordered_ids)
+        ]
+        await self.task_repo.bulk_update_positions(temp_mappings)
+
+        final_mappings = [
+            {"id": tid, "position": idx} for idx, tid in enumerate(ordered_ids)
+        ]
+        await self.task_repo.bulk_update_positions(final_mappings)
 
         await self.session.commit()
         await self.session.refresh(task)
@@ -205,10 +263,16 @@ class TaskService:
         remaining_tasks = await self.task_repo.get_column_tasks(
             column_id, for_update=True
         )
-        mappings = [
+        temp_mappings = [
+            {"id": t.id, "position": -(idx + 1)}
+            for idx, t in enumerate(remaining_tasks)
+        ]
+        await self.task_repo.bulk_update_positions(temp_mappings)
+
+        final_mappings = [
             {"id": t.id, "position": idx} for idx, t in enumerate(remaining_tasks)
         ]
-        await self.task_repo.bulk_update_positions(mappings)
+        await self.task_repo.bulk_update_positions(final_mappings)
 
         await self.session.commit()
 
@@ -247,10 +311,16 @@ class TaskService:
             target_pos = max(0, min(data.position, len(ordered_ids)))
             ordered_ids.insert(target_pos, task_id)
 
-            mappings = [
+            temp_mappings = [
+                {"id": tid, "position": -(idx + 1)}
+                for idx, tid in enumerate(ordered_ids)
+            ]
+            await self.task_repo.bulk_update_positions(temp_mappings)
+
+            final_mappings = [
                 {"id": tid, "position": idx} for idx, tid in enumerate(ordered_ids)
             ]
-            await self.task_repo.bulk_update_positions(mappings)
+            await self.task_repo.bulk_update_positions(final_mappings)
         else:
             # Across Column Move
             # Lock both columns in a consistent order to avoid deadlock
@@ -267,26 +337,38 @@ class TaskService:
                         col_id, for_update=True
                     )
 
-            # 1. Clean up source column
-            src_ordered_ids = [t.id for t in src_tasks if t.id != task_id]
-            src_mappings = [
-                {"id": tid, "position": idx} for idx, tid in enumerate(src_ordered_ids)
-            ]
-            await self.task_repo.bulk_update_positions(src_mappings)
-
-            # 2. Add to target column
+            # 1. Determine target position and list of destination IDs
             dest_ordered_ids = [t.id for t in dest_tasks]
             target_pos = max(0, min(data.position, len(dest_ordered_ids)))
             dest_ordered_ids.insert(target_pos, task_id)
 
-            # 3. Direct relocation update
-            await self.task_repo.move_task(task_id, data.column_id, target_pos)
+            # 2. Relocate task immediately to target column and safe negative position
+            await self.task_repo.move_task(task_id, data.column_id, -(target_pos + 1))
 
-            # 4. Sequentially reorder destination tasks
-            dest_mappings = [
+            # 3. Clean up source column (now safe as task is removed from source in DB)
+            src_ordered_ids = [t.id for t in src_tasks if t.id != task_id]
+            src_temp = [
+                {"id": tid, "position": -(idx + 1)}
+                for idx, tid in enumerate(src_ordered_ids)
+            ]
+            await self.task_repo.bulk_update_positions(src_temp)
+
+            src_final = [
+                {"id": tid, "position": idx} for idx, tid in enumerate(src_ordered_ids)
+            ]
+            await self.task_repo.bulk_update_positions(src_final)
+
+            # 4. Sequentially reorder destination tasks to positive numbers
+            dest_temp = [
+                {"id": tid, "position": -(idx + 1)}
+                for idx, tid in enumerate(dest_ordered_ids)
+            ]
+            await self.task_repo.bulk_update_positions(dest_temp)
+
+            dest_final = [
                 {"id": tid, "position": idx} for idx, tid in enumerate(dest_ordered_ids)
             ]
-            await self.task_repo.bulk_update_positions(dest_mappings)
+            await self.task_repo.bulk_update_positions(dest_final)
 
         await self.session.commit()
         await self.session.refresh(task)
@@ -312,10 +394,16 @@ class TaskService:
                 detail="One or more task IDs do not belong to this column.",
             )
 
-        mappings = [
+        temp_mappings = [
+            {"id": tid, "position": -(idx + 1)}
+            for idx, tid in enumerate(data.ordered_ids)
+        ]
+        await self.task_repo.bulk_update_positions(temp_mappings)
+
+        final_mappings = [
             {"id": tid, "position": idx} for idx, tid in enumerate(data.ordered_ids)
         ]
-        await self.task_repo.bulk_update_positions(mappings)
+        await self.task_repo.bulk_update_positions(final_mappings)
         await self.session.commit()
 
     # ------------------------------------------------------------------
