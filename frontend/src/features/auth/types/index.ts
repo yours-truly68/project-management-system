@@ -3,9 +3,10 @@ export interface User {
   email: string;
   username: string;
   full_name: string;
-  avatar_url?: string;
+  auth_provider?: string;
+  avatar_url: string | null;
   is_active: boolean;
-  is_superuser: boolean;
+  is_verified: boolean;
   created_at: string;
   updated_at: string;
 }

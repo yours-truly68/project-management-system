@@ -20,13 +20,10 @@ export function useLogin() {
       try {
         // 1. Call login endpoint (returns access_token only)
         const response = await authService.login(data);
-        tokenManager.setAccessToken(response.access_token);
+        tokenManager.setAccessToken(response.tokens.access_token);
 
-        // 2. Fetch user details with Bearer token
-        const user = await authService.getMe();
-
-        // 3. Hydrate Zustand auth store
-        setAuth(user);
+        // 2. Hydrate Zustand auth store with user from response
+        setAuth(response.user);
 
         // 4. Redirect user to Dashboard root
         router.push("/");
