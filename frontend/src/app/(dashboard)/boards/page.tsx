@@ -27,7 +27,6 @@ import {
 import { getErrorMessage, cn } from "@/lib/utils";
 import { useFavorites, useCreateFavorite, useDeleteFavorite } from "@/features/favorites/hooks/use-favorites";
 
-
 interface BoardCardProps {
   board: Board;
   projectKey?: string;
@@ -79,8 +78,8 @@ function BoardCard({
     <div
       className={`flex flex-col justify-between p-5 rounded-2xl border bg-card shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:translate-y-[-2px] hover:shadow-md ${
         isActive
-          ? "border-primary"
-          : "border-border hover:border-[#3B82F6] hover:bg-card-hover"
+          ? "border-[#3B82F6] ring-1 ring-[#3B82F6]/30 bg-card-hover/20"
+          : "border-border hover:border-[#3B82F6] hover:bg-card-hover/40"
       }`}
     >
       {/* Card Header */}
@@ -110,12 +109,12 @@ function BoardCard({
         <div className="flex flex-wrap gap-2 mt-4">
           {projectKey && (
             <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-accent border border-border text-foreground flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
               Project: {projectKey}
             </span>
           )}
           <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-accent border border-border text-foreground flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
             {tasks.length} {tasks.length === 1 ? "task" : "tasks"}
           </span>
         </div>
@@ -240,6 +239,15 @@ export default function BoardsPage() {
     }
   };
 
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-24 select-none">
@@ -275,7 +283,7 @@ export default function BoardsPage() {
   }
 
   return (
-    <div className="space-y-6 select-none animate-fade-in max-w-[1000px] w-full mx-auto px-4 py-2">
+    <div className="space-y-6 select-none animate-fade-in max-w-7xl w-full mx-auto px-4 py-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
         <div>
@@ -295,22 +303,90 @@ export default function BoardsPage() {
         )}
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {boards.map((board) => (
-          <BoardCard
-            key={board.id}
-            board={board}
-            projectKey={project?.key}
-            isActive={board.id === activeBoardId}
-            canManage={canManage}
-            activeMenuId={activeMenuId}
-            setActiveMenuId={setActiveMenuId}
-            onEdit={setBoardToEdit}
-            onDelete={setBoardToDelete}
-            onSelect={setActiveBoardId}
-          />
-        ))}
+      {/* Main Grid split */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+        {/* Left column: Project Overview Card */}
+        <div className="lg:col-span-1 space-y-4">
+          <div className="bg-card border border-border rounded-2xl p-5 shadow-[0_8px_24px_rgba(0,0,0,0.25)] space-y-5">
+            <div>
+              <span className="text-[10px] uppercase tracking-wider font-bold text-primary bg-primary/10 border border-primary/20 px-2.5 py-0.5 rounded-full select-none">
+                Project Overview
+              </span>
+              <h3 className="font-bold text-xl text-foreground mt-3.5 truncate" title={project?.name}>
+                {project?.name || "Loading..."}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1 font-mono">
+                Key: {project?.key || "loading"}
+              </p>
+            </div>
+
+            {project?.description && (
+              <p className="text-xs text-secondary-text leading-relaxed">
+                {project.description}
+              </p>
+            )}
+
+            <div className="border-t border-border/60 pt-4 space-y-3">
+              <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">
+                Project Stats
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-secondary/40 border border-border/40 p-3 rounded-xl text-center">
+                  <span className="block text-xl font-bold text-foreground">{boards.length}</span>
+                  <span className="text-[10px] text-muted-foreground uppercase font-medium">Boards</span>
+                </div>
+                <div className="bg-secondary/40 border border-border/40 p-3 rounded-xl text-center">
+                  <span className="block text-xl font-bold text-foreground">{members.length}</span>
+                  <span className="text-[10px] text-muted-foreground uppercase font-medium">Members</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-border/60 pt-4">
+              <h4 className="text-xs font-bold text-foreground uppercase tracking-wider mb-3">
+                Project Members
+              </h4>
+              <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                {members.slice(0, 5).map((member) => (
+                  <div key={member.id} className="flex items-center gap-2 text-xs">
+                    <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold border border-border text-[9px] shrink-0">
+                      {getInitials(member.full_name)}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-foreground truncate">{member.full_name}</p>
+                      <p className="text-[9px] text-muted-foreground uppercase font-medium">{member.role}</p>
+                    </div>
+                  </div>
+                ))}
+                {members.length > 5 && (
+                  <p className="text-[10px] text-muted-foreground text-center pt-1 font-medium">
+                    + {members.length - 5} more members
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right column: Boards Grid */}
+        <div className="lg:col-span-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {boards.map((board) => (
+              <BoardCard
+                key={board.id}
+                board={board}
+                projectKey={project?.key}
+                isActive={board.id === activeBoardId}
+                canManage={canManage}
+                activeMenuId={activeMenuId}
+                setActiveMenuId={setActiveMenuId}
+                onEdit={setBoardToEdit}
+                onDelete={setBoardToDelete}
+                onSelect={setActiveBoardId}
+              />
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Modals & Dialogs */}

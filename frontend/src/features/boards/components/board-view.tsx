@@ -55,9 +55,26 @@ export function BoardView({
     return () => clearTimeout(timer);
   }, []);
 
+  // Local synchronous state for DND to prevent snap-back / rollup animations
+  const [localColumns, setLocalColumns] = React.useState<Column[]>(columns);
+  const [prevColumns, setPrevColumns] = React.useState<Column[]>(columns);
+
+  const [localTasksByColumn, setLocalTasksByColumn] = React.useState<Record<string, Task[]>>(tasksByColumn);
+  const [prevTasksByColumn, setPrevTasksByColumn] = React.useState<Record<string, Task[]>>(tasksByColumn);
+
+  if (columns !== prevColumns) {
+    setLocalColumns(columns);
+    setPrevColumns(columns);
+  }
+
+  if (tasksByColumn !== prevTasksByColumn) {
+    setLocalTasksByColumn(tasksByColumn);
+    setPrevTasksByColumn(tasksByColumn);
+  }
+
   const sortedColumns = React.useMemo(() => {
-    return [...columns].sort((a, b) => a.position - b.position);
-  }, [columns]);
+    return [...localColumns].sort((a, b) => a.position - b.position);
+  }, [localColumns]);
 
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId, type } = result;
@@ -76,6 +93,16 @@ export function BoardView({
       const [removed] = orderedIds.splice(source.index, 1);
       orderedIds.splice(destination.index, 0, removed);
 
+      // 1. Update local state synchronously to prevent snap-back
+      const idToIndex = new Map(orderedIds.map((id, index) => [id, index]));
+      const newColumns = localColumns.map((col) => {
+        const newIndex = idToIndex.get(col.id);
+        return newIndex !== undefined ? { ...col, position: newIndex } : col;
+      }).sort((a, b) => a.position - b.position);
+
+      setLocalColumns(newColumns);
+
+      // 2. Trigger asynchronous background mutation
       reorderColumns({ ordered_ids: orderedIds });
     } else if (type === "TASK") {
       const taskId = draggableId;
@@ -83,14 +110,58 @@ export function BoardView({
       const destColId = destination.droppableId;
 
       if (sourceColId === destColId) {
-        const columnTasks = tasksByColumn[sourceColId] || [];
+        const columnTasks = localTasksByColumn[sourceColId] || [];
         const sortedColumnTasks = [...columnTasks].sort((a, b) => a.position - b.position);
         const orderedIds = sortedColumnTasks.map((t) => t.id);
         const [removed] = orderedIds.splice(source.index, 1);
         orderedIds.splice(destination.index, 0, removed);
 
+        // 1. Update local state synchronously to prevent snap-back
+        const positionMap = new Map(orderedIds.map((id, index) => [id, index]));
+        const updatedTasks = columnTasks.map((task) => {
+          const newPos = positionMap.get(task.id);
+          return newPos !== undefined ? { ...task, position: newPos } : task;
+        }).sort((a, b) => a.position - b.position);
+
+        setLocalTasksByColumn((prev) => ({
+          ...prev,
+          [sourceColId]: updatedTasks,
+        }));
+
+        // 2. Trigger asynchronous background mutation
         reorderTasks({ columnId: sourceColId, orderedIds });
       } else {
+        const sourceTasks = (localTasksByColumn[sourceColId] || [])
+          .filter((t) => t.id !== taskId)
+          .sort((a, b) => a.position - b.position);
+
+        const targetTasks = (localTasksByColumn[destColId] || [])
+          .sort((a, b) => a.position - b.position);
+
+        const movedTask = (localTasksByColumn[sourceColId] || []).find((t) => t.id === taskId);
+        if (!movedTask) return;
+
+        const optimisticMovedTask = {
+          ...movedTask,
+          column_id: destColId,
+        };
+
+        const updatedTargetTasks = [...targetTasks];
+        const targetIndex = Math.max(0, Math.min(destination.index, updatedTargetTasks.length));
+        updatedTargetTasks.splice(targetIndex, 0, optimisticMovedTask);
+
+        // Re-index positions
+        const reindexedSource = sourceTasks.map((t, idx) => ({ ...t, position: idx }));
+        const reindexedTarget = updatedTargetTasks.map((t, idx) => ({ ...t, position: idx }));
+
+        // 1. Update local state synchronously to prevent snap-back
+        setLocalTasksByColumn((prev) => ({
+          ...prev,
+          [sourceColId]: reindexedSource,
+          [destColId]: reindexedTarget,
+        }));
+
+        // 2. Trigger asynchronous background mutation
         moveTask({
           taskId,
           column_id: destColId,
@@ -106,9 +177,10 @@ export function BoardView({
 
   // Pre-hydration rendering fallback (static elements)
   if (!mounted) {
+    const fallbackSortedColumns = [...columns].sort((a, b) => a.position - b.position);
     return (
       <div className="flex-1 flex gap-4 overflow-x-auto min-h-0 pb-3 select-none">
-        {sortedColumns.map((column) => (
+        {fallbackSortedColumns.map((column) => (
           <div
             key={column.id}
             className="flex flex-col bg-column-surface rounded-[18px] border border-border p-4 space-y-4 w-[360px] shrink-0 h-full overflow-hidden shadow-sm animate-fade-in"
@@ -211,7 +283,7 @@ export function BoardView({
                         <h3 className="text-base font-bold text-foreground/90 tracking-tight truncate flex items-center gap-2">
                           <span>{column.name}</span>
                           <span className="text-xs font-semibold text-secondary-text px-2 py-0.5 rounded-full bg-background/50 border border-border/40 font-mono">
-                            {tasksByColumn[column.id]?.length || 0}
+                            {localTasksByColumn[column.id]?.length || 0}
                           </span>
                         </h3>
                       </div>
@@ -244,7 +316,7 @@ export function BoardView({
                           {...taskProvided.droppableProps}
                           className="flex-1 overflow-y-auto pr-0.5 min-h-[150px]"
                         >
-                          {!tasksByColumn[column.id] || tasksByColumn[column.id].length === 0 ? (
+                          {!localTasksByColumn[column.id] || localTasksByColumn[column.id].length === 0 ? (
                             <div className="flex flex-col items-center justify-center py-10 px-4 border border-dashed border-border/30 rounded-xl select-none text-center h-full justify-center my-auto min-h-[100px]">
                               <span className="text-sm font-semibold text-muted-foreground/50">
                                 No tasks in this stage
@@ -252,7 +324,7 @@ export function BoardView({
                             </div>
                           ) : (
                             <div className="space-y-3 pb-4">
-                              {[...tasksByColumn[column.id]]
+                              {[...localTasksByColumn[column.id]]
                                 .sort((a, b) => a.position - b.position)
                                 .map((task, taskIndex) => (
                                   <Draggable key={task.id} draggableId={task.id} index={taskIndex}>

@@ -196,7 +196,7 @@ export function TaskCard({ task, onClick, members, boardId }: TaskCardProps) {
   return (
     <div
       onClick={onClick}
-      className="group relative flex flex-col p-4 bg-card border border-border rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.25)] hover:border-[#3B82F6] hover:bg-card-hover hover:translate-y-[-2px] transition-all duration-200 cursor-pointer select-none space-y-4 h-auto"
+      className="group relative flex flex-col p-4 bg-card border border-border rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 cursor-pointer select-none space-y-4 h-auto active:scale-[0.98] active:border-[#3B82F6] active:bg-card-hover/40 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
       role="button"
       tabIndex={0}
       onKeyDown={(e) => {
