@@ -48,6 +48,36 @@ export function BoardView({
   const { mutate: moveTask } = useMoveTask(boardId);
   const { mutate: reorderTasks } = useReorderTasks(boardId);
 
+  // SSR Hydration guard — must be declared before scroll hooks so they can reference it
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Local synchronous state for DND to prevent snap-back / rollup animations
+  const [localColumns, setLocalColumns] = React.useState<Column[]>(columns);
+  const [prevColumns, setPrevColumns] = React.useState<Column[]>(columns);
+
+  const [localTasksByColumn, setLocalTasksByColumn] = React.useState<Record<string, Task[]>>(tasksByColumn);
+  const [prevTasksByColumn, setPrevTasksByColumn] = React.useState<Record<string, Task[]>>(tasksByColumn);
+
+  if (columns !== prevColumns) {
+    setLocalColumns(columns);
+    setPrevColumns(columns);
+  }
+
+  if (tasksByColumn !== prevTasksByColumn) {
+    setLocalTasksByColumn(tasksByColumn);
+    setPrevTasksByColumn(tasksByColumn);
+  }
+
+  const sortedColumns = React.useMemo(() => {
+    return [...localColumns].sort((a, b) => a.position - b.position);
+  }, [localColumns]);
+
   const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
   const dragInfoRef = React.useRef<{
     isDragging: boolean;
@@ -118,8 +148,10 @@ export function BoardView({
     handleDragEnd(result);
   };
 
-  // Convert mouse wheel scroll vertical movement to horizontal movement
+  // Convert mouse wheel vertical movement to horizontal scroll on the board container
+  // Fires after mount so scrollContainerRef.current is populated
   React.useEffect(() => {
+    if (!mounted) return;
     const container = scrollContainerRef.current;
     if (!container) return;
 
@@ -136,6 +168,7 @@ export function BoardView({
     };
   }, [mounted]);
 
+  // Cleanup on unmount
   React.useEffect(() => {
     return () => {
       window.removeEventListener("pointermove", handlePointerMove);
@@ -145,35 +178,6 @@ export function BoardView({
     };
   }, []);
 
-  // SSR Hydration guard
-  const [mounted, setMounted] = React.useState(false);
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setMounted(true);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Local synchronous state for DND to prevent snap-back / rollup animations
-  const [localColumns, setLocalColumns] = React.useState<Column[]>(columns);
-  const [prevColumns, setPrevColumns] = React.useState<Column[]>(columns);
-
-  const [localTasksByColumn, setLocalTasksByColumn] = React.useState<Record<string, Task[]>>(tasksByColumn);
-  const [prevTasksByColumn, setPrevTasksByColumn] = React.useState<Record<string, Task[]>>(tasksByColumn);
-
-  if (columns !== prevColumns) {
-    setLocalColumns(columns);
-    setPrevColumns(columns);
-  }
-
-  if (tasksByColumn !== prevTasksByColumn) {
-    setLocalTasksByColumn(tasksByColumn);
-    setPrevTasksByColumn(tasksByColumn);
-  }
-
-  const sortedColumns = React.useMemo(() => {
-    return [...localColumns].sort((a, b) => a.position - b.position);
-  }, [localColumns]);
 
   const handleDragEnd = (result: DropResult) => {
     const { destination, source, draggableId, type } = result;
