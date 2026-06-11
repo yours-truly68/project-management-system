@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 import { ViewSwitcher } from "@/features/boards/components/view-switcher";
 import { BoardView } from "@/features/boards/components/board-view";
 import { ListView } from "@/features/boards/components/list-view";
+import { ColumnNavigator } from "@/features/boards/components/column-navigator";
 import { useBoardPreference, useUpdateBoardPreference } from "@/features/boards/hooks/use-board-preferences";
 import { useFavorites, useCreateFavorite, useDeleteFavorite } from "@/features/favorites/hooks/use-favorites";
 import { ActivityFeedDrawer } from "@/features/activity/components/activity-feed-drawer";
@@ -84,6 +85,8 @@ export default function Page() {
   // Task quick-create and details drawer states
   const [taskToCreateColId, setTaskToCreateColId] = React.useState<string | null>(null);
   const [selectedTask, setSelectedTask] = React.useState<Task | null>(null);
+
+  const columnRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
 
   const archivedEntity = useProjectStore((s) => s.archivedEntity);
   const setArchivedEntity = useProjectStore((s) => s.setArchivedEntity);
@@ -288,6 +291,12 @@ export default function Page() {
             currentView={viewMode}
             onViewChange={(v) => updatePreference(v)}
           />
+          {viewMode === "board" && (
+            <ColumnNavigator
+              columns={columns}
+              columnRefs={columnRefs}
+            />
+          )}
           <button
             onClick={() => setIsActivityOpen(true)}
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-border text-foreground hover:bg-card-hover text-xs font-semibold transition-all cursor-pointer animate-fade-in"
@@ -342,6 +351,7 @@ export default function Page() {
           onAddTask={setTaskToCreateColId}
           onSelectTask={setSelectedTask}
           getColumnColor={getColumnColor}
+          columnRefs={columnRefs}
         />
       )}
 

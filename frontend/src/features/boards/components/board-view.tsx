@@ -28,6 +28,7 @@ interface BoardViewProps {
   onAddTask: (columnId: string) => void;
   onSelectTask: (task: Task) => void;
   getColumnColor: (name: string, defaultColor: string | null) => string;
+  columnRefs?: React.RefObject<Record<string, HTMLDivElement | null>>;
 }
 
 export function BoardView({
@@ -41,10 +42,108 @@ export function BoardView({
   onAddTask,
   onSelectTask,
   getColumnColor,
+  columnRefs,
 }: BoardViewProps) {
   const { mutate: reorderColumns } = useReorderColumns(boardId);
   const { mutate: moveTask } = useMoveTask(boardId);
   const { mutate: reorderTasks } = useReorderTasks(boardId);
+
+  const scrollContainerRef = React.useRef<HTMLDivElement | null>(null);
+  const dragInfoRef = React.useRef<{
+    isDragging: boolean;
+    pointerX: number;
+  }>({
+    isDragging: false,
+    pointerX: 0,
+  });
+
+  const scrollIntervalRef = React.useRef<number | null>(null);
+
+  const startAutoScrollLoop = () => {
+    if (scrollIntervalRef.current) return;
+
+    const loop = () => {
+      if (!dragInfoRef.current.isDragging || !scrollContainerRef.current) {
+        stopAutoScrollLoop();
+        return;
+      }
+
+      const container = scrollContainerRef.current;
+      const rect = container.getBoundingClientRect();
+      const pointerX = dragInfoRef.current.pointerX;
+
+      const threshold = 120; // start auto scroll when within 120px of boundaries
+      const maxSpeed = 16;   // max pixels to scroll per frame
+
+      const distToRight = rect.right - pointerX;
+      const distToLeft = pointerX - rect.left;
+
+      if (distToRight > 0 && distToRight < threshold) {
+        const ratio = (threshold - distToRight) / threshold;
+        const speed = Math.round(maxSpeed * ratio);
+        container.scrollLeft += speed;
+      } else if (distToLeft > 0 && distToLeft < threshold) {
+        const ratio = (threshold - distToLeft) / threshold;
+        const speed = Math.round(maxSpeed * ratio);
+        container.scrollLeft -= speed;
+      }
+
+      scrollIntervalRef.current = requestAnimationFrame(loop);
+    };
+
+    scrollIntervalRef.current = requestAnimationFrame(loop);
+  };
+
+  const stopAutoScrollLoop = () => {
+    if (scrollIntervalRef.current) {
+      cancelAnimationFrame(scrollIntervalRef.current);
+      scrollIntervalRef.current = null;
+    }
+  };
+
+  const handlePointerMove = (e: PointerEvent) => {
+    dragInfoRef.current.pointerX = e.clientX;
+  };
+
+  const handleDragStart = () => {
+    dragInfoRef.current.isDragging = true;
+    window.addEventListener("pointermove", handlePointerMove);
+    startAutoScrollLoop();
+  };
+
+  const handleDragEndInternal = (result: DropResult) => {
+    dragInfoRef.current.isDragging = false;
+    window.removeEventListener("pointermove", handlePointerMove);
+    stopAutoScrollLoop();
+    handleDragEnd(result);
+  };
+
+  // Convert mouse wheel scroll vertical movement to horizontal movement
+  React.useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.deltaX === 0 && e.deltaY !== 0) {
+        e.preventDefault();
+        container.scrollLeft += e.deltaY;
+      }
+    };
+
+    container.addEventListener("wheel", handleWheel, { passive: false });
+    return () => {
+      container.removeEventListener("wheel", handleWheel);
+    };
+  }, [mounted]);
+
+  React.useEffect(() => {
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      if (scrollIntervalRef.current) {
+        cancelAnimationFrame(scrollIntervalRef.current);
+      }
+    };
+  }, []);
 
   // SSR Hydration guard
   const [mounted, setMounted] = React.useState(false);
@@ -179,10 +278,18 @@ export function BoardView({
   if (!mounted) {
     const fallbackSortedColumns = [...columns].sort((a, b) => a.position - b.position);
     return (
-      <div className="flex-1 flex gap-4 overflow-x-auto min-h-0 pb-3 select-none">
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 flex gap-4 overflow-x-auto min-h-0 pb-3 select-none"
+      >
         {fallbackSortedColumns.map((column) => (
           <div
             key={column.id}
+            ref={(el) => {
+              if (columnRefs?.current) {
+                columnRefs.current[column.id] = el;
+              }
+            }}
             className="flex flex-col bg-column-surface rounded-[18px] border border-border p-4 space-y-4 w-[360px] shrink-0 h-full overflow-hidden shadow-sm animate-fade-in"
           >
             {/* Column Header */}
@@ -251,11 +358,14 @@ export function BoardView({
 
   // Interactive Drag & Drop rendering
   return (
-    <DragDropContext onDragEnd={handleDragEnd}>
+    <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEndInternal}>
       <Droppable droppableId="board" type="COLUMN" direction="horizontal">
         {(provided) => (
           <div
-            ref={provided.innerRef}
+            ref={(el) => {
+              provided.innerRef(el);
+              scrollContainerRef.current = el;
+            }}
             {...provided.droppableProps}
             className="flex-1 flex gap-4 overflow-x-auto min-h-0 pb-3 select-none"
           >
@@ -263,7 +373,12 @@ export function BoardView({
               <Draggable key={column.id} draggableId={column.id} index={colIndex}>
                 {(colProvided) => (
                   <div
-                    ref={colProvided.innerRef}
+                    ref={(el) => {
+                      colProvided.innerRef(el);
+                      if (columnRefs?.current) {
+                        columnRefs.current[column.id] = el;
+                      }
+                    }}
                     {...colProvided.draggableProps}
                     style={colProvided.draggableProps.style as React.CSSProperties}
                     className="flex flex-col bg-column-surface rounded-[18px] border border-border p-4 space-y-4 w-[360px] shrink-0 h-full overflow-hidden shadow-sm animate-fade-in"
