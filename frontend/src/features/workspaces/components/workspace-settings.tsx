@@ -85,7 +85,7 @@ export function WorkspaceSettings({ workspace }: WorkspaceSettingsProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       {/* General Settings */}
       <div className="bg-secondary/20 rounded-xl border border-border p-6 space-y-4">
         <div>
