@@ -47,6 +47,19 @@ class ProjectService:
             created_by=current_user.id,
         )
         project = await self.project_repo.create(project)
+
+        # Log PROJECT_CREATED
+        from app.activities.service import ActivityService
+        from app.shared.enums import ActivityAction
+        activity_service = ActivityService(self.session)
+        await activity_service.create_activity(
+            workspace_id=project.workspace_id,
+            actor_id=current_user.id,
+            action=ActivityAction.PROJECT_CREATED,
+            project_id=project.id,
+            metadata={"project_name": project.name},
+        )
+
         await self.session.commit()
         await self.session.refresh(project)
 
@@ -110,9 +123,16 @@ class ProjectService:
 
         update_dict = data.model_dump(exclude_unset=True)
 
+        is_archived_changed = False
+        was_archived = project.archived_at is not None
+        now_archived = was_archived
+
         if "is_archived" in update_dict:
-            is_archived = update_dict.pop("is_archived")
-            update_dict["archived_at"] = datetime.now(UTC) if is_archived else None
+            is_archived_val = update_dict.pop("is_archived")
+            update_dict["archived_at"] = datetime.now(UTC) if is_archived_val else None
+            now_archived = is_archived_val
+            if was_archived != now_archived:
+                is_archived_changed = True
 
         # If key is changing, validate uniqueness
         if "key" in update_dict and update_dict["key"] != project.key:
@@ -128,6 +148,20 @@ class ProjectService:
             update_dict["key"] = normalized_key
 
         updated_project = await self.project_repo.update(project_id, update_dict)
+
+        if is_archived_changed:
+            from app.activities.service import ActivityService
+            from app.shared.enums import ActivityAction
+            activity_service = ActivityService(self.session)
+            action = ActivityAction.PROJECT_ARCHIVED if now_archived else ActivityAction.PROJECT_RESTORED
+            await activity_service.create_activity(
+                workspace_id=project.workspace_id,
+                actor_id=current_user.id,
+                action=action,
+                project_id=project.id,
+                metadata={"project_name": project.name},
+            )
+
         await self.session.commit()
         await self.session.refresh(updated_project)
 

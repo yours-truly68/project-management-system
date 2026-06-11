@@ -76,6 +76,19 @@ class ColumnService:
         ordered_ids.insert(target_pos, column.id)
         await self.column_repo.reorder_columns(ordered_ids)
 
+        # Log COLUMN_CREATED
+        from app.activities.service import ActivityService
+        from app.shared.enums import ActivityAction
+        activity_service = ActivityService(self.session)
+        await activity_service.create_activity(
+            workspace_id=project.workspace_id,
+            actor_id=current_user.id,
+            action=ActivityAction.COLUMN_CREATED,
+            project_id=project.id,
+            board_id=board.id,
+            metadata={"column_name": column.name},
+        )
+
         await self.session.commit()
         await self.session.refresh(column)
 
@@ -234,6 +247,19 @@ class ColumnService:
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have permission to delete columns.",
             )
+
+        # Log COLUMN_DELETED
+        from app.activities.service import ActivityService
+        from app.shared.enums import ActivityAction
+        activity_service = ActivityService(self.session)
+        await activity_service.create_activity(
+            workspace_id=project.workspace_id,
+            actor_id=current_user.id,
+            action=ActivityAction.COLUMN_DELETED,
+            project_id=project.id,
+            board_id=board.id,
+            metadata={"column_name": column.name},
+        )
 
         # Delete the column
         await self.column_repo.delete(column)

@@ -120,6 +120,24 @@ class TaskService:
         ]
         await self.task_repo.bulk_update_positions(final_mappings)
 
+        # Log TASK_CREATED
+        column = await self.column_repo.get_by_id(task.column_id)
+        board = await self.board_repo.get_by_id(column.board_id)
+        project = await self.project_repo.get_by_id(board.project_id)
+        
+        from app.activities.service import ActivityService
+        from app.shared.enums import ActivityAction
+        activity_service = ActivityService(self.session)
+        await activity_service.create_activity(
+            workspace_id=project.workspace_id,
+            actor_id=current_user.id,
+            action=ActivityAction.TASK_CREATED,
+            project_id=project.id,
+            board_id=board.id,
+            task_id=task.id,
+            metadata={"task_title": task.title},
+        )
+
         await self.session.commit()
         await self.session.refresh(task)
         return TaskResponse.model_validate(task)
@@ -157,8 +175,17 @@ class TaskService:
                 detail="You do not have permission to edit tasks.",
             )
 
+        before_state = {
+            "priority": task.priority,
+            "assignee_id": task.assignee_id,
+            "due_date": task.due_date,
+        }
+
         update_dict = data.model_dump(exclude_unset=True)
         updated_task = await self.task_repo.update(task_id, update_dict)
+
+        await self._log_task_changes(before_state, updated_task, current_user)
+
         await self.session.commit()
         await self.session.refresh(updated_task)
         return TaskResponse.model_validate(updated_task)
@@ -180,9 +207,18 @@ class TaskService:
                 detail="You do not have permission to assign tasks.",
             )
 
+        before_state = {
+            "priority": task.priority,
+            "assignee_id": task.assignee_id,
+            "due_date": task.due_date,
+        }
+
         updated_task = await self.task_repo.update(
             task_id, {"assignee_id": data.assignee_id}
         )
+
+        await self._log_task_changes(before_state, updated_task, current_user)
+
         await self.session.commit()
         await self.session.refresh(updated_task)
         return TaskResponse.model_validate(updated_task)
@@ -204,7 +240,16 @@ class TaskService:
                 detail="You do not have permission to change task priority.",
             )
 
+        before_state = {
+            "priority": task.priority,
+            "assignee_id": task.assignee_id,
+            "due_date": task.due_date,
+        }
+
         updated_task = await self.task_repo.update(task_id, {"priority": priority})
+
+        await self._log_task_changes(before_state, updated_task, current_user)
+
         await self.session.commit()
         await self.session.refresh(updated_task)
         return TaskResponse.model_validate(updated_task)
@@ -226,7 +271,16 @@ class TaskService:
                 detail="You do not have permission to set task due date.",
             )
 
+        before_state = {
+            "priority": task.priority,
+            "assignee_id": task.assignee_id,
+            "due_date": task.due_date,
+        }
+
         updated_task = await self.task_repo.update(task_id, {"due_date": due_date})
+
+        await self._log_task_changes(before_state, updated_task, current_user)
+
         await self.session.commit()
         await self.session.refresh(updated_task)
         return TaskResponse.model_validate(updated_task)
@@ -257,6 +311,25 @@ class TaskService:
             )
 
         column_id = task.column_id
+
+        # Log TASK_DELETED
+        column = await self.column_repo.get_by_id(task.column_id)
+        board = await self.board_repo.get_by_id(column.board_id)
+        project = await self.project_repo.get_by_id(board.project_id)
+        
+        from app.activities.service import ActivityService
+        from app.shared.enums import ActivityAction
+        activity_service = ActivityService(self.session)
+        await activity_service.create_activity(
+            workspace_id=project.workspace_id,
+            actor_id=current_user.id,
+            action=ActivityAction.TASK_DELETED,
+            project_id=project.id,
+            board_id=board.id,
+            task_id=task.id,
+            metadata={"task_title": task.title},
+        )
+
         await self.task_repo.delete(task)
 
         # Close the gap in remaining tasks sequentially
@@ -370,6 +443,32 @@ class TaskService:
             ]
             await self.task_repo.bulk_update_positions(dest_final)
 
+            # Log TASK_MOVED
+            old_col = await self.column_repo.get_by_id(task.column_id)
+            new_col = await self.column_repo.get_by_id(data.column_id)
+            old_col_name = old_col.name if old_col else "Unknown"
+            new_col_name = new_col.name if new_col else "Unknown"
+            
+            board = await self.board_repo.get_by_id(new_col.board_id)
+            project = await self.project_repo.get_by_id(board.project_id)
+            
+            from app.activities.service import ActivityService
+            from app.shared.enums import ActivityAction
+            activity_service = ActivityService(self.session)
+            await activity_service.create_activity(
+                workspace_id=project.workspace_id,
+                actor_id=current_user.id,
+                action=ActivityAction.TASK_MOVED,
+                project_id=project.id,
+                board_id=board.id,
+                task_id=task.id,
+                metadata={
+                    "task_title": task.title,
+                    "from_column": old_col_name,
+                    "to_column": new_col_name,
+                },
+            )
+
         await self.session.commit()
         await self.session.refresh(task)
         return TaskResponse.model_validate(task)
@@ -443,3 +542,78 @@ class TaskService:
                 detail="You do not belong to this workspace.",
             )
         return membership.role
+
+    async def _log_task_changes(
+        self, before_state: dict, after: Task, current_user: User
+    ) -> None:
+        column = await self.column_repo.get_by_id(after.column_id)
+        board = await self.board_repo.get_by_id(column.board_id)
+        project = await self.project_repo.get_by_id(board.project_id)
+        workspace_id = project.workspace_id
+
+        from app.activities.service import ActivityService
+        from app.shared.enums import ActivityAction
+        activity_service = ActivityService(self.session)
+
+        # Check priority change
+        if before_state["priority"] != after.priority:
+            await activity_service.create_activity(
+                workspace_id=workspace_id,
+                actor_id=current_user.id,
+                action=ActivityAction.TASK_PRIORITY_CHANGED,
+                project_id=project.id,
+                board_id=board.id,
+                task_id=after.id,
+                metadata={
+                    "task_title": after.title,
+                    "from_priority": before_state["priority"].value.lower(),
+                    "to_priority": after.priority.value.lower(),
+                },
+            )
+
+        # Check assignee change
+        if before_state["assignee_id"] != after.assignee_id:
+            if after.assignee_id is not None:
+                from app.users.models import User as DBUser
+                assignee = await self.session.get(DBUser, after.assignee_id)
+                assignee_name = assignee.full_name if assignee else "Unknown User"
+                await activity_service.create_activity(
+                    workspace_id=workspace_id,
+                    actor_id=current_user.id,
+                    action=ActivityAction.TASK_ASSIGNED,
+                    project_id=project.id,
+                    board_id=board.id,
+                    task_id=after.id,
+                    metadata={
+                        "task_title": after.title,
+                        "assignee_name": assignee_name,
+                    },
+                )
+            else:
+                await activity_service.create_activity(
+                    workspace_id=workspace_id,
+                    actor_id=current_user.id,
+                    action=ActivityAction.TASK_UNASSIGNED,
+                    project_id=project.id,
+                    board_id=board.id,
+                    task_id=after.id,
+                    metadata={
+                        "task_title": after.title,
+                    },
+                )
+
+        # Check due date change
+        if before_state["due_date"] != after.due_date:
+            await activity_service.create_activity(
+                workspace_id=workspace_id,
+                actor_id=current_user.id,
+                action=ActivityAction.TASK_DUE_DATE_CHANGED,
+                project_id=project.id,
+                board_id=board.id,
+                task_id=after.id,
+                metadata={
+                    "task_title": after.title,
+                    "from_due_date": before_state["due_date"].isoformat() if before_state["due_date"] else None,
+                    "to_due_date": after.due_date.isoformat() if after.due_date else None,
+                },
+            )
