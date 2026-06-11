@@ -6,12 +6,14 @@ import { Topbar } from "./topbar";
 import { ContentArea } from "./content-area";
 import { useSidebarStore } from "@/stores/sidebar.store";
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { useActiveStateSync } from "@/features/workspaces/hooks/use-active-state-sync";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
+  useActiveStateSync();
   const isMobileOpen = useSidebarStore((state) => state.isMobileOpen);
   const setMobileOpen = useSidebarStore((state) => state.setMobileOpen);
 

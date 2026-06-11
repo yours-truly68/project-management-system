@@ -135,7 +135,9 @@ export function ListView({
                     No tasks in this stage
                   </div>
                 ) : (
-                  columnTasks.map((task) => {
+                  [...columnTasks]
+                    .sort((a, b) => a.position - b.position)
+                    .map((task) => {
                     const assignee = getAssignee(task.assignee_id);
                     const formattedDate = formatDueDate(task.due_date);
 
