@@ -21,6 +21,7 @@ export function useCreateTask(boardId: string | null) {
     onSuccess: () => {
       if (boardId) {
         queryClient.invalidateQueries({ queryKey: ["tasks", boardId] });
+        queryClient.invalidateQueries({ queryKey: ["activities"] });
       }
     },
   });
@@ -34,6 +35,7 @@ export function useUpdateTask(taskId: string, boardId: string | null) {
     onSuccess: () => {
       if (boardId) {
         queryClient.invalidateQueries({ queryKey: ["tasks", boardId] });
+        queryClient.invalidateQueries({ queryKey: ["activities"] });
       }
     },
   });
@@ -47,6 +49,7 @@ export function useDeleteTask(boardId: string | null) {
     onSuccess: () => {
       if (boardId) {
         queryClient.invalidateQueries({ queryKey: ["tasks", boardId] });
+        queryClient.invalidateQueries({ queryKey: ["activities"] });
       }
     },
   });
@@ -60,6 +63,7 @@ export function useAssignTask(taskId: string, boardId: string | null) {
     onSuccess: () => {
       if (boardId) {
         queryClient.invalidateQueries({ queryKey: ["tasks", boardId] });
+        queryClient.invalidateQueries({ queryKey: ["activities"] });
       }
     },
   });
@@ -73,6 +77,7 @@ export function useMoveTask(taskId: string, boardId: string | null) {
     onSuccess: () => {
       if (boardId) {
         queryClient.invalidateQueries({ queryKey: ["tasks", boardId] });
+        queryClient.invalidateQueries({ queryKey: ["activities"] });
       }
     },
   });

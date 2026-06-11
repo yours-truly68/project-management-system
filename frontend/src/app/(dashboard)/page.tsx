@@ -18,6 +18,7 @@ import {
   Edit3,
   Archive,
   Star,
+  History,
 } from "lucide-react";
 import { useProjectStore } from "@/stores/project.store";
 import { useUpdateProject } from "@/features/projects/hooks/use-projects";
@@ -32,6 +33,7 @@ import { BoardView } from "@/features/boards/components/board-view";
 import { ListView } from "@/features/boards/components/list-view";
 import { useBoardPreference, useUpdateBoardPreference } from "@/features/boards/hooks/use-board-preferences";
 import { useFavorites, useCreateFavorite, useDeleteFavorite } from "@/features/favorites/hooks/use-favorites";
+import { ActivityFeedDrawer } from "@/features/activity/components/activity-feed-drawer";
 
 
 export default function Page() {
@@ -75,6 +77,7 @@ export default function Page() {
 
   const [isEditOpen, setIsEditOpen] = React.useState(false);
   const [isColumnCreateOpen, setIsColumnCreateOpen] = React.useState(false);
+  const [isActivityOpen, setIsActivityOpen] = React.useState(false);
   const [columnToEdit, setColumnToEdit] = React.useState<Column | null>(null);
 
   // Task quick-create and details drawer states
@@ -276,6 +279,14 @@ export default function Page() {
             currentView={viewMode}
             onViewChange={(v) => updatePreference(v)}
           />
+          <button
+            onClick={() => setIsActivityOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-border text-foreground hover:bg-card-hover text-xs font-semibold transition-all cursor-pointer animate-fade-in"
+            aria-label="View activity history"
+          >
+            <History className="w-3.5 h-3.5" />
+            <span>History</span>
+          </button>
           {canManageBoard && (
             <button
               onClick={() => setIsEditOpen(true)}
@@ -370,6 +381,16 @@ export default function Page() {
           isOpen={!!selectedTask}
           onClose={() => setSelectedTask(null)}
           members={members}
+        />
+      )}
+
+      {activeWorkspace && (
+        <ActivityFeedDrawer
+          workspaceId={activeWorkspace.id}
+          projectId={activeProject?.id}
+          boardId={activeBoard?.id}
+          isOpen={isActivityOpen}
+          onClose={() => setIsActivityOpen(false)}
         />
       )}
     </div>

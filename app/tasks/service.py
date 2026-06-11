@@ -359,6 +359,8 @@ class TaskService:
                 detail="Task not found.",
             )
 
+        old_column_id = task.column_id
+
         # Auth checks on source and target columns
         source_role = await self._get_column_workspace_role(
             task.column_id, current_user.id
@@ -444,7 +446,7 @@ class TaskService:
             await self.task_repo.bulk_update_positions(dest_final)
 
             # Log TASK_MOVED
-            old_col = await self.column_repo.get_by_id(task.column_id)
+            old_col = await self.column_repo.get_by_id(old_column_id)
             new_col = await self.column_repo.get_by_id(data.column_id)
             old_col_name = old_col.name if old_col else "Unknown"
             new_col_name = new_col.name if new_col else "Unknown"
@@ -557,6 +559,8 @@ class TaskService:
 
         # Check priority change
         if before_state["priority"] != after.priority:
+            from_priority = before_state["priority"].value.lower() if hasattr(before_state["priority"], "value") else before_state["priority"].lower()
+            to_priority = after.priority.value.lower() if hasattr(after.priority, "value") else after.priority.lower()
             await activity_service.create_activity(
                 workspace_id=workspace_id,
                 actor_id=current_user.id,
@@ -566,8 +570,8 @@ class TaskService:
                 task_id=after.id,
                 metadata={
                     "task_title": after.title,
-                    "from_priority": before_state["priority"].value.lower(),
-                    "to_priority": after.priority.value.lower(),
+                    "from_priority": from_priority,
+                    "to_priority": to_priority,
                 },
             )
 
