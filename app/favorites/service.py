@@ -39,9 +39,17 @@ class FavoriteService:
                 except HTTPException:
                     continue
 
-                response = FavoriteResponse.model_validate(fav)
-                response.project = ProjectResponse.model_validate(project)
-                results.append(response)
+                results.append(
+                    FavoriteResponse(
+                        id=fav.id,
+                        user_id=fav.user_id,
+                        entity_type=fav.entity_type,
+                        entity_id=fav.entity_id,
+                        created_at=fav.created_at,
+                        updated_at=fav.updated_at,
+                        project=ProjectResponse.model_validate(project),
+                    )
+                )
 
             elif fav.entity_type == "board":
                 board = await self.board_repo.get_by_id(fav.entity_id)
@@ -57,10 +65,18 @@ class FavoriteService:
                 except HTTPException:
                     continue
 
-                response = FavoriteResponse.model_validate(fav)
-                response.board = BoardResponse.model_validate(board)
-                response.project = ProjectResponse.model_validate(project)
-                results.append(response)
+                results.append(
+                    FavoriteResponse(
+                        id=fav.id,
+                        user_id=fav.user_id,
+                        entity_type=fav.entity_type,
+                        entity_id=fav.entity_id,
+                        created_at=fav.created_at,
+                        updated_at=fav.updated_at,
+                        board=BoardResponse.model_validate(board),
+                        project=ProjectResponse.model_validate(project),
+                    )
+                )
 
         return results
 
@@ -106,9 +122,15 @@ class FavoriteService:
             await self.session.commit()
             await self.session.refresh(favorite)
 
-            response = FavoriteResponse.model_validate(favorite)
-            response.project = ProjectResponse.model_validate(project)
-            return response
+            return FavoriteResponse(
+                id=favorite.id,
+                user_id=favorite.user_id,
+                entity_type=favorite.entity_type,
+                entity_id=favorite.entity_id,
+                created_at=favorite.created_at,
+                updated_at=favorite.updated_at,
+                project=ProjectResponse.model_validate(project),
+            )
 
         elif data.entity_type == "board":
             board = await self.board_repo.get_by_id(data.entity_id)
@@ -145,10 +167,16 @@ class FavoriteService:
             await self.session.commit()
             await self.session.refresh(favorite)
 
-            response = FavoriteResponse.model_validate(favorite)
-            response.board = BoardResponse.model_validate(board)
-            response.project = ProjectResponse.model_validate(project)
-            return response
+            return FavoriteResponse(
+                id=favorite.id,
+                user_id=favorite.user_id,
+                entity_type=favorite.entity_type,
+                entity_id=favorite.entity_id,
+                created_at=favorite.created_at,
+                updated_at=favorite.updated_at,
+                board=BoardResponse.model_validate(board),
+                project=ProjectResponse.model_validate(project),
+            )
 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
