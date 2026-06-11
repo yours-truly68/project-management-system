@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useWorkspaces } from "@/features/workspaces/hooks/use-workspaces";
 import { useProjects } from "@/features/projects/hooks/use-projects";
 import { useBoards } from "@/features/boards/hooks/use-boards";
@@ -251,10 +252,17 @@ export default function Page() {
       {/* Board Header Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-border pb-5 pt-6 shrink-0">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground select-none animate-fade-in">
-              {activeBoard.name}
-            </h1>
+          <div className="flex flex-col gap-2.5">
+            <Link
+              href="/boards"
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-all font-semibold bg-secondary/80 border border-border/40 px-2.5 py-1 rounded-lg w-fit select-none cursor-pointer"
+            >
+              ← Back to Boards
+            </Link>
+            <div className="flex items-center gap-2 mt-1">
+              <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground select-none animate-fade-in">
+                {activeBoard.name}
+              </h1>
             <button
               onClick={handleFavoriteToggle}
               className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground hover:text-amber-500 transition-colors cursor-pointer shrink-0 mt-1"
@@ -273,6 +281,7 @@ export default function Page() {
               {activeBoard.description}
             </p>
           )}
+          </div>
         </div>
         <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 pt-1 flex-wrap sm:flex-nowrap">
           <ViewSwitcher

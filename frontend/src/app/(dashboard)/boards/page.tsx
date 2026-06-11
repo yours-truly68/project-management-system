@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useBoards, useDeleteBoard } from "@/features/boards/hooks/use-boards";
 import { useProject } from "@/features/projects/hooks/use-projects";
 import { useTasks } from "@/features/tasks/hooks/use-tasks";
@@ -76,7 +78,8 @@ function BoardCard({
 
   return (
     <div
-      className={`flex flex-col justify-between p-5 rounded-2xl border bg-card shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:translate-y-[-2px] hover:shadow-md ${
+      onClick={() => onSelect(board.id)}
+      className={`flex flex-col justify-between p-5 rounded-2xl border bg-card shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:translate-y-[-2px] hover:shadow-md cursor-pointer ${
         isActive
           ? "border-[#3B82F6] ring-1 ring-[#3B82F6]/30 bg-card-hover/20"
           : "border-border hover:border-[#3B82F6] hover:bg-card-hover/40"
@@ -106,7 +109,7 @@ function BoardCard({
           {board.description || "No description provided."}
         </p>
 
-        <div className="flex flex-wrap gap-2 mt-4">
+        <div className="flex flex-wrap gap-2 mt-4" onClick={(e) => e.stopPropagation()}>
           {projectKey && (
             <span className="text-xs px-2 py-0.5 rounded-full font-semibold bg-accent border border-border text-foreground flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
@@ -119,16 +122,19 @@ function BoardCard({
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-4 font-medium">
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-4 font-medium" onClick={(e) => e.stopPropagation()}>
           <Calendar className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
           <span>Updated {lastUpdated}</span>
         </div>
       </div>
 
       {/* Card Footer Actions */}
-      <div className="flex items-center justify-between gap-2.5 pt-4 mt-5 border-t border-border/60">
+      <div className="flex items-center justify-between gap-2.5 pt-4 mt-5 border-t border-border/60" onClick={(e) => e.stopPropagation()}>
         <button
-          onClick={() => onSelect(board.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect(board.id);
+          }}
           disabled={isActive}
           className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
             isActive
@@ -149,7 +155,10 @@ function BoardCard({
         <div className="relative">
           {canManage && (
             <button
-              onClick={() => setActiveMenuId(activeMenuId === board.id ? null : board.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveMenuId(activeMenuId === board.id ? null : board.id);
+              }}
               className="board-menu-trigger p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-card-hover transition-all cursor-pointer focus-visible:outline-none"
               aria-label="Board actions"
             >
@@ -160,7 +169,8 @@ function BoardCard({
           {activeMenuId === board.id && (
             <div className="board-menu-dropdown absolute right-0 mt-1.5 w-36 rounded-lg border border-border bg-elevated shadow-2xl py-1 z-[9999] animate-fade-in text-left select-none">
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   onEdit(board);
                   setActiveMenuId(null);
                 }}
@@ -170,7 +180,8 @@ function BoardCard({
                 <span>Edit Board</span>
               </button>
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   onDelete(board);
                   setActiveMenuId(null);
                 }}
@@ -188,6 +199,7 @@ function BoardCard({
 }
 
 export default function BoardsPage() {
+  const router = useRouter();
   const { activeWorkspaceId } = useWorkspaceStore();
   const { activeProjectId } = useProjectStore();
   const { user } = useAuthStore();
@@ -239,6 +251,11 @@ export default function BoardsPage() {
     }
   };
 
+  const handleSelectBoard = (boardId: string) => {
+    setActiveBoardId(boardId);
+    router.push("/");
+  };
+
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -286,11 +303,19 @@ export default function BoardsPage() {
     <div className="space-y-6 select-none animate-fade-in max-w-7xl w-full mx-auto px-4 py-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
-        <div>
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground/90 font-heading tracking-tight">Boards</h2>
-          <p className="text-xs text-muted-foreground mt-1">
-            Manage, select, and organize task pipelines inside the active project.
-          </p>
+        <div className="flex items-start gap-3 min-w-0">
+          <Link
+            href="/projects"
+            className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-all font-semibold bg-secondary/80 border border-border/40 px-2.5 py-1 rounded-lg mr-2 mt-1 shrink-0 select-none cursor-pointer"
+          >
+            ← Back to Projects
+          </Link>
+          <div>
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground/90 font-heading tracking-tight">Boards</h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Manage, select, and organize task pipelines inside the active project.
+            </p>
+          </div>
         </div>
         {canManage && (
           <button
@@ -382,7 +407,7 @@ export default function BoardsPage() {
                 setActiveMenuId={setActiveMenuId}
                 onEdit={setBoardToEdit}
                 onDelete={setBoardToDelete}
-                onSelect={setActiveBoardId}
+                onSelect={handleSelectBoard}
               />
             ))}
           </div>
@@ -441,7 +466,7 @@ export default function BoardsPage() {
               )}
 
               <div className="space-y-1.5">
-                <p className="text-xs font-semibold text-foreground">
+                <p className="text-xs font-semibold text-rose-500">
                   To confirm, type <span className="font-semibold text-rose-500 select-all">{boardToDelete.name}</span> below:
                 </p>
                 <input
