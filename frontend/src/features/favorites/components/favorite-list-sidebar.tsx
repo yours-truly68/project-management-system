@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Star, Loader2 } from "lucide-react";
 import { useWorkspaceStore } from "@/stores/workspace.store";
 import { useProjectStore } from "@/stores/project.store";
@@ -38,6 +39,7 @@ function SidebarTooltip({
 }
 
 export function FavoriteListSidebar({ isCollapsed }: FavoriteListSidebarProps) {
+  const router = useRouter();
   const { activeWorkspaceId } = useWorkspaceStore();
   const { setActiveProjectId } = useProjectStore();
   const { setActiveBoardId } = useBoardStore();
@@ -60,9 +62,11 @@ export function FavoriteListSidebar({ isCollapsed }: FavoriteListSidebarProps) {
     if (fav.entity_type === "project" && fav.project) {
       setActiveProjectId(fav.project.id);
       setActiveBoardId(null);
+      router.push("/boards");
     } else if (fav.entity_type === "board" && fav.board && fav.project) {
       setActiveProjectId(fav.project.id);
       setActiveBoardId(fav.board.id);
+      router.push("/");
     }
   };
 

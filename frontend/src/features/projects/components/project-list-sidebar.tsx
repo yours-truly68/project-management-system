@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
+import { useBoardStore } from "@/stores/board.store";
 import { Plus, Loader2 } from "lucide-react";
 import { useWorkspaceStore } from "@/stores/workspace.store";
 import { useWorkspaceMembers } from "@/features/workspaces/hooks/use-workspace-members";
@@ -68,6 +70,7 @@ function getProjectColor(key: string): string {
 }
 
 export function ProjectListSidebar({ isCollapsed }: ProjectListSidebarProps) {
+  const router = useRouter();
   const { activeWorkspaceId } = useWorkspaceStore();
   const { user } = useAuthStore();
   const { members } = useWorkspaceMembers(activeWorkspaceId);
@@ -140,7 +143,12 @@ export function ProjectListSidebar({ isCollapsed }: ProjectListSidebarProps) {
                 disabled={!isCollapsed}
               >
                 <button
-                  onClick={() => setActiveProjectId(project.id)}
+                  onClick={() => {
+                    setActiveProjectId(project.id);
+                    const { setActiveBoardId } = useBoardStore.getState();
+                    setActiveBoardId(null);
+                    router.push("/boards");
+                  }}
                   className={cn(
                     "flex items-center gap-2.5 px-2.5 py-1.5 rounded-r-md border-l-2 text-[15px] text-sidebar-foreground/70 hover:text-sidebar-foreground w-full text-left transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer",
                     isActive

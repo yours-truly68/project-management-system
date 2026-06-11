@@ -1,7 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { useProjects, useDeleteProject, useUpdateProject } from "@/features/projects/hooks/use-projects";
+import { useBoardStore } from "@/stores/board.store";
 import { useQuery } from "@tanstack/react-query";
 import { boardService } from "@/features/boards/services/board.service";
 import { taskService } from "@/features/tasks/services/task.service";
@@ -155,11 +157,17 @@ function ProjectCard({
 
   return (
     <div
-      className={`flex flex-col justify-between p-5 rounded-2xl border bg-card shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:translate-y-[-2px] hover:shadow-md ${
+      onClick={() => {
+        if (!project.archived_at) {
+          onSelect(project.id);
+        }
+      }}
+      className={cn(
+        "flex flex-col justify-between p-5 rounded-2xl border bg-card shadow-[0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:translate-y-[-2px] hover:shadow-md cursor-pointer",
         isActive
           ? "border-[#3B82F6] ring-1 ring-[#3B82F6]/30 bg-card-hover/20"
           : "border-border hover:border-[#3B82F6] hover:bg-card-hover/40"
-      }`}
+      )}
     >
       {/* Card Header */}
       <div>
@@ -228,7 +236,10 @@ function ProjectCard({
           </span>
         ) : (
           <button
-            onClick={() => onSelect(project.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect(project.id);
+            }}
             disabled={isActive}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
               isActive
@@ -250,7 +261,10 @@ function ProjectCard({
         <div className="relative" ref={menuRef}>
           {(canCreateOrEdit || canDelete) && (
             <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMenuOpen(!isMenuOpen);
+              }}
               className="p-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-card-hover transition-all cursor-pointer focus-visible:outline-none"
               aria-label="Project actions"
             >
@@ -259,7 +273,10 @@ function ProjectCard({
           )}
 
           {isMenuOpen && (
-            <div className="board-menu-dropdown absolute right-0 mt-1.5 w-36 rounded-lg border border-border bg-elevated shadow-2xl py-1 z-[9999] animate-fade-in text-left select-none">
+            <div
+              className="board-menu-dropdown absolute right-0 mt-1.5 w-36 rounded-lg border border-border bg-elevated shadow-2xl py-1 z-[9999] animate-fade-in text-left select-none"
+              onClick={(e) => e.stopPropagation()}
+            >
               {canCreateOrEdit && !project.archived_at && (
                 <button
                   onClick={() => {
@@ -305,6 +322,7 @@ function ProjectCard({
 }
 
 export default function ProjectsPage() {
+  const router = useRouter();
   const { activeWorkspace } = useWorkspaces();
   const { activeWorkspaceId } = useWorkspaceStore();
   const { user } = useAuthStore();
@@ -312,6 +330,13 @@ export default function ProjectsPage() {
   const [showArchived, setShowArchived] = React.useState(false);
 
   const { projects, activeProjectId, setActiveProjectId, isLoading } = useProjects(showArchived);
+
+  const handleSelectProject = (projectId: string) => {
+    setActiveProjectId(projectId);
+    const { setActiveBoardId } = useBoardStore.getState();
+    setActiveBoardId(null);
+    router.push("/boards");
+  };
   const { mutateAsync: deleteProject, isPending: isDeleting } = useDeleteProject();
 
   // Dialog / Modal states
@@ -514,7 +539,7 @@ export default function ProjectsPage() {
                   canDelete={canDelete}
                   onEdit={setProjectToEdit}
                   onDelete={setProjectToDelete}
-                  onSelect={setActiveProjectId}
+                  onSelect={handleSelectProject}
                   memberCount={members.length}
                 />
               ))}

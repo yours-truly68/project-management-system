@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { LayoutGrid, Plus, Loader2 } from "lucide-react";
 import { useWorkspaceStore } from "@/stores/workspace.store";
 import { useWorkspaceMembers } from "@/features/workspaces/hooks/use-workspace-members";
@@ -40,6 +41,7 @@ function SidebarTooltip({
 }
 
 export function BoardListSidebar({ isCollapsed }: BoardListSidebarProps) {
+  const router = useRouter();
   const { activeWorkspaceId } = useWorkspaceStore();
   const { activeProjectId } = useProjectStore();
   const { user } = useAuthStore();
@@ -113,7 +115,10 @@ export function BoardListSidebar({ isCollapsed }: BoardListSidebarProps) {
                 disabled={!isCollapsed}
               >
                 <button
-                  onClick={() => setActiveBoardId(board.id)}
+                  onClick={() => {
+                    setActiveBoardId(board.id);
+                    router.push("/");
+                  }}
                   className={cn(
                     "flex items-center gap-2.5 px-2.5 py-1.5 rounded-r-md border-l-2 text-[15px] text-sidebar-foreground/70 hover:text-sidebar-foreground w-full text-left transition-all focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer",
                     isActive
