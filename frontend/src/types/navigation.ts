@@ -6,3 +6,4 @@ export interface NavigationItem {
   icon: ComponentType<{ className?: string }>;
   disabled?: boolean;
 }
+
