@@ -23,7 +23,7 @@ export interface ActivityMetadata {
   to_column?: string;
   from_due_date?: string | null;
   to_due_date?: string | null;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface Activity {
