@@ -11,22 +11,28 @@ import { BoardEmptyState } from "@/features/boards/components/board-empty-state"
 import { EditBoardModal } from "@/features/boards/components/edit-board-modal";
 import { CreateColumnModal } from "@/features/columns/components/create-column-modal";
 import { EditColumnModal } from "@/features/columns/components/edit-column-modal";
-import { ColumnActionsMenu } from "@/features/columns/components/column-actions-menu";
-import { ColumnEmptyState } from "@/features/columns/components/column-empty-state";
 import { Column } from "@/features/columns/types/column.types";
 import {
   Plus,
   Loader2,
   Edit3,
   Archive,
+  Star,
 } from "lucide-react";
 import { useProjectStore } from "@/stores/project.store";
 import { useUpdateProject } from "@/features/projects/hooks/use-projects";
 import { useTasks } from "@/features/tasks/hooks/use-tasks";
-import { TaskCard } from "@/features/tasks/components/task-card";
 import { CreateTaskModal } from "@/features/tasks/components/create-task-modal";
 import { TaskDetailsDrawer } from "@/features/tasks/components/task-details-drawer";
 import { Task } from "@/features/tasks/types/task.types";
+import { cn } from "@/lib/utils";
+
+import { ViewSwitcher } from "@/features/boards/components/view-switcher";
+import { BoardView } from "@/features/boards/components/board-view";
+import { ListView } from "@/features/boards/components/list-view";
+import { useBoardPreference, useUpdateBoardPreference } from "@/features/boards/hooks/use-board-preferences";
+import { useFavorites, useCreateFavorite, useDeleteFavorite } from "@/features/favorites/hooks/use-favorites";
+
 
 export default function Page() {
   const { activeWorkspace, isLoading: isWorkspaceLoading } = useWorkspaces();
@@ -42,6 +48,30 @@ export default function Page() {
 
   const { user } = useAuthStore();
   const { members } = useWorkspaceMembers(activeWorkspace?.id || null);
+
+  // Board view preference
+  const { data: prefData } = useBoardPreference(activeBoard?.id || null);
+  const { mutate: updatePreference } = useUpdateBoardPreference(activeBoard?.id || null);
+  const viewMode = (prefData?.view_type || "board") as "board" | "list";
+
+  // Favorites
+  const { data: favorites = [] } = useFavorites();
+  const { mutate: createFavorite } = useCreateFavorite();
+  const { mutate: deleteFavorite } = useDeleteFavorite();
+
+  const matchingFavorite = favorites.find(
+    (fav) => fav.entity_type === "board" && fav.entity_id === activeBoard?.id
+  );
+  const isFavorited = !!matchingFavorite;
+
+  const handleFavoriteToggle = () => {
+    if (!activeBoard) return;
+    if (isFavorited && matchingFavorite) {
+      deleteFavorite(matchingFavorite.id);
+    } else {
+      createFavorite({ entity_type: "board", entity_id: activeBoard.id });
+    }
+  };
 
   const [isEditOpen, setIsEditOpen] = React.useState(false);
   const [isColumnCreateOpen, setIsColumnCreateOpen] = React.useState(false);
@@ -213,24 +243,39 @@ export default function Page() {
     return defaultColor || "#3B82F6";
   };
 
-  // Sorted columns based on their sequential position property
-  const sortedColumns = [...columns].sort((a, b) => a.position - b.position);
-
   return (
     <div className="flex flex-col h-full space-y-4">
       {/* Board Header Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-border pb-5 pt-6 shrink-0">
         <div>
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground select-none animate-fade-in">
-            {activeBoard.name}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-foreground select-none animate-fade-in">
+              {activeBoard.name}
+            </h1>
+            <button
+              onClick={handleFavoriteToggle}
+              className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground hover:text-amber-500 transition-colors cursor-pointer shrink-0 mt-1"
+              aria-label={isFavorited ? "Unfavorite board" : "Favorite board"}
+            >
+              <Star
+                className={cn(
+                  "w-5 h-5 transition-all duration-200",
+                  isFavorited ? "text-amber-500 fill-amber-500" : "text-muted-foreground/35"
+                )}
+              />
+            </button>
+          </div>
           {activeBoard.description && (
             <p className="text-sm text-secondary-text mt-1.5 max-w-2xl truncate leading-relaxed">
               {activeBoard.description}
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 pt-1">
+        <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 pt-1 flex-wrap sm:flex-nowrap">
+          <ViewSwitcher
+            currentView={viewMode}
+            onViewChange={(v) => updatePreference(v)}
+          />
           {canManageBoard && (
             <button
               onClick={() => setIsEditOpen(true)}
@@ -254,75 +299,30 @@ export default function Page() {
         </div>
       </div>
 
-      {/* Board Column Flex Area or Empty State */}
-      {sortedColumns.length === 0 ? (
-        <ColumnEmptyState boardId={activeBoard.id} />
+      {/* Board Column Flex Area or List View */}
+      {viewMode === "list" ? (
+        <ListView
+          columns={columns}
+          tasksByColumn={tasksByColumn}
+          members={members}
+          canManageBoard={canManageBoard}
+          onAddTask={setTaskToCreateColId}
+          onSelectTask={setSelectedTask}
+          getColumnColor={getColumnColor}
+        />
       ) : (
-        <div className="flex-1 flex gap-4 overflow-x-auto min-h-0 pb-3">
-          {sortedColumns.map((column) => (
-            <div
-              key={column.id}
-              className="flex flex-col bg-column-surface rounded-[18px] border border-border p-4 space-y-4 w-[360px] shrink-0 h-full overflow-hidden shadow-sm"
-            >
-              {/* Column Header */}
-              <div className="flex items-center justify-between pb-1 select-none shrink-0">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <span
-                    className="w-2.5 h-2.5 rounded-full shrink-0"
-                    style={{ backgroundColor: getColumnColor(column.name, column.color) }}
-                  />
-                  <h3 className="text-base font-bold text-foreground/90 tracking-tight truncate flex items-center gap-2">
-                    <span>{column.name}</span>
-                    <span className="text-xs font-semibold text-secondary-text px-2 py-0.5 rounded-full bg-background/50 border border-border/40 font-mono">
-                      {tasksByColumn[column.id]?.length || 0}
-                    </span>
-                  </h3>
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <ColumnActionsMenu
-                    canManage={canManageBoard}
-                    onEdit={() => setColumnToEdit(column)}
-                    onDelete={() => deleteColumn(column.id)}
-                  />
-                </div>
-              </div>
-
-              {/* Add Task CTA (Directly below column header) */}
-              {canManageBoard && (
-                <button
-                  onClick={() => setTaskToCreateColId(column.id)}
-                  className="w-full h-11 bg-accent border border-border hover:bg-card-hover rounded-xl flex items-center justify-center transition-all text-foreground hover:text-foreground cursor-pointer shrink-0 gap-2 text-sm font-semibold"
-                  aria-label="Add Task"
-                >
-                  <Plus className="w-4 h-4 text-foreground/80" />
-                  <span>Add Task</span>
-                </button>
-              )}
-
-              {/* Column Task List Area */}
-              <div className="flex-1 overflow-y-auto space-y-3 pr-0.5 min-h-0">
-                {!tasksByColumn[column.id] || tasksByColumn[column.id].length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-10 px-4 border border-dashed border-border/30 rounded-xl select-none text-center h-full justify-center my-auto">
-                    <span className="text-sm font-semibold text-muted-foreground/50">No tasks in this stage</span>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {tasksByColumn[column.id].map((task) => (
-                      <TaskCard
-                        key={task.id}
-                        task={task}
-                        columnName={column.name}
-                        onClick={() => setSelectedTask(task)}
-                        members={members}
-                        boardId={activeBoard.id}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+        <BoardView
+          boardId={activeBoard.id}
+          columns={columns}
+          tasksByColumn={tasksByColumn}
+          members={members}
+          canManageBoard={canManageBoard}
+          onEditColumn={setColumnToEdit}
+          onDeleteColumn={deleteColumn}
+          onAddTask={setTaskToCreateColId}
+          onSelectTask={setSelectedTask}
+          getColumnColor={getColumnColor}
+        />
       )}
 
       {/* Dialogs & Modals */}

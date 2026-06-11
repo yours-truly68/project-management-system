@@ -5,8 +5,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.dependencies import get_current_user
 from app.database.session import get_db
 from app.users.models import User
-from app.boards.schemas import BoardCreate, BoardResponse, BoardUpdate
+from app.boards.schemas import (
+    BoardCreate,
+    BoardResponse,
+    BoardUpdate,
+    UserBoardPreferenceResponse,
+    UserBoardPreferenceUpdate,
+)
 from app.boards.service import BoardService
+
 
 router = APIRouter(prefix="/boards", tags=["boards"])
 
@@ -68,3 +75,25 @@ async def delete_board(
     service = BoardService(session)
     await service.delete_board(board_id, user)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.get("/{board_id}/preference", response_model=UserBoardPreferenceResponse)
+async def get_user_board_preference(
+    board_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db),
+) -> UserBoardPreferenceResponse:
+    service = BoardService(session)
+    return await service.get_user_board_preference(board_id, user)
+
+
+@router.put("/{board_id}/preference", response_model=UserBoardPreferenceResponse)
+async def save_user_board_preference(
+    board_id: uuid.UUID,
+    data: UserBoardPreferenceUpdate,
+    user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_db),
+) -> UserBoardPreferenceResponse:
+    service = BoardService(session)
+    return await service.save_user_board_preference(board_id, data, user)
+

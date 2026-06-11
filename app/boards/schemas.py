@@ -37,3 +37,19 @@ class BoardResponse(BaseModel):
     created_by: uuid.UUID
     created_at: datetime
     updated_at: datetime
+
+
+class UserBoardPreferenceResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    user_id: uuid.UUID
+    board_id: uuid.UUID
+    view_type: str
+    created_at: datetime
+    updated_at: datetime
+
+
+class UserBoardPreferenceUpdate(BaseModel):
+    view_type: str = Field(min_length=1, max_length=20, pattern="^(board|list)$")
+

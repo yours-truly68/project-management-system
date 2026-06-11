@@ -1,4 +1,6 @@
 import uuid
+from datetime import datetime
+from uuid6 import uuid7
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -6,7 +8,13 @@ from app.shared.enums import WorkspaceRole
 from app.users.models import User
 from app.boards.models import Board
 from app.boards.repository import BoardRepository
-from app.boards.schemas import BoardCreate, BoardResponse, BoardUpdate
+from app.boards.schemas import (
+    BoardCreate,
+    BoardResponse,
+    BoardUpdate,
+    UserBoardPreferenceResponse,
+    UserBoardPreferenceUpdate,
+)
 from app.projects.repository import ProjectRepository
 from app.workspaces.repository import WorkspaceRepository
 from app.shared.permissions.policies import has_permission, Permission
@@ -183,3 +191,65 @@ class BoardService:
                 detail="You do not belong to this workspace.",
             )
         return membership.role
+
+    async def get_user_board_preference(
+        self, board_id: uuid.UUID, current_user: User
+    ) -> UserBoardPreferenceResponse:
+        board = await self.board_repo.get_by_id(board_id)
+        if not board:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Board not found.",
+            )
+        project = await self.project_repo.get_by_id(board.project_id)
+        if not project:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Project not found.",
+            )
+        role = await self._get_workspace_role(project.workspace_id, current_user.id)
+        if not has_permission(role, Permission.BOARD_VIEW):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to view this board.",
+            )
+
+        pref = await self.board_repo.get_preference(current_user.id, board_id)
+        if not pref:
+            return UserBoardPreferenceResponse(
+                id=uuid7(),
+                user_id=current_user.id,
+                board_id=board_id,
+                view_type="board",
+                created_at=datetime.now(),
+                updated_at=datetime.now(),
+            )
+        return UserBoardPreferenceResponse.model_validate(pref)
+
+    async def save_user_board_preference(
+        self, board_id: uuid.UUID, data: UserBoardPreferenceUpdate, current_user: User
+    ) -> UserBoardPreferenceResponse:
+        board = await self.board_repo.get_by_id(board_id)
+        if not board:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Board not found.",
+            )
+        project = await self.project_repo.get_by_id(board.project_id)
+        if not project:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Project not found.",
+            )
+        role = await self._get_workspace_role(project.workspace_id, current_user.id)
+        if not has_permission(role, Permission.BOARD_VIEW):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to view this board.",
+            )
+
+        pref = await self.board_repo.save_preference(current_user.id, board_id, data.view_type)
+        await self.session.commit()
+        await self.session.refresh(pref)
+        return UserBoardPreferenceResponse.model_validate(pref)
+

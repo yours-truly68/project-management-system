@@ -24,8 +24,10 @@ import {
   Calendar,
   Archive,
   MoreHorizontal,
+  Star,
 } from "lucide-react";
 import { getErrorMessage } from "@/lib/utils";
+import { useFavorites, useCreateFavorite, useDeleteFavorite } from "@/features/favorites/hooks/use-favorites";
 
 // Deterministic color selection based on project key hash
 function getProjectColor(key: string): string {
@@ -77,11 +79,30 @@ function ProjectCard({
   memberCount,
 }: ProjectCardProps) {
   const { mutateAsync: updateProject } = useUpdateProject(project.id);
+  const { data: favorites = [] } = useFavorites();
+  const { mutate: createFavorite } = useCreateFavorite();
+  const { mutate: deleteFavorite } = useDeleteFavorite();
+
+  const matchingFavorite = favorites.find(
+    (fav) => fav.entity_type === "project" && fav.entity_id === project.id
+  );
+  const isFavorited = !!matchingFavorite;
+
+  const handleFavoriteToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isFavorited && matchingFavorite) {
+      deleteFavorite(matchingFavorite.id);
+    } else {
+      createFavorite({ entity_type: "project", entity_id: project.id });
+    }
+  };
+
   const color = getProjectColor(project.key);
   const lastUpdated = new Date(project.updated_at).toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
   });
+
 
   // Fetch boards for this project
   const { data: boards = [] } = useQuery({
@@ -151,6 +172,18 @@ function ProjectCard({
             <h3 className="font-bold text-lg text-foreground truncate" title={project.name}>
               {project.name}
             </h3>
+            <button
+              onClick={handleFavoriteToggle}
+              className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-amber-500 transition-colors cursor-pointer shrink-0"
+              aria-label={isFavorited ? "Unfavorite project" : "Favorite project"}
+            >
+              <Star
+                className={cn(
+                  "w-4 h-4 transition-all duration-200",
+                  isFavorited ? "text-amber-500 fill-amber-500" : "text-muted-foreground/40"
+                )}
+              />
+            </button>
           </div>
           <span className="text-[10px] px-2.5 py-0.5 rounded font-bold uppercase tracking-wider bg-accent border border-border text-muted-foreground shrink-0">
             {project.key}

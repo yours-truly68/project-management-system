@@ -8,6 +8,7 @@ import { MAIN_NAV_ITEMS, OTHER_NAV_ITEMS } from "@/constants/navigation";
 import { cn } from "@/lib/utils";
 
 import { WorkspaceSwitcher } from "@/features/workspaces/components/workspace-switcher";
+import { FavoriteListSidebar } from "@/features/favorites/components/favorite-list-sidebar";
 import { ProjectListSidebar } from "@/features/projects/components/project-list-sidebar";
 import { BoardListSidebar } from "@/features/boards/components/board-list-sidebar";
 import {
@@ -16,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
 
 interface SidebarTooltipProps {
   content: string;
@@ -106,8 +108,12 @@ export function Sidebar() {
             })}
           </div>
 
+          {/* Favorites List Section (Dynamic) */}
+          <FavoriteListSidebar isCollapsed={isCollapsed} />
+
           {/* 4. Projects List Section (Dynamic) */}
           <ProjectListSidebar isCollapsed={isCollapsed} />
+
 
           {/* 5. Boards List Section (Dynamic) */}
           <BoardListSidebar isCollapsed={isCollapsed} />

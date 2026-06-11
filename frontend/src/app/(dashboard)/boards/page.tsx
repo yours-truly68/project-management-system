@@ -22,8 +22,11 @@ import {
   X,
   Calendar,
   MoreHorizontal,
+  Star,
 } from "lucide-react";
-import { getErrorMessage } from "@/lib/utils";
+import { getErrorMessage, cn } from "@/lib/utils";
+import { useFavorites, useCreateFavorite, useDeleteFavorite } from "@/features/favorites/hooks/use-favorites";
+
 
 interface BoardCardProps {
   board: Board;
@@ -49,6 +52,24 @@ function BoardCard({
   onSelect,
 }: BoardCardProps) {
   const { data: tasks = [] } = useTasks(board.id);
+  const { data: favorites = [] } = useFavorites();
+  const { mutate: createFavorite } = useCreateFavorite();
+  const { mutate: deleteFavorite } = useDeleteFavorite();
+
+  const matchingFavorite = favorites.find(
+    (fav) => fav.entity_type === "board" && fav.entity_id === board.id
+  );
+  const isFavorited = !!matchingFavorite;
+
+  const handleFavoriteToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isFavorited && matchingFavorite) {
+      deleteFavorite(matchingFavorite.id);
+    } else {
+      createFavorite({ entity_type: "board", entity_id: board.id });
+    }
+  };
+
   const lastUpdated = new Date(board.updated_at).toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
@@ -64,9 +85,23 @@ function BoardCard({
     >
       {/* Card Header */}
       <div>
-        <h3 className="font-bold text-lg text-foreground truncate" title={board.name}>
-          {board.name}
-        </h3>
+        <div className="flex items-center justify-between gap-3 overflow-hidden">
+          <h3 className="font-bold text-lg text-foreground truncate" title={board.name}>
+            {board.name}
+          </h3>
+          <button
+            onClick={handleFavoriteToggle}
+            className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-amber-500 transition-colors cursor-pointer shrink-0"
+            aria-label={isFavorited ? "Unfavorite board" : "Favorite board"}
+          >
+            <Star
+              className={cn(
+                "w-4 h-4 transition-all duration-200",
+                isFavorited ? "text-amber-500 fill-amber-500" : "text-muted-foreground/40"
+              )}
+            />
+          </button>
+        </div>
 
         <p className="text-sm text-secondary-text mt-2.5 line-clamp-2 min-h-[40px] leading-relaxed">
           {board.description || "No description provided."}

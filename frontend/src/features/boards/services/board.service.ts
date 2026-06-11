@@ -27,6 +27,18 @@ export const boardService = {
   async deleteBoard(id: string): Promise<void> {
     await apiClient.delete(`/boards/${id}`);
   },
+
+  async getBoardPreference(boardId: string): Promise<{ view_type: string }> {
+    const response = await apiClient.get<{ view_type: string }>(`/boards/${boardId}/preference`);
+    return response.data;
+  },
+
+  async updateBoardPreference(boardId: string, viewType: string): Promise<{ view_type: string }> {
+    const response = await apiClient.put<{ view_type: string }>(`/boards/${boardId}/preference`, {
+      view_type: viewType,
+    });
+    return response.data;
+  },
 };
 
 export default boardService;

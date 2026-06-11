@@ -2,14 +2,41 @@ import uuid
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.boards.models import Board
+from app.boards.models import Board, UserBoardPreference
 
 
 class BoardRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
+    async def get_preference(
+        self, user_id: uuid.UUID, board_id: uuid.UUID
+    ) -> UserBoardPreference | None:
+        stmt = select(UserBoardPreference).where(
+            UserBoardPreference.user_id == user_id,
+            UserBoardPreference.board_id == board_id,
+        )
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def save_preference(
+        self, user_id: uuid.UUID, board_id: uuid.UUID, view_type: str
+    ) -> UserBoardPreference:
+        pref = await self.get_preference(user_id, board_id)
+        if pref:
+            pref.view_type = view_type
+        else:
+            pref = UserBoardPreference(
+                user_id=user_id,
+                board_id=board_id,
+                view_type=view_type,
+            )
+            self.session.add(pref)
+        await self.session.flush()
+        return pref
+
     async def create(self, board: Board) -> Board:
+
         self.session.add(board)
         await self.session.flush()
         return board

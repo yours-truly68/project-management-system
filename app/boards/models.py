@@ -52,3 +52,41 @@ class Board(UUIDMixin, TimestampMixin, Base):
         foreign_keys=[created_by],
         lazy="raise",
     )
+
+
+class UserBoardPreference(UUIDMixin, TimestampMixin, Base):
+    __tablename__ = "user_board_preferences"
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "board_id", name="uq_user_board_preferences_user_board"),
+        Index("ix_user_board_preferences_user_id", "user_id"),
+        Index("ix_user_board_preferences_board_id", "board_id"),
+    )
+
+    user_id: Mapped[_uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    board_id: Mapped[_uuid.UUID] = mapped_column(
+        ForeignKey("boards.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    view_type: Mapped[str] = mapped_column(
+        String(20),
+        default="board",
+        server_default="board",
+        nullable=False,
+    )
+
+    # Relationships
+    user: Mapped["User"] = relationship(  # type: ignore[name-defined]  # noqa: F821
+        "User",
+        foreign_keys=[user_id],
+        lazy="raise",
+    )
+    board: Mapped["Board"] = relationship(
+        "Board",
+        foreign_keys=[board_id],
+        lazy="raise",
+    )
+
