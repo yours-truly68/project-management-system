@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { useQuery, useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 import { useProjects, useDeleteProject, useUpdateProject } from "@/features/projects/hooks/use-projects";
 import { useBoardStore } from "@/stores/board.store";
 import { boardService } from "@/features/boards/services/board.service";
@@ -25,7 +25,6 @@ import {
   Check,
   AlertTriangle,
   X,
-  Calendar,
   Archive,
   MoreHorizontal,
   Star,
@@ -40,12 +39,10 @@ import {
   PageHeader,
   ActionToolbar,
   ContentGrid,
-  Surface,
   StatCard,
   EntityCard,
   EmptyState,
   SearchInput,
-  AvatarGroup,
   ProgressIndicator,
 } from "@/components/ui/primitives";
 
