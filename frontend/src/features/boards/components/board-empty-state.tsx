@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { LayoutGrid, Plus } from "lucide-react";
+import { LayoutGrid, Plus, Sparkles } from "lucide-react";
 import { CreateBoardModal } from "./create-board-modal";
 import { useWorkspaceStore } from "@/stores/workspace.store";
 import { useWorkspaceMembers } from "@/features/workspaces/hooks/use-workspace-members";
 import { useAuthStore } from "@/stores/auth.store";
+import { EmptyState } from "@/components/ui/primitives";
 
 export function BoardEmptyState() {
   const { activeWorkspaceId } = useWorkspaceStore();
@@ -19,32 +20,29 @@ export function BoardEmptyState() {
     currentUserMember?.role === "OWNER" || currentUserMember?.role === "ADMIN";
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[450px] p-8 text-center rounded-xl border border-dashed border-border bg-card/40 animate-fade-in select-none">
-      <div className="w-12 h-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-4">
-        <LayoutGrid className="w-6 h-6" />
-      </div>
-
-      <h3 className="text-base font-semibold text-foreground mb-1">
-        Create your first board
-      </h3>
-      <p className="text-xs text-muted-foreground max-w-sm mb-6 leading-relaxed">
-        Boards organize your workflow into columns and tasks. Start by creating a board for your project.
-      </p>
-
-      {canCreate ? (
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 transition-colors cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          Create Board
-        </button>
-      ) : (
-        <p className="text-xs text-muted-foreground/80 italic">
-          Only workspace owners or administrators can create boards.
-        </p>
-      )}
-
+    <div className="flex-1 flex items-center justify-center p-8 select-none animate-fade-in relative overflow-hidden">
+      <div className="absolute inset-0 dots-pattern opacity-60" />
+      <EmptyState
+        title="Create your first board"
+        description="Boards organize your workflow into columns and tasks. Start by creating a board for your project."
+        icon={LayoutGrid}
+        primaryAction={
+          canCreate ? (
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold rounded-xl bg-primary text-primary-foreground hover:bg-primary/95 transition-all duration-200 cursor-pointer shadow-sm btn-interactive"
+            >
+              <Plus className="w-4 h-4" />
+              Create Board
+            </button>
+          ) : (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground/70 justify-center">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span className="italic">Only workspace owners or administrators can create boards.</span>
+            </div>
+          )
+        }
+      />
       {isModalOpen && (
         <CreateBoardModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       )}

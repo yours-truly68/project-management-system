@@ -49,6 +49,34 @@
   --color-disabled-text: var(--disabled-text);
 
   --font-sans: var(--font-satoshi), Inter, system-ui, sans-serif;
+
+  /* Animations */
+  --animate-fade-in: fade-in 0.25s ease-out;
+  --animate-scale-in: scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-glow-pulse: glow-pulse 3s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes scale-in {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  @keyframes glow-pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+  }
+  @keyframes shimmer {
+    from { background-position: -200% 0; }
+    to { background-position: 200% 0; }
+  }
 }
 
 :root {
@@ -66,7 +94,7 @@
   --primary: #1E293B;
   --primary-foreground: #F4F6F8;
 
-  --secondary: #FFFFFF; /* Surface */
+  --secondary: #FFFFFF;
   --secondary-foreground: #1E293B;
 
   --muted: #F4F6F8;
@@ -98,49 +126,49 @@
 }
 
 .dark {
-  /* Dark Mode values */
-  --background: #090B0F;
-  --foreground: #F3F4F6;
+  /* Deep Dark Mode — Inspired by Linear/GitHub Dark Dimmed */
+  --background: #050608;
+  --foreground: #E6EDF3;
 
-  --card: #1E2633;
-  --card-foreground: #F3F4F6;
+  --card: #0D1117;
+  --card-foreground: #E6EDF3;
 
-  --elevated: #232C3B;
+  --elevated: #111820;
   --popover: var(--elevated);
-  --popover-foreground: #F3F4F6;
+  --popover-foreground: #E6EDF3;
 
-  --primary: #F3F4F6;
-  --primary-foreground: #090B0F;
+  --primary: #E6EDF3;
+  --primary-foreground: #050608;
 
-  --secondary: #161D28; /* Surface */
-  --secondary-foreground: #F3F4F6;
+  --secondary: #0A0F15;
+  --secondary-foreground: #E6EDF3;
 
-  --muted: #101722;
-  --muted-foreground: #7F8A99;
+  --muted: #0A0E14;
+  --muted-foreground: #7D8590;
 
-  --accent: #1D2633;
-  --accent-foreground: #F3F4F6;
+  --accent: #151B24;
+  --accent-foreground: #E6EDF3;
 
-  --destructive: #ef4444;
+  --destructive: #f85149;
   --destructive-foreground: #ffffff;
 
-  --border: #2D384B;
-  --input: #2D384B;
-  --ring: #3B82F6;
+  --border: #1A2233;
+  --input: #1A2233;
+  --ring: #388BFD;
 
-  --sidebar: #0D1015;
-  --sidebar-foreground: #B8C0CC;
-  --sidebar-border: #2D384B;
-  --sidebar-accent: #252F40;
-  --sidebar-accent-foreground: #F3F4F6;
-  --overlay: rgba(0, 0, 0, 0.75);
+  --sidebar: #060809;
+  --sidebar-foreground: #9CA3AF;
+  --sidebar-border: #151B24;
+  --sidebar-accent: #151B24;
+  --sidebar-accent-foreground: #E6EDF3;
+  --overlay: rgba(0, 0, 0, 0.80);
 
-  --topbar: #101722;
-  --board-surface: #0E131B;
-  --column-surface: #161D28;
-  --card-hover: #252F40;
-  --secondary-text: #B8C0CC;
-  --disabled-text: #5D6672;
+  --topbar: #0A0E14;
+  --board-surface: #070A0E;
+  --column-surface: #0C1118;
+  --card-hover: #151B24;
+  --secondary-text: #8B949E;
+  --disabled-text: #484F58;
 }
 
 body {
@@ -150,3 +178,110 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* ─── Glassmorphism Utilities (strictly for dropdowns/context-menus/popovers) ─── */
+
+.glass {
+  background: rgba(13, 17, 23, 0.85);
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(13, 17, 23, 0.9);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 10px 30px -10px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.glass-subtle {
+  background: rgba(13, 17, 23, 0.75);
+  backdrop-filter: blur(8px) saturate(140%);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Light mode overrides for floating components */
+:root .glass,
+:root .glass-card,
+:root .glass-subtle {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Micro-interactions & Polish ─── */
+
+/* Soft scale origin utilities for dropdown open animation */
+.origin-dropdown {
+  transform-origin: top right;
+}
+
+/* Custom interactive actions */
+.btn-interactive {
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-interactive:active {
+  transform: scale(0.97);
+}
+
+.card-interactive {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card-interactive:hover {
+  background-color: var(--accent);
+  border-color: rgba(56, 139, 253, 0.2);
+}
+
+/* Shimmer Skeleton animation */
+.shimmer-bg {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 25%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+:root .shimmer-bg {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.03) 25%,
+    rgba(0, 0, 0, 0.06) 50%,
+    rgba(0, 0, 0, 0.03) 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Dot Pattern Background */
+.dots-pattern {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+:root .dots-pattern {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.02) 1px, transparent 1px);
+}
+

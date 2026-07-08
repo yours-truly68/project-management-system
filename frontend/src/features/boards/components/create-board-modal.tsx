@@ -19,9 +19,10 @@ type CreateBoardFormData = z.infer<typeof createBoardSchema>;
 interface CreateBoardModalProps {
   isOpen: boolean;
   onClose: () => void;
+  projectId?: string;
 }
 
-export function CreateBoardModal({ isOpen, onClose }: CreateBoardModalProps) {
+export function CreateBoardModal({ isOpen, onClose, projectId }: CreateBoardModalProps) {
   const { activeProjectId } = useProjectStore();
   const { mutateAsync: createBoard, isPending, error } = useCreateBoard();
 
@@ -50,10 +51,11 @@ export function CreateBoardModal({ isOpen, onClose }: CreateBoardModalProps) {
   if (!isOpen) return null;
 
   const onSubmit = async (data: CreateBoardFormData) => {
-    if (!activeProjectId) return;
+    const targetProjectId = projectId || activeProjectId;
+    if (!targetProjectId) return;
     try {
       await createBoard({
-        project_id: activeProjectId,
+        project_id: targetProjectId,
         name: data.name,
         description: data.description || undefined,
       });
