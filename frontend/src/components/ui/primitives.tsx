@@ -323,7 +323,7 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center p-8 text-center rounded-xl border border-dashed border-border bg-card/10 select-none min-h-[360px]",
+        "relative z-10 flex flex-col items-center justify-center p-8 text-center rounded-xl border border-dashed border-border bg-card/10 select-none min-h-[360px]",
         className
       )}
       {...props}
