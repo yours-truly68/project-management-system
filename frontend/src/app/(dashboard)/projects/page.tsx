@@ -44,6 +44,7 @@ import {
   EmptyState,
   SearchInput,
   ProgressIndicator,
+  ProjectsSkeleton,
 } from "@/components/ui/primitives";
 
 // Deterministic color selection based on project key hash
@@ -69,7 +70,6 @@ interface ProjectCardProps {
   onEdit: (project: Project) => void;
   onDelete: (project: Project) => void;
   onSelect: (id: string) => void;
-  memberCount: number;
 }
 
 function ProjectCard({
@@ -80,7 +80,6 @@ function ProjectCard({
   onEdit,
   onDelete,
   onSelect,
-  memberCount,
 }: ProjectCardProps) {
   const { mutateAsync: updateProject } = useUpdateProject(project.id);
   const { data: favorites = [] } = useFavorites();
@@ -351,39 +350,10 @@ export default function ProjectsPage() {
     return allBoardsQueries.flatMap((q) => q.data || []);
   }, [allBoardsQueries]);
 
-  const allTasksQueries = useQueries({
-    queries: allBoardsList.map((b) => ({
-      queryKey: ["tasks", b.id],
-      queryFn: () => taskService.listTasks(b.id),
-    })),
-  });
 
-  const taskStats = React.useMemo(() => {
-    let completed = 0;
-    let active = 0;
-
-    allTasksQueries.forEach((q) => {
-      if (!q.data) return;
-      q.data.forEach((t) => {
-        // Assume simple statuses or simple task metrics
-        if (t.priority === "LOW") {
-          completed++;
-        } else {
-          active++;
-        }
-      });
-    });
-
-    return { completed, active };
-  }, [allTasksQueries]);
 
   if (isLoading) {
-    return (
-      <PageContainer className="animate-pulse">
-        <div className="h-8 w-48 bg-accent/30 rounded-lg mb-6" />
-        <div className="h-40 bg-accent/20 rounded-xl" />
-      </PageContainer>
-    );
+    return <ProjectsSkeleton />;
   }
 
   if (!activeWorkspaceId) {
@@ -486,7 +456,6 @@ export default function ProjectsPage() {
                 onEdit={setProjectToEdit}
                 onDelete={setProjectToDelete}
                 onSelect={handleSelectProject}
-                memberCount={members.length}
               />
             ))}
           </ContentGrid>

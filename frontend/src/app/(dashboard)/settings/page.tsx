@@ -1,14 +1,12 @@
-"use client";
-
-import * as React from "react";
 import { ThemeSwitcher } from "@/components/theme/theme-switcher";
+import { Surface } from "@/components/ui/primitives";
 
 export default function SettingsPage() {
   return (
     <div className="flex flex-col space-y-6 select-none max-w-4xl">
 
       {/* Profile Section Preview (Utility mockup) */}
-      <div className="bg-secondary/20 rounded-xl border border-border p-6 space-y-4">
+      <Surface className="space-y-4">
         <h2 className="text-sm font-semibold text-foreground">User Profile</h2>
         <p className="text-xs text-muted-foreground">
           Your account credentials and email notification settings are synchronized with your authenticated session.
@@ -21,10 +19,10 @@ export default function SettingsPage() {
             </div>
           </div>
         </div>
-      </div>
+      </Surface>
 
       {/* Appearance Section */}
-      <div className="bg-secondary/20 rounded-xl border border-border p-6 space-y-4">
+      <Surface className="space-y-4">
         <div>
           <h2 className="text-sm font-semibold text-foreground">Appearance</h2>
           <p className="text-xs text-muted-foreground mt-1">
@@ -36,7 +34,7 @@ export default function SettingsPage() {
         <div className="pt-2">
           <ThemeSwitcher />
         </div>
-      </div>
+      </Surface>
     </div>
   );
 }

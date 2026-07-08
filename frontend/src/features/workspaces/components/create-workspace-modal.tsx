@@ -73,14 +73,14 @@ export function CreateWorkspaceModal({ isOpen, onClose }: CreateWorkspaceModalPr
   const errorMessage = error ? getErrorMessage(error) : "";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-[2px] animate-fade-in select-none">
+    <div className="fixed inset-0 z-[var(--z-overlay)] flex items-center justify-center bg-black/75 backdrop-blur-[2px] animate-fade-in select-none">
       <div
-        className="relative w-full max-w-md bg-elevated border border-border rounded-[20px] shadow-2xl p-5 m-4 animate-scale-in"
+        className="relative w-full max-w-md bg-elevated border border-border/60 rounded-dialog shadow-2xl p-dialog-pad m-4 animate-scale-in"
         role="dialog"
         aria-modal="true"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3.5 border-b border-border">
+        <div className="flex items-center justify-between pb-3.5 border-b border-border/20">
           <h3 className="text-sm font-semibold text-foreground">Create Workspace</h3>
           <button
             onClick={onClose}
@@ -105,12 +105,12 @@ export function CreateWorkspaceModal({ isOpen, onClose }: CreateWorkspaceModalPr
               htmlFor="name"
               className="block text-[11px] font-bold text-muted-foreground uppercase tracking-wide"
             >
-              Workspace Name
+              Workspace Name<span className="text-rose-500 ml-0.5">*</span>
             </label>
             <input
               id="name"
               type="text"
-              className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all"
+              className="w-full h-[var(--height-control-md)] text-xs px-3 rounded-button bg-background border border-border text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all"
               placeholder="e.g. Acme Corporation"
               {...register("name")}
             />
@@ -126,16 +126,16 @@ export function CreateWorkspaceModal({ isOpen, onClose }: CreateWorkspaceModalPr
               htmlFor="slug"
               className="block text-[11px] font-bold text-muted-foreground uppercase tracking-wide"
             >
-              Workspace URL Slug
+              Workspace URL Slug<span className="text-rose-500 ml-0.5">*</span>
             </label>
-            <div className="flex rounded-lg border border-border bg-background focus-within:ring-1 focus-within:ring-ring focus-within:border-ring transition-all overflow-hidden">
-              <span className="flex items-center text-muted-foreground/60 text-xs px-2.5 py-1.5 bg-secondary border-r border-border font-medium">
+            <div className="flex rounded-button border border-border bg-background focus-within:ring-1 focus-within:ring-ring focus-within:border-ring transition-all overflow-hidden h-[var(--height-control-md)]">
+              <span className="flex items-center text-muted-foreground/60 text-xs px-3 bg-secondary border-r border-border font-medium shrink-0">
                 /workspaces/
               </span>
               <input
                 id="slug"
                 type="text"
-                className="w-full text-xs px-2.5 py-1.5 bg-transparent border-0 text-foreground placeholder-muted-foreground/60 focus:outline-none"
+                className="w-full text-xs px-3 bg-transparent border-0 text-foreground placeholder-muted-foreground/60 focus:outline-none"
                 placeholder="acme-corp"
                 {...register("slug")}
                 onChange={(e) => {
@@ -160,7 +160,7 @@ export function CreateWorkspaceModal({ isOpen, onClose }: CreateWorkspaceModalPr
             </label>
             <textarea
               id="description"
-              className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all min-h-[80px]"
+              className="w-full text-xs px-3 py-2 rounded-button bg-background border border-border text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all min-h-[80px]"
               placeholder="Describe your workspace..."
               {...register("description")}
             />
@@ -172,19 +172,19 @@ export function CreateWorkspaceModal({ isOpen, onClose }: CreateWorkspaceModalPr
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-2.5 pt-2 border-t border-border">
+          <div className="flex justify-end gap-3 pt-4 border-t border-border/20 mt-6">
             <button
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-secondary border border-border text-foreground hover:bg-secondary/80 transition-colors disabled:opacity-50 cursor-pointer"
+              className="px-4 h-[var(--height-control-md)] text-xs font-semibold rounded-button bg-secondary border border-border text-foreground hover:bg-secondary/80 transition-colors disabled:opacity-50 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 transition-colors disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-1.5 px-4 h-[var(--height-control-md)] text-xs font-semibold rounded-button bg-primary text-primary-foreground hover:bg-primary/95 transition-colors disabled:opacity-50 cursor-pointer"
             >
               {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               Create

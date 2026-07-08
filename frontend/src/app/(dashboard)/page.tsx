@@ -2,7 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useQueries } from "@tanstack/react-query";
 import { useWorkspaces } from "@/features/workspaces/hooks/use-workspaces";
 import { useProjects } from "@/features/projects/hooks/use-projects";
 import { useBoards } from "@/features/boards/hooks/use-boards";
@@ -28,7 +29,6 @@ import {
   CheckCircle2,
   LayoutGrid,
   Folder,
-  ArrowRight,
   TrendingUp,
 } from "lucide-react";
 import { useProjectStore } from "@/stores/project.store";
@@ -52,7 +52,6 @@ import { CreateBoardModal } from "@/features/boards/components/create-board-moda
 
 import { boardService } from "@/features/boards/services/board.service";
 import { taskService } from "@/features/tasks/services/task.service";
-import { useWorkspaceStore } from "@/stores/workspace.store";
 import { useBoardStore } from "@/stores/board.store";
 import { useActivities } from "@/features/activity/hooks/use-activities";
 
@@ -67,13 +66,10 @@ import {
   StatCard,
   EntityCard,
   EmptyState,
-  CommandButton,
-  SearchInput,
   AvatarGroup,
   ActivityItem,
   Timeline,
-  PropertyRow,
-  ProgressIndicator,
+  DashboardSkeleton,
 } from "@/components/ui/primitives";
 
 /* ─── Hero Empty State Onboarding Components ─── */
@@ -133,13 +129,13 @@ function NoProjectHero() {
 }
 
 export default function Page() {
+  const router = useRouter();
   const { activeWorkspace, isLoading: isWorkspaceLoading } = useWorkspaces();
-  const { activeWorkspaceId } = useWorkspaceStore();
   const { projects, isLoading: isProjectsLoading } = useProjects();
   const { activeProject } = useProjects();
   const { activeBoard, isLoading: isBoardLoading } = useBoards();
   const { activeBoardId, setActiveBoardId } = useBoardStore();
-  const { activeProjectId, setActiveProjectId } = useProjectStore();
+  const { setActiveProjectId } = useProjectStore();
 
   const { data: columns = [], isLoading: isColumnsLoading } = useColumns(
     activeBoard?.id || null
@@ -184,7 +180,7 @@ export default function Page() {
 
   // Task quick-create and details drawer states
   const [taskToCreateColId, setTaskToCreateColId] = React.useState<string | null>(null);
-  const [selectedTask, setSelectedTask] = React.useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = React.useState<(Task & { board_id: string }) | null>(null);
 
   const columnRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -214,7 +210,10 @@ export default function Page() {
   const tasksQueries = useQueries({
     queries: allBoards.map((b) => ({
       queryKey: ["tasks", b.id],
-      queryFn: () => taskService.listTasks(b.id),
+      queryFn: async () => {
+        const tasks = await taskService.listTasks(b.id);
+        return tasks.map((t) => ({ ...t, board_id: b.id }));
+      },
       enabled: !activeBoardId && allBoards.length > 0,
     })),
   });
@@ -272,18 +271,7 @@ export default function Page() {
   const canManageBoard = role === "OWNER" || role === "ADMIN";
 
   if (isWorkspaceLoading || isProjectsLoading || isBoardLoading || isColumnsLoading || isTasksLoading) {
-    return (
-      <PageContainer className="animate-pulse">
-        <div className="h-8 w-48 bg-accent/30 rounded-lg mb-6" />
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div className="lg:col-span-3 space-y-6">
-            <div className="h-40 bg-accent/20 rounded-xl" />
-            <div className="h-60 bg-accent/20 rounded-xl" />
-          </div>
-          <div className="lg:col-span-1 h-80 bg-accent/20 rounded-xl" />
-        </div>
-      </PageContainer>
-    );
+    return <DashboardSkeleton />;
   }
 
   if (!activeWorkspace) {
@@ -601,6 +589,10 @@ export default function Page() {
     return defaultColor || "#3B82F6";
   };
 
+  if (!activeBoard) {
+    return <DashboardSkeleton />;
+  }
+
   // --- RENDER STANDARD ACTIVE BOARD VIEW ---
   return (
     <PageContainer className="animate-fade-in select-none">
@@ -685,7 +677,7 @@ export default function Page() {
             members={members}
             canManageBoard={canManageBoard}
             onAddTask={setTaskToCreateColId}
-            onSelectTask={setSelectedTask}
+            onSelectTask={(task) => setSelectedTask({ ...task, board_id: activeBoard.id })}
             getColumnColor={getColumnColor}
           />
         ) : (
@@ -698,7 +690,7 @@ export default function Page() {
             onEditColumn={setColumnToEdit}
             onDeleteColumn={deleteColumn}
             onAddTask={setTaskToCreateColId}
-            onSelectTask={setSelectedTask}
+            onSelectTask={(task) => setSelectedTask({ ...task, board_id: activeBoard.id })}
             getColumnColor={getColumnColor}
             columnRefs={columnRefs}
           />

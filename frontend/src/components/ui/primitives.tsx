@@ -11,7 +11,7 @@ export interface PageContainerProps extends React.HTMLAttributes<HTMLDivElement>
 export function PageContainer({ children, className, ...props }: PageContainerProps) {
   return (
     <div
-      className={cn("w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col min-w-0 h-full", className)}
+      className={cn("w-full max-w-[1440px] mx-auto px-6 md:px-8 py-6 flex flex-col min-w-0 h-full", className)}
       {...props}
     >
       {children}
@@ -522,5 +522,217 @@ export function ProgressIndicator({ value, className, ...props }: ProgressIndica
         {percent}%
       </span>
     </div>
+  );
+}
+
+// ─── LIST & TABLE PRIMITIVES ───
+
+export interface ListItemProps extends React.HTMLAttributes<HTMLDivElement> {
+  startSlot?: React.ReactNode;
+  title: string;
+  subtitle?: string;
+  endSlot?: React.ReactNode;
+  interactive?: boolean;
+}
+
+export function ListItem({
+  startSlot,
+  title,
+  subtitle,
+  endSlot,
+  interactive = true,
+  className,
+  ...props
+}: ListItemProps) {
+  return (
+    <div
+      className={cn(
+        "flex items-center justify-between gap-3 px-3.5 h-[var(--height-sidebar-item)] min-h-[32px] rounded-lg text-xs transition-all",
+        interactive && "hover:bg-accent/40 cursor-pointer",
+        className
+      )}
+      {...props}
+    >
+      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+        {startSlot && <div className="shrink-0 text-muted-foreground">{startSlot}</div>}
+        <div className="truncate flex flex-col justify-center">
+          <span className="font-semibold text-foreground truncate leading-none">{title}</span>
+          {subtitle && (
+            <span className="text-[9px] text-muted-foreground/80 mt-0.5 truncate leading-none">
+              {subtitle}
+            </span>
+          )}
+        </div>
+      </div>
+      {endSlot && <div className="shrink-0">{endSlot}</div>}
+    </div>
+  );
+}
+
+export interface TableRowProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+}
+
+export function TableRow({ children, className, ...props }: TableRowProps) {
+  return (
+    <div
+      className={cn(
+        "flex items-center justify-between gap-4 py-2 px-3 border-b border-border/20 hover:bg-accent/15 transition-all text-xs",
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+export interface PropertyListProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+}
+
+export function PropertyList({ children, className, ...props }: PropertyListProps) {
+  return (
+    <div className={cn("space-y-1.5", className)} {...props}>
+      {children}
+    </div>
+  );
+}
+
+export interface SectionListProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+}
+
+export function SectionList({ children, className, ...props }: SectionListProps) {
+  return (
+    <div className={cn("divide-y divide-border/20", className)} {...props}>
+      {children}
+    </div>
+  );
+}
+
+// ─── PAGE LOADING SKELETON PRIMITIVES ───
+
+export function DashboardSkeleton() {
+  return (
+    <PageContainer className="animate-pulse space-y-6">
+      {/* PageHeader Skeleton */}
+      <div className="border-b border-border/20 pb-5">
+        <div className="h-6 w-48 bg-accent/30 rounded" />
+        <div className="h-3 w-72 bg-accent/30 rounded mt-2" />
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="h-24 bg-card border border-border/40 rounded-surface p-surface-pad space-y-2">
+            <div className="h-3 w-16 bg-accent/30 rounded" />
+            <div className="h-6 w-12 bg-accent/30 rounded" />
+          </div>
+        ))}
+      </div>
+
+      {/* Split layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-3 space-y-4">
+          <div className="h-4 w-32 bg-accent/30 rounded" />
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="h-14 bg-card border border-border/40 rounded-surface" />
+            ))}
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div className="h-4 w-24 bg-accent/30 rounded" />
+          <div className="h-48 bg-card border border-border/40 rounded-surface" />
+        </div>
+      </div>
+    </PageContainer>
+  );
+}
+
+export function ProjectsSkeleton() {
+  return (
+    <PageContainer className="animate-pulse space-y-6">
+      {/* PageHeader Skeleton */}
+      <div className="border-b border-border/20 pb-5">
+        <div className="h-6 w-48 bg-accent/30 rounded" />
+        <div className="h-3 w-72 bg-accent/30 rounded mt-2" />
+      </div>
+
+      {/* Filterbar / search */}
+      <div className="flex items-center justify-between">
+        <div className="h-8 w-64 bg-accent/30 rounded-button" />
+        <div className="h-8 w-32 bg-accent/30 rounded-button" />
+      </div>
+
+      {/* Project grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="h-40 bg-card border border-border/40 rounded-surface p-surface-pad flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="h-4 w-32 bg-accent/30 rounded" />
+              <div className="h-3 w-48 bg-accent/30 rounded" />
+            </div>
+            <div className="h-3 w-16 bg-accent/30 rounded" />
+          </div>
+        ))}
+      </div>
+    </PageContainer>
+  );
+}
+
+export function BoardsSkeleton() {
+  return (
+    <PageContainer className="animate-pulse space-y-6">
+      {/* PageHeader Skeleton */}
+      <div className="border-b border-border/20 pb-5">
+        <div className="h-6 w-48 bg-accent/30 rounded" />
+        <div className="h-3 w-72 bg-accent/30 rounded mt-2" />
+      </div>
+
+      {/* Toolbar */}
+      <div className="h-[var(--height-toolbar)] bg-card border border-border/40 rounded-surface flex items-center px-4" />
+
+      {/* Columns Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start flex-1 min-h-[400px]">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="bg-secondary/20 border border-border/40 rounded-surface p-3 space-y-3 min-h-[300px]">
+            <div className="h-4 w-20 bg-accent/30 rounded" />
+            <div className="space-y-2">
+              {Array.from({ length: 2 }).map((_, j) => (
+                <div key={j} className="h-20 bg-card border border-border/40 rounded-surface" />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </PageContainer>
+  );
+}
+
+export function MyWorkSkeleton() {
+  return (
+    <PageContainer className="animate-pulse space-y-6">
+      {/* PageHeader Skeleton */}
+      <div className="border-b border-border/20 pb-5">
+        <div className="h-6 w-48 bg-accent/30 rounded" />
+        <div className="h-3 w-72 bg-accent/30 rounded mt-2" />
+      </div>
+
+      {/* Lists of tasks */}
+      <div className="space-y-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="bg-card border border-border/40 rounded-surface p-surface-pad space-y-3">
+            <div className="h-4 w-28 bg-accent/30 rounded" />
+            <div className="space-y-2">
+              {Array.from({ length: 2 }).map((_, j) => (
+                <div key={j} className="h-10 bg-secondary/20 border border-border/30 rounded" />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </PageContainer>
   );
 }

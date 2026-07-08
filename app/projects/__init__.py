@@ -1,1 +1,0 @@
-# app/projects package

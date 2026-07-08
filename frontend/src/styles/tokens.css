@@ -1,0 +1,71 @@
+:root {
+  /* Spacing Scale */
+  --spacing-xs: 0.25rem;            /* 4px */
+  --spacing-sm: 0.5rem;             /* 8px */
+  --spacing-md: 0.75rem;            /* 12px */
+  --spacing-lg: 1rem;               /* 16px */
+  --spacing-xl: 1.25rem;            /* 20px */
+  --spacing-xxl: 1.5rem;            /* 24px */
+
+  /* Spacing Semantic Slots (using --spacing- prefix for auto-registration in Tailwind v4) */
+  --spacing-surface-pad: 1.25rem;   /* 20px */
+  --spacing-dialog-pad: 1.5rem;     /* 24px */
+  --spacing-card-gap: 1rem;         /* 16px */
+  --spacing-section-gap: 1.5rem;    /* 24px */
+
+  /* plain variables for backwards-compatibility with var() */
+  --surface-pad: 1.25rem;
+  --dialog-pad: 1.5rem;
+  --card-gap: 1rem;
+  --section-gap: 1.5rem;
+
+  /* Border Radii (Tailwind v4 automatically maps --radius-* variables) */
+  --radius-button: 6px;
+  --radius-dropdown: 8px;
+  --radius-surface: 12px;
+  --radius-dialog: 16px;
+
+  /* Heights Scale (using --spacing- prefix for height/width utility generation) */
+  --spacing-height-control-sm: 32px;
+  --spacing-height-control-md: 36px;
+  --spacing-height-control-lg: 40px;
+  --spacing-height-toolbar: 48px;
+  --spacing-height-topbar: 56px;
+  --spacing-height-sidebar-item: 32px;
+  --spacing-height-dropdown-item: 32px;
+  --spacing-height-card-header: 44px;
+  --spacing-height-dialog-header: 48px;
+
+  /* plain variables for backwards-compatibility with var() */
+  --height-control-sm: 32px;
+  --height-control-md: 36px;
+  --height-control-lg: 40px;
+  --height-toolbar: 48px;
+  --height-topbar: 56px;
+  --height-sidebar-item: 32px;
+  --height-dropdown-item: 32px;
+  --height-card-header: 44px;
+  --height-dialog-header: 48px;
+
+  /* Content Widths (Ultrawide constraints) */
+  --content-xs: 480px;
+  --content-sm: 640px;
+  --content-md: 768px;
+  --content-lg: 1024px;
+  --content-xl: 1440px;
+  --content-fluid: 100%;
+
+  /* Z-Index Layers */
+  --z-tooltip: 100;
+  --z-toast: 60;
+  --z-dropdown: 50;
+  --z-dialog: 50;
+  --z-overlay: 40;
+
+  /* Icon Sizes */
+  --icon-xs: 12px;
+  --icon-sm: 16px;
+  --icon-md: 18px;
+  --icon-lg: 20px;
+  --icon-xl: 24px;
+}

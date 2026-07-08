@@ -57,9 +57,9 @@ export function ProfileDropdown() {
 
       {/* Dropdown Menu Card */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 rounded-[20px] border border-border bg-elevated shadow-2xl py-1 z-[9999] animate-fade-in focus:outline-none select-none">
+        <div className="absolute right-0 mt-2 w-56 rounded-dropdown border border-border/60 bg-elevated shadow-2xl py-1 z-[var(--z-dropdown)] origin-top-right animate-scale-in focus:outline-none select-none">
           {/* User Profile info header */}
-          <div className="px-3 py-2 border-b border-border">
+          <div className="px-3 py-2 border-b border-border/20">
             <p className="text-xs font-semibold text-foreground truncate">
               {user?.full_name || "User Profile"}
             </p>
@@ -69,20 +69,20 @@ export function ProfileDropdown() {
           </div>
 
           {/* Links Section */}
-          <div className="py-1 border-b border-border">
+          <div className="py-1 border-b border-border/20">
             <Link
               href="/settings"
               onClick={() => setIsOpen(false)}
-              className="flex items-center gap-2 px-3 py-1.5 text-xs text-foreground hover:bg-secondary transition-colors"
+              className="flex items-center gap-2 px-3 h-[var(--height-dropdown-item)] text-xs text-foreground hover:bg-secondary transition-colors"
             >
-              <Settings className="w-3.5 h-3.5 text-muted-foreground" />
+              <Settings className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
               <span>Settings</span>
             </Link>
           </div>
 
           {/* Mini Theme Switcher Section */}
           {mounted && (
-            <div className="px-3 py-2 border-b border-border flex items-center justify-between text-xs text-muted-foreground">
+            <div className="px-3 py-1.5 border-b border-border/20 flex items-center justify-between text-xs text-muted-foreground">
               <span>Theme</span>
               <div className="flex bg-secondary rounded p-0.5 gap-0.5 border border-border/40">
                 <button
@@ -133,9 +133,9 @@ export function ProfileDropdown() {
                 logout();
               }}
               disabled={isLoading}
-              className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-rose-500 hover:bg-rose-500/10 transition-colors text-left cursor-pointer disabled:opacity-50"
+              className="w-full flex items-center gap-2 px-3 h-[var(--height-dropdown-item)] text-xs text-rose-500 hover:bg-rose-500/10 transition-colors text-left cursor-pointer disabled:opacity-50"
             >
-              <LogOut className="w-3.5 h-3.5" />
+              <LogOut className="w-3.5 h-3.5 shrink-0" />
               <span>{isLoading ? "Logging out..." : "Log out"}</span>
             </button>
           </div>

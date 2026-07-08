@@ -25,6 +25,7 @@ import {
   PageHeader,
   Surface,
   EmptyState,
+  MyWorkSkeleton,
 } from "@/components/ui/primitives";
 
 export default function MyWorkPage() {
@@ -33,7 +34,7 @@ export default function MyWorkPage() {
   const { projects } = useProjects();
   const { members } = useWorkspaceMembers(activeWorkspace?.id || null);
 
-  const [selectedTask, setSelectedTask] = React.useState<Task | null>(null);
+  const [selectedTask, setSelectedTask] = React.useState<(Task & { board_id: string }) | null>(null);
 
   // Fetch all boards for projects
   const boardsQueries = useQueries({
@@ -52,7 +53,10 @@ export default function MyWorkPage() {
   const tasksQueries = useQueries({
     queries: allBoards.map((b) => ({
       queryKey: ["tasks", b.id],
-      queryFn: () => taskService.listTasks(b.id),
+      queryFn: async () => {
+        const tasks = await taskService.listTasks(b.id);
+        return tasks.map((t) => ({ ...t, board_id: b.id }));
+      },
       enabled: allBoards.length > 0,
     })),
   });
@@ -67,12 +71,7 @@ export default function MyWorkPage() {
   }, [allTasks, user]);
 
   if (isWsLoading) {
-    return (
-      <PageContainer className="animate-pulse">
-        <div className="h-8 w-48 bg-accent/30 rounded-lg mb-6" />
-        <div className="h-40 bg-accent/20 rounded-xl" />
-      </PageContainer>
-    );
+    return <MyWorkSkeleton />;
   }
 
   if (!activeWorkspace) {

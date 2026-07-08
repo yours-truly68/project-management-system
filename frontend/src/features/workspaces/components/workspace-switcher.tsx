@@ -75,8 +75,8 @@ export function WorkspaceSwitcher({ isCollapsed }: WorkspaceSwitcherProps) {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute left-0 mt-1.5 w-64 rounded-[20px] border border-border bg-elevated shadow-2xl py-1.5 z-[9999] animate-fade-in focus:outline-none select-none">
-          <div className="px-3.5 py-1.5 border-b border-border">
+        <div className="absolute left-0 mt-1.5 w-60 rounded-dropdown border border-border/60 bg-elevated shadow-2xl py-1 z-[var(--z-dropdown)] origin-top-left animate-scale-in focus:outline-none select-none">
+          <div className="px-3 py-1.5 border-b border-border/20">
             <span className="text-[10px] font-bold text-muted-foreground/80 uppercase tracking-wider">
               Workspaces
             </span>
@@ -99,13 +99,13 @@ export function WorkspaceSwitcher({ isCollapsed }: WorkspaceSwitcherProps) {
                     setActiveWorkspaceId(ws.id);
                     setIsOpen(false);
                   }}
-                  className={`w-full flex items-center gap-2.5 px-3.5 py-2 text-sm font-semibold text-left cursor-pointer transition-colors ${
+                  className={`w-full flex items-center gap-2 px-3 h-[var(--height-dropdown-item)] text-xs font-semibold text-left cursor-pointer transition-colors ${
                     isActive
                       ? "bg-secondary text-foreground font-semibold"
                       : "text-foreground hover:bg-secondary/60"
                   }`}
                 >
-                  <div className="w-6 h-6 rounded bg-sidebar-accent border border-border/40 flex items-center justify-center text-xs font-bold shrink-0 text-foreground">
+                  <div className="w-5 h-5 rounded bg-sidebar-accent border border-border/40 flex items-center justify-center text-[10px] font-bold shrink-0 text-foreground">
                     {wsInitials}
                   </div>
                   <span className="truncate flex-1">{ws.name}</span>
@@ -114,21 +114,21 @@ export function WorkspaceSwitcher({ isCollapsed }: WorkspaceSwitcherProps) {
             })}
 
             {workspaces.length === 0 && (
-              <div className="px-3.5 py-2 text-xs text-muted-foreground text-center">
+              <div className="px-3 py-2 text-xs text-muted-foreground text-center">
                 No workspaces found
               </div>
             )}
           </div>
 
-          <div className="border-t border-border pt-1.5 mt-1 pb-0.5 space-y-0.5">
+          <div className="border-t border-border/20 pt-1 mt-1 pb-0.5 space-y-0.5">
             <button
               onClick={() => {
                 setIsModalOpen(true);
                 setIsOpen(false);
               }}
-              className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm font-semibold text-foreground hover:bg-secondary transition-colors text-left cursor-pointer"
+              className="w-full flex items-center gap-2 px-3 h-[var(--height-dropdown-item)] text-xs font-semibold text-foreground hover:bg-secondary transition-colors text-left cursor-pointer"
             >
-              <Plus className="w-4 h-4 text-muted-foreground" />
+              <Plus className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
               <span>Create Workspace</span>
             </button>
 
@@ -136,9 +136,9 @@ export function WorkspaceSwitcher({ isCollapsed }: WorkspaceSwitcherProps) {
               <Link
                 href="/settings/workspace"
                 onClick={() => setIsOpen(false)}
-                className="flex items-center gap-2.5 px-3.5 py-2 text-sm font-semibold text-foreground hover:bg-secondary transition-colors"
+                className="flex items-center gap-2 px-3 h-[var(--height-dropdown-item)] text-xs font-semibold text-foreground hover:bg-secondary transition-colors"
               >
-                <Settings className="w-4 h-4 text-muted-foreground" />
+                <Settings className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <span>Workspace Settings</span>
               </Link>
             )}

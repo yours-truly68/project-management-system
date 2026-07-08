@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useWorkspaces } from "@/features/workspaces/hooks/use-workspaces";
 import { cn } from "@/lib/utils";
-import { User, Settings } from "lucide-react";
+import { User, Settings as SettingsIcon } from "lucide-react";
+import { PageContainer } from "@/components/ui/primitives";
 
 interface SettingsLayoutProps {
   children: React.ReactNode;
@@ -27,22 +28,22 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
       href: "/settings/workspace",
       active: pathname === "/settings/workspace",
       disabled: !activeWorkspace,
-      icon: Settings,
+      icon: SettingsIcon,
     },
   ];
 
   return (
-    <div className="flex flex-col h-full space-y-5 select-none max-w-[1000px] w-full mx-auto px-4 py-4 animate-fade-in">
+    <PageContainer className="animate-fade-in select-none">
       {/* Settings Header */}
-      <div className="space-y-1 border-b border-border pb-4">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">Settings</h1>
+      <div className="space-y-1 border-b border-border pb-4 shrink-0">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground font-heading">Settings</h1>
         <p className="text-xs text-muted-foreground mt-1">
           Manage your account preferences, theme settings, workspaces, and team memberships.
         </p>
       </div>
 
       {/* Sidebar Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-8 items-start">
+      <div className="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-8 items-start pt-6 flex-1 min-h-0 overflow-auto">
         {/* Settings Navigation Sidebar */}
         <nav className="flex flex-row md:flex-col gap-1 overflow-x-auto md:overflow-x-visible pb-3 md:pb-0 border-b border-border md:border-b-0" aria-label="Settings sub-navigation">
           {menuItems.map((item) => {
@@ -53,10 +54,10 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 rounded-r-md border-l-2 text-sm font-medium transition-all shrink-0",
+                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all shrink-0",
                   item.active
-                    ? "bg-accent border-primary text-foreground font-semibold"
-                    : "border-transparent text-muted-foreground hover:bg-accent/40 hover:text-foreground"
+                    ? "bg-sidebar-accent text-foreground font-semibold"
+                    : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-foreground"
                 )}
               >
                 <Icon className="w-4 h-4 shrink-0" />
@@ -69,7 +70,7 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
         {/* Settings Content Area */}
         <div className="min-w-0">{children}</div>
       </div>
-    </div>
+    </PageContainer>
   );
 }
 

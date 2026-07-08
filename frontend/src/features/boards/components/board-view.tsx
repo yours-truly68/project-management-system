@@ -294,7 +294,7 @@ export function BoardView({
                 columnRefs.current[column.id] = el;
               }
             }}
-            className="flex flex-col bg-column-surface rounded-[18px] border border-border p-4 space-y-4 w-[360px] shrink-0 h-full overflow-hidden shadow-sm animate-fade-in"
+            className="flex flex-col bg-column-surface rounded-[18px] border border-border p-4 space-y-4 flex-1 min-w-[320px] max-w-none h-full overflow-hidden shadow-sm animate-fade-in"
           >
             {/* Column Header */}
             <div className="flex items-center justify-between pb-1 select-none shrink-0">
@@ -385,7 +385,7 @@ export function BoardView({
                     }}
                     {...colProvided.draggableProps}
                     style={colProvided.draggableProps.style as React.CSSProperties}
-                    className="flex flex-col bg-column-surface rounded-[18px] border border-border p-4 space-y-4 w-[360px] shrink-0 h-full overflow-hidden shadow-sm animate-fade-in"
+                    className="flex flex-col bg-column-surface rounded-[18px] border border-border p-4 space-y-4 flex-1 min-w-[320px] max-w-none h-full overflow-hidden shadow-sm animate-fade-in"
                   >
                     {/* Column Header */}
                     <div

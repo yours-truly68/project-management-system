@@ -1,11 +1,13 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useQuery, useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { useBoards, useDeleteBoard } from "@/features/boards/hooks/use-boards";
-import { useProject, useProjects } from "@/features/projects/hooks/use-projects";
+import {
+  useProject,
+  useProjects,
+} from "@/features/projects/hooks/use-projects";
 import { useTasks } from "@/features/tasks/hooks/use-tasks";
 import { useProjectStore } from "@/stores/project.store";
 import { useWorkspaceStore } from "@/stores/workspace.store";
@@ -32,10 +34,15 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { getErrorMessage, cn } from "@/lib/utils";
-import { useFavorites, useCreateFavorite, useDeleteFavorite } from "@/features/favorites/hooks/use-favorites";
+import {
+  useFavorites,
+  useCreateFavorite,
+  useDeleteFavorite,
+} from "@/features/favorites/hooks/use-favorites";
 import { useBoardStore } from "@/stores/board.store";
 import { useWorkspaces } from "@/features/workspaces/hooks/use-workspaces";
 import { useActivities } from "@/features/activity/hooks/use-activities";
+import { boardService } from "@/features/boards/services/board.service";
 
 import {
   PageContainer,
@@ -50,11 +57,11 @@ import {
   EmptyState,
   ActivityItem,
   Timeline,
+  BoardsSkeleton,
 } from "@/components/ui/primitives";
 
 interface BoardCardProps {
   board: Board;
-  projectKey?: string;
   isActive: boolean;
   canManage: boolean;
   activeMenuId: string | null;
@@ -66,7 +73,6 @@ interface BoardCardProps {
 
 function BoardCard({
   board,
-  projectKey,
   isActive,
   canManage,
   activeMenuId,
@@ -81,7 +87,7 @@ function BoardCard({
   const { mutate: deleteFavorite } = useDeleteFavorite();
 
   const matchingFavorite = favorites.find(
-    (fav) => fav.entity_type === "board" && fav.entity_id === board.id
+    (fav) => fav.entity_type === "board" && fav.entity_id === board.id,
   );
   const isFavorited = !!matchingFavorite;
 
@@ -104,12 +110,13 @@ function BoardCard({
       title={board.name}
       description={board.description || "No description provided."}
       onClick={() => onSelect(board.id)}
-      className={cn(
-        isActive && "border-primary bg-accent/10"
-      )}
+      className={cn(isActive && "border-primary bg-accent/10")}
       icon={<LayoutGrid className="w-4 h-4 text-primary shrink-0" />}
       actions={
-        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="flex items-center gap-1.5"
+          onClick={(e) => e.stopPropagation()}
+        >
           <button
             onClick={handleFavoriteToggle}
             className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-amber-500 transition-colors cursor-pointer shrink-0"
@@ -118,7 +125,9 @@ function BoardCard({
             <Star
               className={cn(
                 "w-3.5 h-3.5 transition-all duration-200",
-                isFavorited ? "text-amber-500 fill-amber-500" : "text-muted-foreground/35"
+                isFavorited
+                  ? "text-amber-500 fill-amber-500"
+                  : "text-muted-foreground/35",
               )}
             />
           </button>
@@ -126,7 +135,9 @@ function BoardCard({
           {canManage && (
             <div className="relative">
               <button
-                onClick={() => setActiveMenuId(activeMenuId === board.id ? null : board.id)}
+                onClick={() =>
+                  setActiveMenuId(activeMenuId === board.id ? null : board.id)
+                }
                 className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-all cursor-pointer focus-visible:outline-none"
                 aria-label="Board actions"
               >
@@ -194,7 +205,10 @@ export default function BoardsPage() {
   React.useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as HTMLElement;
-      if (!target.closest(".board-menu-trigger") && !target.closest(".board-menu-dropdown")) {
+      if (
+        !target.closest(".board-menu-trigger") &&
+        !target.closest(".board-menu-dropdown")
+      ) {
         setActiveMenuId(null);
       }
     }
@@ -247,17 +261,16 @@ export default function BoardsPage() {
 
   const { data: favorites = [] } = useFavorites();
   const favBoards = React.useMemo(() => {
-    const ids = new Set(favorites.filter((f) => f.entity_type === "board").map((f) => f.entity_id));
+    const ids = new Set(
+      favorites
+        .filter((f) => f.entity_type === "board")
+        .map((f) => f.entity_id),
+    );
     return allWorkspaceBoards.filter((b) => ids.has(b.id));
   }, [favorites, allWorkspaceBoards]);
 
   if (isLoading) {
-    return (
-      <PageContainer className="animate-pulse">
-        <div className="h-8 w-48 bg-accent/30 rounded-lg mb-6" />
-        <div className="h-40 bg-accent/20 rounded-xl" />
-      </PageContainer>
-    );
+    return <BoardsSkeleton />;
   }
 
   if (!activeWorkspaceId) {
@@ -355,11 +368,24 @@ export default function BoardsPage() {
                     key={activity.id}
                     actor={activity.actor?.full_name || "Workspace member"}
                     action={activity.action.toLowerCase().replace(/_/g, " ")}
-                    timestamp={new Date(activity.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                    details={activity.metadata?.task_title || activity.metadata?.project_name || undefined}
+                    timestamp={new Date(activity.created_at).toLocaleDateString(
+                      undefined,
+                      {
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      },
+                    )}
+                    details={
+                      activity.metadata?.task_title ||
+                      activity.metadata?.project_name ||
+                      undefined
+                    }
                   />
                 ))}
-                {(!workspaceActivities.data || workspaceActivities.data.length === 0) && (
+                {(!workspaceActivities.data ||
+                  workspaceActivities.data.length === 0) && (
                   <span className="text-xs text-muted-foreground/50 block py-6 text-center">
                     No recent activity logs.
                   </span>
@@ -413,7 +439,10 @@ export default function BoardsPage() {
               <span className="text-[10px] uppercase tracking-wider font-bold text-primary bg-primary/10 border border-primary/20 px-2.5 py-0.5 rounded-full select-none">
                 Project Overview
               </span>
-              <h3 className="font-bold text-base text-foreground mt-3 truncate" title={project?.name}>
+              <h3
+                className="font-bold text-base text-foreground mt-3 truncate"
+                title={project?.name}
+              >
                 {project?.name || "Loading..."}
               </h3>
               <p className="text-[10px] text-muted-foreground font-mono mt-0.5">
@@ -433,12 +462,20 @@ export default function BoardsPage() {
               </h4>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-secondary/40 border border-border/20 p-2.5 rounded-xl text-center">
-                  <span className="block text-lg font-bold text-foreground">{boards.length}</span>
-                  <span className="text-[9px] text-muted-foreground uppercase font-medium">Boards</span>
+                  <span className="block text-lg font-bold text-foreground">
+                    {boards.length}
+                  </span>
+                  <span className="text-[9px] text-muted-foreground uppercase font-medium">
+                    Boards
+                  </span>
                 </div>
                 <div className="bg-secondary/40 border border-border/20 p-2.5 rounded-xl text-center">
-                  <span className="block text-lg font-bold text-foreground">{members.length}</span>
-                  <span className="text-[9px] text-muted-foreground uppercase font-medium">Members</span>
+                  <span className="block text-lg font-bold text-foreground">
+                    {members.length}
+                  </span>
+                  <span className="text-[9px] text-muted-foreground uppercase font-medium">
+                    Members
+                  </span>
                 </div>
               </div>
             </div>
@@ -453,7 +490,6 @@ export default function BoardsPage() {
               <BoardCard
                 key={board.id}
                 board={board}
-                projectKey={project?.key}
                 isActive={board.id === activeBoardId}
                 canManage={canManage}
                 activeMenuId={activeMenuId}
@@ -469,7 +505,11 @@ export default function BoardsPage() {
 
       {/* Modals & Dialogs */}
       {isCreateOpen && (
-        <CreateBoardModal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)} projectId={activeProjectId} />
+        <CreateBoardModal
+          isOpen={isCreateOpen}
+          onClose={() => setIsCreateOpen(false)}
+          projectId={activeProjectId}
+        />
       )}
 
       {boardToEdit && (
@@ -506,9 +546,9 @@ export default function BoardsPage() {
 
             <div className="mt-3.5 space-y-3">
               <p className="text-xs text-muted-foreground leading-relaxed">
-                Are you sure you want to delete the board &ldquo;{boardToDelete.name}&rdquo;?
-                This action cannot be undone and will permanently delete all associated columns,
-                tasks, and data.
+                Are you sure you want to delete the board &ldquo;
+                {boardToDelete.name}&rdquo;? This action cannot be undone and
+                will permanently delete all associated columns, tasks, and data.
               </p>
 
               {deleteError && (
@@ -519,7 +559,11 @@ export default function BoardsPage() {
 
               <div className="space-y-1.5">
                 <p className="text-xs font-semibold text-rose-500">
-                  To confirm, type <span className="font-semibold text-rose-500 select-all">{boardToDelete.name}</span> below:
+                  To confirm, type{" "}
+                  <span className="font-semibold text-rose-500 select-all">
+                    {boardToDelete.name}
+                  </span>{" "}
+                  below:
                 </p>
                 <input
                   type="text"

@@ -11,7 +11,10 @@ import { WorkspaceMemberDetailed } from "@/features/workspaces/types/workspace.t
 import { getErrorMessage } from "@/lib/utils";
 
 const createTaskSchema = z.object({
-  title: z.string().min(1, "Title is required").max(100, "Title cannot exceed 100 characters"),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(100, "Title cannot exceed 100 characters"),
   description: z.string().optional(),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]),
   assignee_id: z.string().optional().nullable(),
@@ -89,18 +92,18 @@ export function CreateTaskModal({
   const errorMessage = error ? getErrorMessage(error) : "";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-[2px] animate-fade-in select-none">
+    <div className="fixed inset-0 z-[var(--z-overlay)] flex items-center justify-center bg-black/75 backdrop-blur-[2px] animate-fade-in select-none">
       <div
-        className="relative w-full max-w-lg bg-elevated border border-border rounded-[20px] shadow-2xl p-6 m-4 animate-scale-in"
+        className="relative w-full max-w-lg bg-white dark:bg-[#111820] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl p-6 m-4 animate-scale-in"
         role="dialog"
         aria-modal="true"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-3.5 border-b border-border">
-          <h3 className="text-base font-bold text-foreground">Create Task</h3>
+        <div className="flex items-center justify-between pb-3.5 border-b border-slate-200 dark:border-slate-800/60">
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-foreground">Create Task</h3>
           <button
             onClick={onClose}
-            className="text-secondary-text hover:text-foreground rounded p-1 transition-colors cursor-pointer focus:outline-none"
+            className="text-slate-400 dark:text-muted-foreground hover:text-slate-600 dark:hover:text-foreground rounded p-1 transition-colors cursor-pointer focus:outline-none"
             aria-label="Close modal"
           >
             <X className="w-4 h-4" />
@@ -117,55 +120,55 @@ export function CreateTaskModal({
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
           {/* Title */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label
               htmlFor="task-title"
-              className="block text-xs font-semibold text-secondary-text uppercase tracking-wide"
+              className="block text-[11px] font-bold text-slate-500 dark:text-muted-foreground uppercase tracking-wide"
             >
-              Task Title
+              Task Title<span className="text-rose-500 ml-0.5">*</span>
             </label>
             <input
               id="task-title"
               type="text"
-              className="w-full text-sm px-3 py-2 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all"
+              className="w-full h-9 text-xs px-3 rounded-lg bg-[#F4F6F8] dark:bg-[#050608] border border-slate-200 dark:border-slate-800 text-slate-950 dark:text-foreground placeholder-slate-400 dark:placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all"
               placeholder="e.g. Implement authentication routing"
               {...register("title")}
             />
             {errors.title && (
-              <p className="text-xs text-destructive font-medium mt-0.5">
+              <p className="text-[10px] text-destructive font-medium mt-0.5">
                 {errors.title.message}
               </p>
             )}
           </div>
 
           {/* Description */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <label
               htmlFor="task-description"
-              className="block text-xs font-semibold text-secondary-text uppercase tracking-wide"
+              className="block text-[11px] font-bold text-slate-500 dark:text-muted-foreground uppercase tracking-wide"
             >
               Description
             </label>
             <textarea
               id="task-description"
-              className="w-full text-sm px-3 py-2 rounded-lg bg-background border border-border text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all min-h-[100px] resize-none leading-relaxed"
+              className="w-full text-xs px-3 py-2 rounded-lg bg-[#F4F6F8] dark:bg-[#050608] border border-slate-200 dark:border-slate-800 text-slate-950 dark:text-foreground placeholder-slate-400 dark:placeholder-muted-foreground/60 focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all min-h-[90px] resize-none leading-relaxed"
               placeholder="e.g. Detailed steps for execution..."
               {...register("description")}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Priority */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <label
                 htmlFor="task-priority"
-                className="block text-xs font-semibold text-secondary-text uppercase tracking-wide"
+                className="block text-[11px] font-bold text-slate-500 dark:text-muted-foreground uppercase tracking-wide"
               >
                 Priority
               </label>
               <select
                 id="task-priority"
-                className="w-full text-sm px-3 py-2 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all cursor-pointer"
+                className="w-full h-9 text-xs px-3 rounded-lg bg-[#F4F6F8] dark:bg-[#050608] border border-slate-200 dark:border-slate-800 text-slate-950 dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all cursor-pointer font-medium"
                 {...register("priority")}
               >
                 <option value="LOW">Low</option>
@@ -176,16 +179,16 @@ export function CreateTaskModal({
             </div>
 
             {/* Assignee */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <label
                 htmlFor="task-assignee"
-                className="block text-xs font-semibold text-secondary-text uppercase tracking-wide"
+                className="block text-[11px] font-bold text-slate-500 dark:text-muted-foreground uppercase tracking-wide"
               >
                 Assignee
               </label>
               <select
                 id="task-assignee"
-                className="w-full text-sm px-3 py-2 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all cursor-pointer"
+                className="w-full h-9 text-xs px-3 rounded-lg bg-[#F4F6F8] dark:bg-[#050608] border border-slate-200 dark:border-slate-800 text-slate-950 dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all cursor-pointer font-medium"
                 {...register("assignee_id")}
               >
                 <option value="">Unassigned</option>
@@ -196,61 +199,38 @@ export function CreateTaskModal({
                 ))}
               </select>
             </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            {/* Tagged Members */}
-            <div className="space-y-1.5">
-              <label
-                htmlFor="task-tagged-members"
-                className="block text-xs font-semibold text-secondary-text uppercase tracking-wide"
-              >
-                Tagged Members
-              </label>
-              <select
-                id="task-tagged-members"
-                multiple
-                className="w-full text-sm px-3 py-2 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all cursor-pointer h-[38px] overflow-hidden"
-              >
-                {members.map((member) => (
-                  <option key={member.user_id} value={member.user_id}>
-                    {member.full_name}
-                  </option>
-                ))}
-              </select>
-            </div>
 
             {/* Due Date */}
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <label
                 htmlFor="task-due-date"
-                className="block text-xs font-semibold text-secondary-text uppercase tracking-wide"
+                className="block text-[11px] font-bold text-slate-500 dark:text-muted-foreground uppercase tracking-wide"
               >
                 Due Date
               </label>
               <input
                 id="task-due-date"
                 type="date"
-                className="w-full text-sm px-3 py-2 rounded-lg bg-background border border-border text-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all cursor-pointer"
+                className="w-full h-9 text-xs px-3 rounded-lg bg-[#F4F6F8] dark:bg-[#050608] border border-slate-200 dark:border-slate-800 text-slate-950 dark:text-foreground focus:outline-none focus:ring-1 focus:ring-primary/40 focus:border-primary/40 transition-all cursor-pointer font-medium"
                 {...register("due_date")}
               />
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex justify-end gap-2.5 pt-4 border-t border-border">
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800/60 mt-6">
             <button
               type="button"
               onClick={onClose}
               disabled={isPending}
-              className="px-4 py-2 text-sm font-semibold rounded-lg bg-accent border border-border text-foreground hover:bg-card-hover transition-colors disabled:opacity-50 cursor-pointer"
+              className="px-4 h-9 text-xs font-semibold rounded-lg bg-transparent border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors disabled:opacity-50 cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/95 transition-colors disabled:opacity-50 cursor-pointer"
+              className="flex items-center gap-1.5 px-4 h-9 text-xs font-semibold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 cursor-pointer"
             >
               {isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
               Create Task

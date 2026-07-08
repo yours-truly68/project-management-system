@@ -206,15 +206,15 @@ export function Topbar() {
           </button>
 
           {isActionDropdownOpen && (
-            <div className="absolute right-0 mt-1.5 w-44 rounded-xl border border-border bg-elevated shadow-xl py-1 z-50 animate-fade-in text-left select-none glass">
+            <div className="absolute right-0 mt-1.5 w-44 rounded-dropdown border border-border/60 bg-elevated shadow-2xl py-1 z-[var(--z-dropdown)] origin-top-right animate-scale-in text-left select-none">
               <button
                 onClick={() => {
                   setIsProjectOpen(true);
                   setIsActionDropdownOpen(false);
                 }}
-                className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer font-medium"
+                className="w-full flex items-center gap-2 px-3 h-[var(--height-dropdown-item)] text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer font-medium"
               >
-                <FolderPlus className="w-3.5 h-3.5 text-muted-foreground" />
+                <FolderPlus className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <span>New Project</span>
               </button>
               {activeProject && (
@@ -223,9 +223,9 @@ export function Topbar() {
                     setIsBoardOpen(true);
                     setIsActionDropdownOpen(false);
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer font-medium"
+                  className="w-full flex items-center gap-2 px-3 h-[var(--height-dropdown-item)] text-xs text-foreground hover:bg-secondary transition-colors text-left cursor-pointer font-medium"
                 >
-                  <LayoutGrid className="w-3.5 h-3.5 text-muted-foreground" />
+                  <LayoutGrid className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                   <span>New Board</span>
                 </button>
               )}

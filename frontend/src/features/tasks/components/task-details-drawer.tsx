@@ -204,7 +204,7 @@ export function TaskDetailsDrawer({
                     setPriority(val);
                     handleUpdateField({ priority: val });
                   }}
-                  className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-background border border-border text-foreground hover:border-border-hover focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all cursor-pointer font-medium"
+                  className="w-full h-8 text-xs px-2.5 rounded-button bg-background border border-border text-foreground hover:border-border/80 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all cursor-pointer font-medium"
                 >
                   <option value="LOW">Low</option>
                   <option value="MEDIUM">Medium</option>
@@ -228,7 +228,7 @@ export function TaskDetailsDrawer({
                   id="drawer-assignee"
                   value={assigneeId}
                   onChange={(e) => handleAssigneeChange(e.target.value)}
-                  className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-background border border-border text-foreground hover:border-border-hover focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all cursor-pointer font-medium"
+                  className="w-full h-8 text-xs px-2.5 rounded-button bg-background border border-border text-foreground hover:border-border/80 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all cursor-pointer font-medium"
                 >
                   <option value="">Unassigned</option>
                   {members.map((member) => (
@@ -261,7 +261,7 @@ export function TaskDetailsDrawer({
                       due_date: val === "" ? null : new Date(val).toISOString(),
                     });
                   }}
-                  className="w-full text-xs px-2.5 py-1.5 rounded-lg bg-background border border-border text-foreground hover:border-border-hover focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all cursor-pointer font-medium"
+                  className="w-full h-8 text-xs px-2.5 rounded-button bg-background border border-border text-foreground hover:border-border/80 focus:outline-none focus:ring-1 focus:ring-ring focus:border-ring transition-all cursor-pointer font-medium"
                 />
               </div>
             </div>

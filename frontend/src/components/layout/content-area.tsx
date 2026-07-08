@@ -9,7 +9,7 @@ interface ContentAreaProps {
 
 export function ContentArea({ children }: ContentAreaProps) {
   const pathname = usePathname();
-  const isFullWidth = pathname === "/" || pathname === "/my-work";
+  const isFullWidth = pathname === "/" || pathname === "/my-work" || pathname === "/boards";
 
   return (
     <main className="flex-1 overflow-auto p-3 md:p-4 bg-background">
@@ -17,7 +17,7 @@ export function ContentArea({ children }: ContentAreaProps) {
         className={
           isFullWidth
             ? "w-full min-w-0 h-full flex flex-col"
-            : "mx-auto max-w-7xl w-full h-full flex flex-col"
+            : "mx-auto max-w-[1440px] w-full h-full flex flex-col"
         }
       >
         {children}
