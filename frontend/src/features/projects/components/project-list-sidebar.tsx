@@ -4,7 +4,6 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useBoardStore } from "@/stores/board.store";
-import { useProjectStore } from "@/stores/project.store";
 import { useWorkspaceStore } from "@/stores/workspace.store";
 import { useWorkspaceMembers } from "@/features/workspaces/hooks/use-workspace-members";
 import { useAuthStore } from "@/stores/auth.store";
@@ -19,7 +18,6 @@ import {
   ChevronDown,
   ChevronRight,
   LayoutGrid,
-  Folder,
 } from "lucide-react";
 import {
   Tooltip,
@@ -293,7 +291,6 @@ export function ProjectListSidebar({ isCollapsed }: ProjectListSidebarProps) {
                   {!isCollapsed && isExpanded && (
                     <ProjectBoardsList
                       projectId={project.id}
-                      projectKey={project.key}
                       isCollapsed={isCollapsed}
                       activeBoardId={activeBoardId}
                       setActiveBoardId={setActiveBoardId}

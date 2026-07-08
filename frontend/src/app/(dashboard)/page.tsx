@@ -502,7 +502,7 @@ export default function Page() {
                   {assignedTasks.length === 0 && (
                     <div className="flex flex-col items-center justify-center h-full py-16 text-center text-muted-foreground/50">
                       <CheckCircle2 className="w-7 h-7 mb-2 text-muted-foreground/30" />
-                      <span className="text-xs font-medium">You're all caught up!</span>
+                      <span className="text-xs font-medium">You&apos;re all caught up!</span>
                     </div>
                   )}
                 </div>

@@ -17,7 +17,6 @@ import {
   Clock,
   Coffee,
   FolderOpen,
-  Loader2,
   Sparkles,
 } from "lucide-react";
 
