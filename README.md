@@ -6,10 +6,7 @@ KANDo is a production-grade project management platform inspired by modern devel
 
 ## 📸 Screenshots & Showcase
 
-<!-- Slide Carousel / Screenshots Grid Placeholders -->
-| Dashboard Overview | Kanban Board (Ultrawide) | Create Task Dialog |
-|:---:|:---:|:---:|
-| ![Dashboard Placeholder](docs/screenshots/dashboard.png) | ![Kanban Board Placeholder](docs/screenshots/kanban.png) | ![Create Task Placeholder](docs/screenshots/create_task.png) |
+
 
 ---
 
